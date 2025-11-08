@@ -264,9 +264,11 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
     tags: ['Array', 'Hash Map'],
     categorySlug: 'hashing',
     body:
-      'Given an array of integers `nums` and an integer `target`, return indices `i` and `j` such that `nums[i] + nums[j] = target`.\n\n' +
-      'You may assume that each input has **exactly one solution**, and you may not use the same element twice.\n\n' +
-      'Return the indices as `[i, j]`.',
+      "Given an array of integers `nums` and an integer `target`, return indices `i` and `j` such that `nums[i] + nums[j] = target`.\n\n" +
+      "### Requirements\n" +
+      "- You may assume that each input has **exactly one solution**.\n" +
+      "- You may not use the same element twice.\n" +
+      "- Return the indices as `[i, j]`.",
     templateCode:
       `def solution(nums, target):
   # Your code here
@@ -450,11 +452,11 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
     tags: ['Stack', 'String'],
     categorySlug: 'stacks',
     body:
-      'Given a string `s` containing just the characters `(`, `)`, `{`, `}`, `[` and `]`, determine if the input string is valid.\n\n' +
-      'An input string is valid if:\n' +
-      '1. Open brackets must be closed by the same type of brackets.\n' +
-      '2. Open brackets must be closed in the correct order.\n' +
-      '3. Every close bracket has a corresponding open bracket of the same type.',
+      "Given a string `s` containing just the characters `(`, `)`, `{`, `}`, `[` and `]`, determine if the input string is valid.\n\n" +
+      "An input string is valid if:\n" +
+      "1. Open brackets must be closed by the same type of brackets.\n" +
+      "2. Open brackets must be closed in the correct order.\n" +
+      "3. Every close bracket has a corresponding open bracket of the same type.",
     templateCode:
       `def solution(s):
   # Your code here
@@ -505,12 +507,12 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
     title: 'Fibonacci Number',
     summary: 'Calculate the nth Fibonacci number.',
     difficulty: 3,
-    tags: ['Recursion', 'Math'],
+    tags: ['Recursion', 'Math', 'DP'],
     categorySlug: 'recursion-dp',
     body:
-      'The Fibonacci numbers are defined by `F(0)=0`, `F(1)=1`, and `F(n)=F(n-1)+F(n-2)` for `n>1`.\n\n' +
-      'Given `n`, calculate `F(n)`.\n\n' +
-      'Constraints: `0 ≤ n ≤ 30`. Use any approach (iterative, memoized recursion, etc.).',
+      "The Fibonacci numbers are defined by `F(0)=0`, `F(1)=1`, and `F(n)=F(n-1)+F(n-2)` for `n>1`.\n\n" +
+      "Given `n`, calculate `F(n)`.\n\n" +
+      "Constraints: `0 ≤ n ≤ 30`. Use any approach (iterative, memoized recursion, etc.).",
     templateCode:
       `def solution(n):
   # Your code here
@@ -729,7 +731,7 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
     categorySlug: 'trees',
     body:
       'Given the root of a binary tree, return its maximum depth.\n\n' +
-      'A binary tree\'s maximum depth is the number of nodes along the longest path from the root node down to the farthest leaf node.\n\n' +
+      "A binary tree's maximum depth is the number of nodes along the longest path from the root node down to the farthest leaf node.\n\n" +
       'The tree node is a dict: `{"val": int, "left": node|None, "right": node|None}`.',
     templateCode:
       `def solution(root):
@@ -1042,11 +1044,11 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
     tags: ['String', 'Dynamic Programming', 'Recursion'],
     categorySlug: 'recursion-dp',
     body:
-      'Given an input string `s` and a pattern `p`, implement wildcard pattern matching with support for `?` and `*` where:\n\n' +
-      '- `?` matches any single character\n' +
-      '- `*` matches any sequence of characters (including the empty sequence)\n\n' +
-      'Return `True` if the pattern matches the entire input string, else `False`.\n\n' +
-      'Use dynamic programming for an efficient solution.',
+      "Given an input string `s` and a pattern `p`, implement wildcard pattern matching with support for `?` and `*` where:\n\n" +
+      "- `?` matches any single character\n" +
+      "- `*` matches any sequence of characters (including the empty sequence)\n\n" +
+      "Return `True` if the pattern matches the entire input string, else `False`.\n\n" +
+      "Use dynamic programming for an efficient solution.",
     templateCode:
       `def solution(s, p):
   # s: str

@@ -11,18 +11,20 @@ import {
 } from '@/components/ui/sidebar';
 import { useFirebase, useCollection, useMemoFirebase, useUser } from '@/firebase';
 import { collection, query } from 'firebase/firestore';
-import type { Problem } from '@/lib/data';
+import type { Problem, Category } from '@/lib/data';
+import { categories } from '@/lib/data';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { CheckCircle } from 'lucide-react';
 import type { Solution } from '@/lib/data';
 
-const difficultyOrder: { [key: string]: number } = {
-  'Easy': 1,
-  'Medium': 2,
-  'Hard': 3,
-};
+// Create a map for quick lookups of category metadata
+const categoryMap = new Map<string, Category>(categories.map(c => [c.slug, c]));
+
+// Sort categories once by the 'order' property
+const sortedCategories = [...categories].sort((a, b) => a.order - b.order);
+
 
 function ProblemList() {
   const pathname = usePathname();
@@ -52,85 +54,88 @@ function ProblemList() {
   const categorizedProblems = useMemo(() => {
     if (!problems) return {};
 
-    const categories: { [key: string]: Problem[] } = {};
+    const problemGroups: { [key: string]: Problem[] } = {};
 
     problems.forEach((problem) => {
-      problem.tags.forEach((tag) => {
-        if (!categories[tag]) {
-          categories[tag] = [];
-        }
-        categories[tag].push(problem);
-      });
+      const catSlug = problem.categorySlug;
+      if (!catSlug) return;
+      if (!problemGroups[catSlug]) {
+        problemGroups[catSlug] = [];
+      }
+      problemGroups[catSlug].push(problem);
     });
 
     // Sort problems within each category by difficulty
-    for (const category in categories) {
-      categories[category].sort((a, b) => {
-        return (difficultyOrder[a.difficulty] || 4) - (difficultyOrder[b.difficulty] || 4);
-      });
+    for (const catSlug in problemGroups) {
+      problemGroups[catSlug].sort((a, b) => a.difficulty - b.difficulty);
     }
 
-    return categories;
+    return problemGroups;
   }, [problems]);
 
   const defaultOpenCategories = useMemo(() => {
     if (!problems || !pathname) return [];
     const slug = pathname.split('/').pop();
     const currentProblem = problems.find(p => p.slug === slug);
-    return currentProblem?.tags || [];
+    return currentProblem ? [currentProblem.categorySlug] : [];
   }, [problems, pathname]);
 
   if (isLoadingProblems || isLoadingSolutions) {
     return <p>Loading problems...</p>;
   }
 
-  const sortedCategories = Object.keys(categorizedProblems).sort();
-
   return (
     <Accordion type="multiple" className="w-full" defaultValue={defaultOpenCategories}>
-      {sortedCategories.map((category) => (
-        <AccordionItem value={category} key={category}>
-          <AccordionTrigger className="px-2 py-1.5 text-sm font-medium hover:no-underline hover:bg-accent rounded-md">
-            {category}
-          </AccordionTrigger>
-          <AccordionContent>
-            <ul className="pl-4 pt-2 flex flex-col gap-1">
-              {categorizedProblems[category].map((problem) => (
-                <li key={problem.slug}>
-                  <Link href={`/problems/${problem.slug}`}>
-                    <div
-                      className={`
-                        flex justify-between items-center text-xs p-1.5 rounded-md
-                        ${pathname === `/problems/${problem.slug}`
-                          ? 'bg-primary/20 text-primary-foreground'
-                          : 'hover:bg-accent'
-                        }
-                      `}
-                    >
-                      <span className="truncate flex-1 flex items-center gap-2">
-                        {solvedProblemSlugs.has(problem.slug) && (
-                          <CheckCircle className="h-3 w-3 text-green-500 flex-shrink-0" />
-                        )}
-                        {problem.title}
-                      </span>
-                      <span
+      {sortedCategories.map((category) => {
+        const problemsInCategory = categorizedProblems[category.slug];
+        if (!problemsInCategory || problemsInCategory.length === 0) {
+          return null;
+        }
+
+        return (
+          <AccordionItem value={category.slug} key={category.slug}>
+            <AccordionTrigger className="px-2 py-1.5 text-sm font-medium hover:no-underline hover:bg-accent rounded-md">
+              {category.title}
+            </AccordionTrigger>
+            <AccordionContent>
+              <ul className="pl-4 pt-2 flex flex-col gap-1">
+                {problemsInCategory.map((problem) => (
+                  <li key={problem.slug}>
+                    <Link href={`/problems/${problem.slug}`}>
+                      <div
                         className={`
-                          text-xs ml-2
-                          ${problem.difficulty === 'Easy' ? 'text-green-500' : ''}
-                          ${problem.difficulty === 'Medium' ? 'text-yellow-500' : ''}
-                          ${problem.difficulty === 'Hard' ? 'text-red-500' : ''}
+                          flex justify-between items-center text-xs p-1.5 rounded-md
+                          ${pathname === `/problems/${problem.slug}`
+                            ? 'bg-primary/20 text-primary-foreground'
+                            : 'hover:bg-accent'
+                          }
                         `}
                       >
-                        {problem.difficulty}
-                      </span>
-                    </div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </AccordionContent>
-        </AccordionItem>
-      ))}
+                        <span className="truncate flex-1 flex items-center gap-2">
+                          {solvedProblemSlugs.has(problem.slug) && (
+                            <CheckCircle className="h-3 w-3 text-green-500 flex-shrink-0" />
+                          )}
+                          {problem.title}
+                        </span>
+                        <span
+                          className={`
+                            text-xs ml-2 font-mono
+                            ${problem.difficulty <= 3 ? 'text-green-500' : ''}
+                            ${problem.difficulty > 3 && problem.difficulty <= 6 ? 'text-yellow-500' : ''}
+                            ${problem.difficulty > 6 ? 'text-red-500' : ''}
+                          `}
+                        >
+                          {problem.difficulty}
+                        </span>
+                      </div>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </AccordionContent>
+          </AccordionItem>
+        );
+      })}
     </Accordion>
   );
 }
