@@ -105,8 +105,4 @@
   .code-editor {
     font-variant-ligatures: common-ligatures;
   }
-
-  .code-editor > textarea {
-    @apply !outline-none;
-  }
 }

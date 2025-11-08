@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Container from '@/components/container';
 import { problems } from '@/lib/data';
 import { notFound } from 'next/navigation';
@@ -12,10 +12,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Problem } from '@/lib/data';
 import type { PyodideInterface } from 'pyodide';
 
-import Editor from 'react-simple-code-editor';
-import { highlight, languages } from 'prismjs/components/prism-core';
-import 'prismjs/components/prism-python';
-
+import CodeMirror from '@uiw/react-codemirror';
+import { python } from '@codemirror/lang-python';
+import { githubDark, githubLight } from '@uiw/codemirror-theme-github';
 
 declare global {
   interface Window {
@@ -65,12 +64,16 @@ function CodeRunner({ problem }: { problem: Problem }) {
     setIsLoading(true);
     let capturedOutput = '';
     
-    const stdoutCallback = (text: string) => {
+    pyodide.setStdout({
+      batched: (text: string) => {
         capturedOutput += text + '\n';
-    }
-
-    pyodide.setStdout({ batched: stdoutCallback });
-    pyodide.setStderr({ batched: stdoutCallback });
+      }
+    });
+    pyodide.setStderr({
+      batched: (text: string) => {
+        capturedOutput += text + '\n';
+      }
+    });
 
     try {
       await pyodide.loadPackagesFromImports(code);
@@ -86,21 +89,26 @@ function CodeRunner({ problem }: { problem: Problem }) {
     }
   };
 
+  const onCodeChange = useCallback((value: string) => {
+    setCode(value);
+  }, []);
+
   return (
     <div className="mt-8">
       <h2 className="text-2xl font-bold font-headline mb-4">Solution</h2>
-        <div className="rounded-md border bg-background font-code text-sm p-4 h-80 overflow-auto code-editor">
-            <Editor
-                value={code}
-                onValueChange={code => setCode(code)}
-                highlight={code => highlight(code, languages.python, 'python')}
-                padding={0}
-                style={{
-                    fontFamily: 'var(--font-code)',
-                    fontSize: '0.875rem',
-                }}
-            />
-        </div>
+      <div className="rounded-md border bg-background font-code text-sm overflow-hidden code-editor">
+        <CodeMirror
+          value={code}
+          height="320px"
+          extensions={[python()]}
+          onChange={onCodeChange}
+          theme={githubDark} // Or use a light theme like githubLight
+          style={{
+            fontFamily: 'var(--font-code)',
+            fontSize: '0.875rem',
+          }}
+        />
+      </div>
       <Button onClick={handleRunCode} disabled={isLoading || isPyodideLoading} className="mt-4">
         {isPyodideLoading ? (
             <>
