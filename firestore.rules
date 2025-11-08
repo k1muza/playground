@@ -148,7 +148,7 @@ service cloud.firestore {
        * @principle Enforces strict user ownership of solutions.
        */
       match /solutions/{solutionId} {
-        allow list: if isOwner(userId); // <-- This is the key change to allow collection queries.
+        allow list: if isOwner(userId);
         allow create: if isSignedIn() && isOwner(userId) && request.resource.data.userId == userId;
         allow get: if isOwner(userId);
         allow update: if isExistingOwner(userId) && resource.data.userId == userId;
