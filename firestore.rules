@@ -89,7 +89,7 @@ service cloud.firestore {
      * The `where` clause in the query is enforced by the security rule.
      */
     match /{path=**}/submissions/{submissionId} {
-      allow list: if isSignedIn() && request.query.where.size() == 1 && request.query.where[0].field == "userId" && request.query.where[0].op == "==" && request.query.where[0].value == request.auth.uid;
+        allow list: if isSignedIn() && request.query.filters[0].field.string_value == 'userId' && request.query.filters[0].op == 'EQUAL' && request.query.filters[0].value.string_value == request.auth.uid;
     }
 
     match /articles/{articleId} {
@@ -114,4 +114,3 @@ service cloud.firestore {
     }
   }
 }
-    
