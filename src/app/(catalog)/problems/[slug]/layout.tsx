@@ -107,7 +107,7 @@ function ProblemList() {
                         className={`
                           flex justify-between items-center text-xs p-1.5 rounded-md
                           ${pathname === `/problems/${problem.slug}`
-                            ? 'bg-primary/20 text-primary-foreground'
+                            ? 'bg-primary/20'
                             : 'hover:bg-accent'
                           }
                         `}
