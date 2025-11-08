@@ -14,7 +14,7 @@ import type { PyodideInterface } from 'pyodide';
 
 import CodeMirror from '@uiw/react-codemirror';
 import { python } from '@codemirror/lang-python';
-import { githubDark, githubLight } from '@uiw/codemirror-theme-github';
+import { githubDark } from '@uiw/codemirror-theme-github';
 
 declare global {
   interface Window {
@@ -102,7 +102,7 @@ function CodeRunner({ problem }: { problem: Problem }) {
           height="320px"
           extensions={[python()]}
           onChange={onCodeChange}
-          theme={githubDark} // Or use a light theme like githubLight
+          theme={githubDark}
           style={{
             fontFamily: 'var(--font-code)',
             fontSize: '0.875rem',
