@@ -34,19 +34,12 @@ import { useRouter } from 'next/navigation';
 import { PlusCircle, Trash2, Database } from 'lucide-react';
 import { seedProblems } from '@/actions/seed-problems';
 
-// Zod schema for test cases where input/output are strings (JSON)
-const TestCaseSchema = z.object({
-  input: z.string().min(1, 'Input is required.'),
-  output: z.string().min(1, 'Output is required.'),
-});
-
-// Zod schema for the form
+// We use the same schema for the form as for the Firestore data,
+// with test cases as strings.
 const FormSchema = ProblemSchema.omit({
   tags: true,
-  testCases: true,
 }).extend({
   tags: z.string().min(1, 'At least one tag is required.'),
-  testCases: z.array(TestCaseSchema).min(1, 'At least one test case is required.'),
 });
 
 type FormValues = z.infer<typeof FormSchema>;
@@ -128,17 +121,14 @@ export default function AddProblemPage() {
     }
 
     try {
-      // Convert string data back to original types
-      const problemData: Problem = {
+      // Form data is already in the correct stringified format for Firestore.
+      // We just need to split the tags string into an array.
+      const problemData = {
         ...data,
         tags: data.tags.split(',').map((tag) => tag.trim()),
-        testCases: data.testCases.map((tc) => ({
-          input: JSON.parse(tc.input),
-          output: JSON.parse(tc.output),
-        })),
       };
 
-      // Validate with the original ProblemSchema
+      // We still validate against the Zod schema to be safe.
       ProblemSchema.parse(problemData);
 
       const problemRef = doc(firestore, 'problems', problemData.slug);
@@ -323,9 +313,9 @@ export default function AddProblemPage() {
                           <FormItem>
                             <FormLabel>Input (JSON)</FormLabel>
                             <FormControl>
-                              <Textarea placeholder='e.g., ["[1, 2, 3]", 5]' className="font-code" {...field} />
+                              <Textarea placeholder='e.g., "[[1, 2, 3], 5]"' className="font-code" {...field} />
                             </FormControl>
-                            <FormDescription>A JSON array of arguments for the solution function.</FormDescription>
+                            <FormDescription>A JSON string representing an array of arguments.</FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -352,7 +342,7 @@ export default function AddProblemPage() {
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => append({ input: '', output: '' })}
+                  onClick={() => append({ input: '[]', output: 'null' })}
                   className="mt-4"
                 >
                   <PlusCircle className="mr-2 h-4 w-4" />

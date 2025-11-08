@@ -1,3 +1,4 @@
+
 'use server';
 
 import { initializeApp, getApps } from 'firebase/app';
@@ -25,8 +26,18 @@ export async function seedProblems() {
     
     for (const problem of problemsForSeeding) {
       const problemRef = doc(problemsCollection, problem.slug);
+      
+      // Stringify test cases to avoid Firestore nested array issue
+      const problemDataForFirestore = {
+        ...problem,
+        testCases: problem.testCases.map(tc => ({
+          input: JSON.stringify(tc.input),
+          output: JSON.stringify(tc.output),
+        })),
+      };
+
       console.log(`  Queueing problem for write: ${problem.slug}`);
-      batch.set(problemRef, problem);
+      batch.set(problemRef, problemDataForFirestore);
     }
 
     await batch.commit();

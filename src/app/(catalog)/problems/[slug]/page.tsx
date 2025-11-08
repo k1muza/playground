@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
@@ -148,7 +149,11 @@ function CodeRunner({ problem }: { problem: Problem }) {
       let allPassed = true;
 
       for (const testCase of problem.testCases) {
-        const inputStr = JSON.stringify(testCase.input).slice(1, -1);
+        // Parse the JSON string from Firestore
+        const parsedInput = JSON.parse(testCase.input);
+        const parsedOutput = JSON.parse(testCase.output);
+
+        const inputStr = JSON.stringify(parsedInput).slice(1, -1);
         const testCode = `
 ${code}
 import json
@@ -158,13 +163,13 @@ actual_result = solution(${inputStr})
 
 # Special sorting for two-sum problem
 if "${problem.slug}" == "two-sum":
-    expected_sorted = sorted(json.loads('${JSON.stringify(testCase.output)}'))
+    expected_sorted = sorted(json.loads('${JSON.stringify(parsedOutput)}'))
     actual_sorted = sorted(actual_result) if isinstance(actual_result, list) else actual_result
     passed = actual_sorted == expected_sorted
     actual_for_print = actual_sorted
     expected_for_print = expected_sorted
 else:
-    expected_json = '${JSON.stringify(testCase.output)}'
+    expected_json = '${JSON.stringify(parsedOutput)}'
     try:
         # Compare JSON strings for deep equality
         actual_json = json.dumps(actual_result)
@@ -179,7 +184,7 @@ else:
 
 # This JSON result is what we'll capture
 print(json.dumps({
-    "input": ${JSON.stringify(testCase.input)},
+    "input": ${JSON.stringify(parsedInput)},
     "expected": expected_for_print,
     "actual": actual_for_print,
     "passed": passed
@@ -202,8 +207,8 @@ print(json.dumps({
             allPassed = false;
             // Handle cases where the test code itself failed to run
              results.push({
-                input: JSON.stringify(testCase.input),
-                expected: JSON.stringify(testCase.output),
+                input: JSON.stringify(parsedInput),
+                expected: JSON.stringify(parsedOutput),
                 actual: `Execution Error: ${capturedOutput || 'Unknown error'}`,
                 passed: false,
             });
@@ -439,16 +444,19 @@ export default function ProblemDetail({ params }: { params: { slug: string } }) 
           <p className="font-code text-sm whitespace-pre-wrap">{p.body}</p>
 
           <div className="mt-8 space-y-4">
-            {p.testCases.map((tc, i) => (
+            {p.testCases.map((tc, i) => {
+              const parsedInput = JSON.parse(tc.input);
+              return (
                 <div key={i}>
                     <p className="font-semibold">Example {i + 1}:</p>
                     <pre className="mt-2 p-3 bg-secondary rounded-md text-sm font-code">
-                        <strong>Input:</strong> {p.slug === 'two-sum' ? `nums = ${JSON.stringify(tc.input[0])}, target = ${tc.input[1]}` : JSON.stringify(tc.input)
+                        <strong>Input:</strong> {p.slug === 'two-sum' ? `nums = ${JSON.stringify(parsedInput[0])}, target = ${parsedInput[1]}` : JSON.stringify(parsedInput)
 }<br />
-                        <strong>Output:</strong> {JSON.stringify(tc.output)}
+                        <strong>Output:</strong> {tc.output}
                     </pre>
                 </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="mt-12 rounded-lg border bg-card p-6">

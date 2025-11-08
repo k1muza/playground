@@ -1,3 +1,4 @@
+
 import { z } from 'zod';
 
 export type Course = {
@@ -20,8 +21,9 @@ export const ProblemSchema = z.object({
   testCases: z
     .array(
       z.object({
-        input: z.any(),
-        output: z.any(),
+        // Inputs and outputs are stored as JSON strings
+        input: z.string(),
+        output: z.string(),
       })
     )
     .min(1, 'At least one test case is required.'),
@@ -102,9 +104,7 @@ export const articles: Article[] = [
 ];
 
 // This is the data that will be seeded into Firestore.
-export const problemsForSeeding: Omit<Problem, 'testCases'> & {
-  testCases: { input: any[]; output: any }[];
-}[] = [
+export const problemsForSeeding: Omit<Problem, 'testCases' | 'tags'> & { tags: string[]; testCases: { input: any[]; output: any }[] }[] = [
   {
     slug: 'two-sum',
     title: 'Two Sum',
