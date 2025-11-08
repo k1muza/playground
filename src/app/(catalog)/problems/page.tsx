@@ -3,7 +3,6 @@
 import { useMemo, useState } from 'react';
 import Container from '@/components/container';
 import ProblemCard from '@/components/problem-card';
-import { problems } from '@/lib/data';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -12,14 +11,36 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, query } from 'firebase/firestore';
+import type { Problem } from '@/lib/data';
+import { Skeleton } from '@/components/ui/skeleton';
 
 type Difficulty = 'All' | 'Easy' | 'Medium' | 'Hard';
+
+function ProblemListSkeleton() {
+  return (
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <Skeleton key={i} className="h-[180px] w-full" />
+      ))}
+    </div>
+  );
+}
 
 export default function ProblemsPage() {
   const [q, setQ] = useState('');
   const [difficulty, setDifficulty] = useState<Difficulty>('All');
+  const { firestore } = useFirebase();
+
+  const problemsQuery = useMemoFirebase(
+    () => (firestore ? query(collection(firestore, 'problems')) : null),
+    [firestore]
+  );
+  const { data: problems, isLoading } = useCollection<Problem>(problemsQuery);
 
   const filtered = useMemo(() => {
+    if (!problems) return [];
     return problems.filter((p) => {
       const matchesQ = [p.title, p.summary, ...p.tags]
         .join(' ')
@@ -28,7 +49,7 @@ export default function ProblemsPage() {
       const matchesD = difficulty === 'All' || p.difficulty === difficulty;
       return matchesQ && matchesD;
     });
-  }, [q, difficulty]);
+  }, [q, difficulty, problems]);
 
   return (
     <Container className="py-10">
@@ -59,11 +80,18 @@ export default function ProblemsPage() {
           </SelectContent>
         </Select>
       </div>
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {filtered.map((p) => (
-          <ProblemCard key={p.slug} problem={p} />
-        ))}
+      <div className="mt-8">
+        {isLoading ? (
+          <ProblemListSkeleton />
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {filtered.map((p) => (
+              <ProblemCard key={p.slug} problem={p} />
+            ))}
+          </div>
+        )}
       </div>
     </Container>
   );
 }
+    

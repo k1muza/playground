@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Container from '@/components/container';
-import { problems } from '@/lib/data';
 import { notFound } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import TopicBadge from '@/components/topic-badge';
@@ -26,8 +25,9 @@ import CodeMirror from '@uiw/react-codemirror';
 import { python } from '@codemirror/lang-python';
 import { githubDark } from '@uiw/codemirror-theme-github';
 
-import { useFirebase } from '@/firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
+import { collection, addDoc, doc } from 'firebase/firestore';
+import { Skeleton } from '@/components/ui/skeleton';
 
 declare global {
   interface Window {
@@ -55,6 +55,11 @@ function CodeRunner({ problem }: { problem: Problem }) {
   const { firestore, user } = useFirebase();
 
   const isLoading = isSubmitting || isRunningCode;
+
+  // Set initial code when problem changes
+  useEffect(() => {
+    setCode(problem.templateCode);
+  }, [problem]);
 
   useEffect(() => {
     const load = async () => {
@@ -348,9 +353,53 @@ print(json.dumps({
   );
 }
 
+function ProblemDetailSkeleton() {
+  return (
+    <div className="grid gap-12 lg:grid-cols-2">
+      <article className="container-prose">
+        <div className="flex items-center gap-4 mb-4">
+          <Skeleton className="h-6 w-16" />
+          <div className="flex flex-wrap gap-1.5">
+            <Skeleton className="h-6 w-20" />
+            <Skeleton className="h-6 w-20" />
+          </div>
+        </div>
+        <Skeleton className="h-10 w-3/4 mb-4" />
+        <hr className="my-6" />
+        <div className="space-y-4">
+          <Skeleton className="h-6 w-full" />
+          <Skeleton className="h-6 w-5/6" />
+          <Skeleton className="h-6 w-full" />
+        </div>
+      </article>
+      <div className="sticky top-20 h-full">
+        <Skeleton className="h-[320px] w-full" />
+        <div className="mt-4 flex gap-2">
+          <Skeleton className="h-10 w-28" />
+          <Skeleton className="h-10 w-28" />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function ProblemDetail({ params }: { params: { slug: string } }) {
-  const p = problems.find((i) => i.slug === params.slug);
+  const { firestore } = useFirebase();
+
+  const problemRef = useMemoFirebase(
+    () => (firestore ? doc(firestore, 'problems', params.slug) : null),
+    [firestore, params.slug]
+  );
+  const { data: p, isLoading } = useDoc<Problem>(problemRef);
+
+  if (isLoading) {
+    return (
+      <Container className="py-8 lg:py-12">
+        <ProblemDetailSkeleton />
+      </Container>
+    );
+  }
+
   if (!p) return notFound();
 
   return (
@@ -375,7 +424,7 @@ export default function ProblemDetail({ params }: { params: { slug: string } }) 
               {p.difficulty}
             </Badge>
             <div className="flex flex-wrap gap-1.5">
-              {p.tags.map((t) => (
+              {p.tags.map((t: string) => (
                 <TopicBadge key={t} label={t} />
               ))}
             </div>

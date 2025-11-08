@@ -1,17 +1,22 @@
 import { MetadataRoute } from 'next';
-import { courses, problems, articles } from '@/lib/data';
+import { courses, articles } from '@/lib/data';
+import { initializeFirebase } from '@/firebase';
+import { getDocs, collection } from 'firebase/firestore';
 
 const BASE_URL = 'https://learnverse.dev';
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const { firestore } = initializeFirebase();
+
   const courseUrls = courses.map((c) => ({
     url: `${BASE_URL}/courses/${c.slug}`,
     lastModified: new Date(),
     priority: 0.8,
   }));
 
-  const problemUrls = problems.map((p) => ({
-    url: `${BASE_URL}/problems/${p.slug}`,
+  const problemDocs = await getDocs(collection(firestore, 'problems'));
+  const problemUrls = problemDocs.docs.map((doc) => ({
+    url: `${BASE_URL}/problems/${doc.id}`,
     lastModified: new Date(),
     priority: 0.6,
   }));
@@ -26,9 +31,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: BASE_URL, lastModified: new Date(), priority: 1.0 },
     { url: `${BASE_URL}/courses`, lastModified: new Date(), priority: 0.9 },
     { url: `${BASE_URL}/problems`, lastModified: new Date(), priority: 0.9 },
-    { url: `${BASE_URL}/articles`, lastModified: new Date(), priority: 0.9 },
+    { url: `${BASE_URL}/articles`, lastModified: new-Date(), priority: 0.9 },
     { url: `${BASE_URL}/search`, lastModified: new Date(), priority: 0.5 },
   ];
 
   return [...staticUrls, ...courseUrls, ...problemUrls, ...articleUrls];
 }
+
+    

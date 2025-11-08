@@ -5,11 +5,21 @@ import Container from '@/components/container';
 import CourseCard from '@/components/course-card';
 import ProblemCard from '@/components/problem-card';
 import ArticleCard from '@/components/article-card';
-import { courses, problems, articles } from '@/lib/data';
+import { courses, articles } from '@/lib/data';
 import { Input } from '@/components/ui/input';
+import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, query } from 'firebase/firestore';
+import type { Problem } from '@/lib/data';
 
 export default function SearchPage() {
   const [q, setQ] = useState('');
+  const { firestore } = useFirebase();
+
+  const problemsQuery = useMemoFirebase(
+    () => (firestore ? query(collection(firestore, 'problems')) : null),
+    [firestore]
+  );
+  const { data: problems } = useCollection<Problem>(problemsQuery);
 
   const results = useMemo(() => {
     if (!q) {
@@ -20,14 +30,14 @@ export default function SearchPage() {
       courses: courses.filter((c) =>
         (c.title + c.description + c.topics.join(' ')).toLowerCase().includes(term)
       ),
-      problems: problems.filter((p) =>
+      problems: (problems || []).filter((p) =>
         (p.title + p.summary + p.tags.join(' ')).toLowerCase().includes(term)
       ),
       articles: articles.filter((a) =>
         (a.title + a.excerpt + a.tags.join(' ')).toLowerCase().includes(term)
       ),
     };
-  }, [q]);
+  }, [q, problems]);
 
   const hasResults =
     results.courses.length > 0 ||
@@ -91,3 +101,5 @@ export default function SearchPage() {
     </Container>
   );
 }
+
+    

@@ -85,13 +85,9 @@
       "type": "object",
       "description": "Represents a practice problem.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the problem."
-        },
         "slug": {
           "type": "string",
-          "description": "URL-friendly slug for the problem."
+          "description": "URL-friendly slug for the problem, used as document ID."
         },
         "title": {
           "type": "string",
@@ -105,9 +101,9 @@
           "type": "string",
           "description": "Difficulty level of the problem (e.g., Easy, Medium, Hard)."
         },
-        "tagIds": {
+        "tags": {
           "type": "array",
-          "description": "References to Tags. (Relationship: Problem N:N Tag)",
+          "description": "Array of string tags for categorization.",
           "items": {
             "type": "string"
           }
@@ -115,15 +111,34 @@
         "body": {
           "type": "string",
           "description": "Full problem statement."
+        },
+        "templateCode": {
+          "type": "string",
+          "description": "Boilerplate code for the user to start with."
+        },
+        "testCases": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "input": {
+                "type": "array"
+              },
+              "output": {}
+            },
+            "required": ["input", "output"]
+          }
         }
       },
       "required": [
-        "id",
         "slug",
         "title",
         "summary",
         "difficulty",
-        "body"
+        "tags",
+        "body",
+        "templateCode",
+        "testCases"
       ]
     },
     "Article": {
@@ -317,17 +332,17 @@
         }
       },
       {
-        "path": "problems/{problemId}",
+        "path": "problems/{problemSlug}",
         "definition": {
           "entityName": "Problem",
           "schema": {
             "$ref": "#/backend/entities/Problem"
           },
-          "description": "Stores problem information.",
+          "description": "Stores problem information, using the URL slug as the document ID.",
           "params": [
             {
-              "name": "problemId",
-              "description": "Unique identifier for the problem."
+              "name": "problemSlug",
+              "description": "URL-friendly slug for the problem, which is also the document ID."
             }
           ]
         }
@@ -417,6 +432,7 @@
         }
       }
     ],
-    "reasoning": "The Firestore structure is designed to reflect the relationships between courses, lessons, problems, articles, tags, and user solutions. Solutions are stored within user documents to ensure clear ownership and facilitate secure access control. Denormalization is used to ensure authorization independence. Specifically, each solution document includes the `userId` and `problemId`. This allows security rules to validate that the authenticated user is the owner of the solution without needing to perform a `get()` request to a parent document.  This structure supports secure list operations (QAPs) by ensuring all documents in the `users/{userId}/solutions` collection share the same security requirements (ownership by the user)."
+    "reasoning": "The Firestore structure is designed to reflect the relationships between courses, lessons, problems, articles, tags, and user solutions. For problems, the document ID is the URL slug for direct and efficient lookups. Solutions are stored within user documents to ensure clear ownership and facilitate secure access control. Denormalization is used to ensure authorization independence. Specifically, each solution document includes the `userId` and `problemId`. This allows security rules to validate that the authenticated user is the owner of the solution without needing to perform a `get()` request to a parent document.  This structure supports secure list operations (QAPs) by ensuring all documents in the `users/{userId}/solutions` collection share the same security requirements (ownership by the user)."
   }
 }
+    
