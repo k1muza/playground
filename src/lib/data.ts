@@ -1,4 +1,3 @@
-
 import { z } from 'zod';
 
 export type Course = {
@@ -67,16 +66,16 @@ export const TestCaseSchema = z.object({
 export type TestCase = z.infer<typeof TestCaseSchema>;
 
 
-export const SolutionSchema = z.object({
+export const SubmissionSchema = z.object({
   id: z.string().optional(),
   problemId: z.string(),
   userId: z.string(),
-  solutionCode: z.string(),
-  submissionDate: z.string(),
+  code: z.string(),
+  submittedAt: z.string(),
   isCorrect: z.boolean(),
 });
 
-export type Solution = z.infer<typeof SolutionSchema>;
+export type Submission = z.infer<typeof SubmissionSchema>;
 
 
 export type Article = {
@@ -265,7 +264,12 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
     difficulty: 2,
     tags: ['Array', 'Hash Map'],
     categorySlug: 'hashing',
-    body: "Given an array of integers `nums` and an integer `target`, return indices `i` and `j` such that `nums[i] + nums[j] = target`.\n\n### Requirements\n- You may assume that each input has **exactly one solution**.\n- You may not use the same element twice.\n- Return the indices as `[i, j]`.",
+    body: `Given an array of integers \`nums\` and an integer \`target\`, return indices \`i\` and \`j\` such that \`nums[i] + nums[j] = target\`.
+
+### Requirements
+- You may assume that each input has **exactly one solution**.
+- You may not use the same element twice.
+- Return the indices as \`[i, j]\`.`,
     templateCode:
       `def solution(nums, target):
   # Your code here
@@ -342,7 +346,9 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
     difficulty: 1,
     tags: ['String', 'Two Pointer'],
     categorySlug: 'warm-ups',
-    body: "Write a function that reverses a string. Use an iterative approach.\n\nFor example, `solution(\"hello\")` should return `\"olleh\"`.",
+    body: `Write a function that reverses a string. Use an iterative approach.
+
+For example, \`solution("hello")\` should return \`"olleh"\`.`,
     templateCode:
       `def solution(s):
   # Your code here
@@ -446,7 +452,12 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
     difficulty: 3,
     tags: ['Stack', 'String'],
     categorySlug: 'stacks',
-    body: "Given a string `s` containing just the characters `(`, `)`, `{`, `}`, `[` and `]`, determine if the input string is valid.\n\nAn input string is valid if:\n1. Open brackets must be closed by the same type of brackets.\n2. Open brackets must be closed in the correct order.\n3. Every close bracket has a corresponding open bracket of the same type.",
+    body: `Given a string \`s\` containing just the characters \`(\`, \`)\`, \`{\`, \`}\`, \`[\` and \`]\`, determine if the input string is valid.
+
+An input string is valid if:
+1. Open brackets must be closed by the same type of brackets.
+2. Open brackets must be closed in the correct order.
+3. Every close bracket has a corresponding open bracket of the same type.`,
     templateCode:
       `def solution(s):
   # Your code here
@@ -523,7 +534,9 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
     difficulty: 2,
     tags: ['String', 'Recursion'],
     categorySlug: 'recursion-dp',
-    body: "Write a function that reverses a string. Do this recursively.\n\nFor example, `solution(\"hello\")` should return `\"olleh\"`.",
+    body: `Write a function that reverses a string. Do this recursively.
+
+For example, \`solution("hello")\` should return \`"olleh"\`.`,
     templateCode:
       `def solution(s):
   # Your code here
@@ -747,7 +760,7 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
     testCases: [
       { input: [null], output: [] },
       { input: [{ val: 1, left: null, right: null }], output: [1] },
-      { input: [{ val: 1, left: { val: 2, left: null, right: null }, right: { val: 3, left: null, right: null } }], output: [2, 1, 3] },
+      { input: [{ val: 2, left: { val: 1, left: null, right: null }, right: { val: 3, left: null, right: null } }], output: [1, 2, 3] },
       { input: [{ val: 2, left: { val: 1, left: null, right: null }, right: { val: 4, left: { val: 3, left: null, right: null }, right: null } }], output: [1, 2, 3, 4] }
     ],
   },
@@ -1051,5 +1064,4 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
     ],
   },
 ];
-
     

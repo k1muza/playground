@@ -1,4 +1,3 @@
-
 'use client';
 
 import { ReactNode, useMemo } from 'react';
@@ -10,14 +9,13 @@ import {
   SidebarContent,
 } from '@/components/ui/sidebar';
 import { useFirebase, useCollection, useMemoFirebase, useUser } from '@/firebase';
-import { collection, query } from 'firebase/firestore';
-import type { Problem, Category } from '@/lib/data';
+import { collection, query, where, collectionGroup } from 'firebase/firestore';
+import type { Problem, Category, Submission } from '@/lib/data';
 import { categories } from '@/lib/data';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { CheckCircle } from 'lucide-react';
-import type { Solution } from '@/lib/data';
 
 // Create a map for quick lookups of category metadata
 const categoryMap = new Map<string, Category>(categories.map(c => [c.slug, c]));
@@ -37,18 +35,21 @@ function ProblemList() {
   );
   const { data: problems, isLoading: isLoadingProblems } = useCollection<Problem>(problemsQuery);
 
-  // Fetch user's solutions if they are logged in
-  const solutionsQuery = useMemoFirebase(
-    () => (user && firestore ? collection(firestore, 'users', user.uid, 'solutions') : null),
+  // Fetch user's submissions using a collection group query
+  const submissionsQuery = useMemoFirebase(
+    () =>
+      user && firestore
+        ? query(collectionGroup(firestore, 'submissions'), where('userId', '==', user.uid))
+        : null,
     [user, firestore]
   );
-  const { data: solutions, isLoading: isLoadingSolutions } = useCollection<Solution>(solutionsQuery);
+  const { data: submissions, isLoading: isLoadingSubmissions } = useCollection<Submission>(submissionsQuery);
 
   // Create a set of solved problem IDs for quick lookup
   const solvedProblemSlugs = useMemo(() => {
-    if (!solutions) return new Set();
-    return new Set(solutions.filter(s => s.isCorrect).map(s => s.problemId));
-  }, [solutions]);
+    if (!submissions) return new Set();
+    return new Set(submissions.filter(s => s.isCorrect).map(s => s.problemId));
+  }, [submissions]);
 
 
   const categorizedProblems = useMemo(() => {
@@ -80,7 +81,7 @@ function ProblemList() {
     return currentProblem ? [currentProblem.categorySlug] : [];
   }, [problems, pathname]);
 
-  if (isLoadingProblems || isLoadingSolutions) {
+  if (isLoadingProblems || isLoadingSubmissions) {
     return <p>Loading problems...</p>;
   }
 
@@ -165,3 +166,4 @@ export default function ProblemLayout({ children }: { children: ReactNode }) {
     </SidebarProvider>
   );
 }
+    

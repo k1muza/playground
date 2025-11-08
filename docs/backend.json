@@ -146,7 +146,11 @@
           "description": "JSON string representing the expected return value."
         }
       },
-      "required": ["problemId", "input", "output"]
+      "required": [
+        "problemId",
+        "input",
+        "output"
+      ]
     },
     "Article": {
       "$schema": "http://json-schema.org/draft-07/schema#",
@@ -230,29 +234,29 @@
         "label"
       ]
     },
-    "Solution": {
+    "Submission": {
       "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Solution",
+      "title": "Submission",
       "type": "object",
-      "description": "Represents a user's solution to a specific problem.",
+      "description": "Represents a user's submission to a specific problem.",
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the solution."
+          "description": "Unique identifier for the submission."
         },
         "problemId": {
           "type": "string",
-          "description": "Reference to Problem. (Relationship: Problem 1:N Solution)"
+          "description": "Reference to Problem. (Relationship: Problem 1:N Submission)"
         },
         "userId": {
           "type": "string",
-          "description": "Reference to User. (Relationship: User 1:N Solution)"
+          "description": "Reference to User. (Relationship: User 1:N Submission)"
         },
-        "solutionCode": {
+        "code": {
           "type": "string",
           "description": "The code the user submitted as a solution."
         },
-        "submissionDate": {
+        "submittedAt": {
           "type": "string",
           "description": "The date and time the solution was submitted.",
           "format": "date-time"
@@ -266,8 +270,8 @@
         "id",
         "problemId",
         "userId",
-        "solutionCode",
-        "submissionDate",
+        "code",
+        "submittedAt",
         "isCorrect"
       ]
     },
@@ -375,6 +379,26 @@
         }
       },
       {
+        "path": "problems/{problemSlug}/submissions/{submissionId}",
+        "definition": {
+          "entityName": "Submission",
+          "schema": {
+            "$ref": "#/backend/entities/Submission"
+          },
+          "description": "Stores submissions for a specific problem. Includes denormalized `userId` and `problemId` for authorization independence and efficient querying.",
+          "params": [
+            {
+              "name": "problemSlug",
+              "description": "The slug of the associated problem."
+            },
+            {
+              "name": "submissionId",
+              "description": "Unique identifier for the submission."
+            }
+          ]
+        }
+      },
+      {
         "path": "articles/{articleId}",
         "definition": {
           "entityName": "Article",
@@ -437,30 +461,9 @@
             }
           ]
         }
-      },
-      {
-        "path": "users/{userId}/solutions/{solutionId}",
-        "definition": {
-          "entityName": "Solution",
-          "schema": {
-            "$ref": "#/backend/entities/Solution"
-          },
-          "description": "Stores solutions submitted by a user. Includes denormalized 'userId' and 'problemId' for authorization independence.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "Unique identifier for the user."
-            },
-            {
-              "name": "solutionId",
-              "description": "Unique identifier for the solution."
-            }
-          ]
-        }
       }
     ],
-    "reasoning": "The Firestore structure is designed to reflect the relationships between courses, lessons, problems, articles, tags, and user solutions. For problems, the document ID is the URL slug for direct and efficient lookups. Test cases are stored in a subcollection under each problem for scalability and to keep the main problem document lean. Solutions are stored within user documents to ensure clear ownership and facilitate secure access control. Denormalization is used to ensure authorization independence. Specifically, each solution document includes the `userId` and `problemId`. This allows security rules to validate that the authenticated user is the owner of the solution without needing to perform a `get()` request to a parent document.  This structure supports secure list operations (QAPs) by ensuring all documents in the `users/{userId}/solutions` collection share the same security requirements (ownership by the user)."
+    "reasoning": "The Firestore structure is designed to reflect the relationships between courses, lessons, problems, articles, tags, and user submissions. For problems, the document ID is the URL slug for direct and efficient lookups. Test cases and submissions are stored in subcollections under each problem for scalability and to keep the main problem document lean. This structure supports secure list operations (QAPs) by ensuring all documents in the `problems/{problemSlug}/submissions` collection share the same security context. Denormalization is used for submissions, which include the `userId` and `problemId` to allow for efficient cross-problem queries (e.g., 'show me all problems a user has solved') using collection group queries on the `submissions` collection."
   }
 }
-
     

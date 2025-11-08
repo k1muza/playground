@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
@@ -24,7 +23,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { Problem, TestCase, Solution } from "@/lib/data";
+import type { Problem, TestCase, Submission } from "@/lib/data";
 import type { PyodideInterface } from "pyodide";
 import ReactMarkdown from "react-markdown";
 
@@ -153,30 +152,30 @@ function CodeRunner({
   const { firestore, user } = useFirebase();
   const isLoading = isSubmitting || isRunningCode;
   
-  // Query for the user's most recent solution to this problem
-  const latestSolutionQuery = useMemoFirebase(
+  // Query for the user's most recent submission to this problem
+  const latestSubmissionQuery = useMemoFirebase(
     () =>
       user && firestore
         ? query(
-            collection(firestore, "users", user.uid, "solutions"),
-            where("problemId", "==", slug),
-            orderBy("submissionDate", "desc"),
+            collection(firestore, "problems", slug, "submissions"),
+            where("userId", "==", user.uid),
+            orderBy("submittedAt", "desc"),
             limit(1)
           )
         : null,
     [firestore, user, slug]
   );
-  const { data: latestSolutionData, isLoading: isSolutionLoading } = useCollection<Solution>(latestSolutionQuery);
+  const { data: latestSubmissionData, isLoading: isSubmissionLoading } = useCollection<Submission>(latestSubmissionQuery);
 
   useEffect(() => {
-    if (!isSolutionLoading) {
-      if (latestSolutionData && latestSolutionData.length > 0) {
-        setCode(latestSolutionData[0].solutionCode);
+    if (!isSubmissionLoading) {
+      if (latestSubmissionData && latestSubmissionData.length > 0) {
+        setCode(latestSubmissionData[0].code);
       } else {
         setCode(problem.templateCode);
       }
     }
-  }, [latestSolutionData, isSolutionLoading, problem.templateCode]);
+  }, [latestSubmissionData, isSubmissionLoading, problem.templateCode]);
 
   useEffect(() => {
     let cancelled = false;
@@ -417,8 +416,8 @@ print(json.dumps({
       setTestResults(results);
 
       if (allPassed) {
-        // Check if there was already a correct solution
-        const alreadySolved = latestSolutionData?.some(s => s.isCorrect) ?? false;
+        // Check if there was already a correct submission
+        const alreadySolved = latestSubmissionData?.some(s => s.isCorrect) ?? false;
         
         if (!alreadySolved) {
           setShowConfetti(true);
@@ -427,16 +426,16 @@ print(json.dumps({
 
         if (user && firestore) {
           try {
-            const solutionsRef = collection(firestore, "users", user.uid, "solutions");
-            await addDoc(solutionsRef, {
+            const submissionsRef = collection(firestore, "problems", slug, "submissions");
+            await addDoc(submissionsRef, {
               problemId: slug,
               userId: user.uid,
-              solutionCode: code,
-              submissionDate: new Date().toISOString(),
+              code: code,
+              submittedAt: new Date().toISOString(),
               isCorrect: true,
             });
           } catch (e) {
-            console.error("Error saving solution to Firestore:", e);
+            console.error("Error saving submission to Firestore:", e);
           }
         }
       }
@@ -472,8 +471,8 @@ print(json.dumps({
       </div>
 
       <div className="mt-4 flex gap-2">
-        <Button onClick={handleRunCode} disabled={isLoading || isPyodideLoading || isSolutionLoading}>
-          {isPyodideLoading || isSolutionLoading ? (
+        <Button onClick={handleRunCode} disabled={isLoading || isPyodideLoading || isSubmissionLoading}>
+          {isPyodideLoading || isSubmissionLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Loading...
@@ -493,11 +492,11 @@ print(json.dumps({
 
         <Button
           onClick={handleSubmit}
-          disabled={isLoading || isPyodideLoading || !user || isSolutionLoading}
+          disabled={isLoading || isPyodideLoading || !user || isSubmissionLoading}
           variant="secondary"
           title={!user ? "Sign in to submit" : undefined}
         >
-          {isPyodideLoading || isSolutionLoading ? (
+          {isPyodideLoading || isSubmissionLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Loading...
@@ -572,7 +571,7 @@ print(json.dumps({
           <AlertDialogHeader>
             <AlertDialogTitle>Congratulations!</AlertDialogTitle>
             <AlertDialogDescription>
-              You&apos;ve passed all the test cases. Your solution has been saved.
+              You've passed all the test cases. Your submission has been saved.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -684,4 +683,4 @@ export default function ProblemDetailClient({ slug }: { slug: string }) {
     </div>
   );
 }
-
+    
