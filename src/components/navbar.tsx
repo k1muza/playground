@@ -30,7 +30,7 @@ export default function Navbar() {
               key={l.href}
               href={l.href}
               className={clsx(
-                'flex items-center gap-2 rounded-md px-3 py-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground',
+                'flex items-center gap-2 rounded-md px-3 py-2 transition-colors hover:bg-accent hover:text-accent-foreground',
                 (pathname === l.href || (l.href !== '/' && pathname.startsWith(l.href))) &&
                   'bg-accent text-accent-foreground'
               )}
