@@ -7,8 +7,17 @@ import { notFound } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import TopicBadge from '@/components/topic-badge';
 import { Button } from '@/components/ui/button';
-import { PlayIcon, Loader2, CheckCircle, XCircle } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { PlayIcon, Loader2, CheckCircle, XCircle, Rocket } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { Problem } from '@/lib/data';
 import type { PyodideInterface } from 'pyodide';
@@ -32,11 +41,15 @@ type TestResult = {
 
 function CodeRunner({ problem }: { problem: Problem }) {
   const [code, setCode] = useState(problem.templateCode);
-  const [output, setOutput] = useState<TestResult[]>([]);
+  const [testResults, setTestResults] = useState<TestResult[]>([]);
   const [consoleOutput, setConsoleOutput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRunningCode, setIsRunningCode] = useState(false);
   const [isPyodideLoading, setIsPyodideLoading] = useState(true);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const pyodideRef = useRef<PyodideInterface | null>(null);
+
+  const isLoading = isSubmitting || isRunningCode;
 
   useEffect(() => {
     const load = async () => {
@@ -50,43 +63,78 @@ function CodeRunner({ problem }: { problem: Problem }) {
         setIsPyodideLoading(false);
       }
     };
-    
+
     if (window.loadPyodide) {
-        load();
+      load();
     } else {
-        const script = document.querySelector('script[src*="pyodide.js"]');
-        script?.addEventListener('load', load);
-        return () => {
-            script?.removeEventListener('load', load)
-        }
+      const script = document.querySelector('script[src*="pyodide.js"]');
+      script?.addEventListener('load', load);
+      return () => {
+        script?.removeEventListener('load', load);
+      };
     }
   }, []);
 
-  const handleRunCode = async () => {
+  const runPythonCode = async (codeToRun: string): Promise<[string, any]> => {
     const pyodide = pyodideRef.current;
     if (!pyodide) {
-      setConsoleOutput('Pyodide is not loaded yet.');
-      return;
+      return ['Pyodide is not loaded yet.', null];
     }
-    setIsLoading(true);
-    setOutput([]);
-    setConsoleOutput('');
-
+  
     let capturedOutput = '';
+    let executionResult: any = null;
+  
     pyodide.setStdout({
       batched: (text: string) => {
         capturedOutput += text + '\n';
-      }
+        // Try to capture the last JSON line for test results
+        const lines = text.trim().split('\n');
+        const lastLine = lines[lines.length - 1];
+        try {
+            executionResult = JSON.parse(lastLine);
+        } catch (e) {
+            // Not a JSON line, ignore
+        }
+      },
     });
     pyodide.setStderr({
       batched: (text: string) => {
         capturedOutput += text + '\n';
-      }
+      },
     });
+  
+    try {
+      await pyodide.loadPackagesFromImports(codeToRun);
+      await pyodide.runPythonAsync(codeToRun);
+    } catch (error) {
+      const err = error as Error;
+      capturedOutput += err.message;
+    } finally {
+      pyodide.setStdout({});
+      pyodide.setStderr({});
+    }
+  
+    return [capturedOutput.trim(), executionResult];
+  };
+
+  const handleRunCode = async () => {
+    setIsRunningCode(true);
+    setTestResults([]);
+    setConsoleOutput('');
+    const [output] = await runPythonCode(code);
+    setConsoleOutput(output || '(No console output)');
+    setIsRunningCode(false);
+  };
+  
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    setTestResults([]);
+    setConsoleOutput('');
 
     try {
-      await pyodide.loadPackagesFromImports(code);
-      const testResults: TestResult[] = [];
+      const results: TestResult[] = [];
+      let allPassed = true;
+
       for (const testCase of problem.testCases) {
         const inputStr = JSON.stringify(testCase.input).slice(1, -1);
         const testCode = `
@@ -96,16 +144,7 @@ import json
 # The result of the user's function
 actual_result = solution(${inputStr})
 
-# Convert Python result to JSON string for comparison
-def custom_serializer(obj):
-    if isinstance(obj, (list, tuple)):
-        # Sort lists of numbers/simple types if order doesn't matter for the problem
-        # For Two Sum, the order of indices can vary.
-        if "${problem.slug}" == "two-sum":
-             return sorted(obj)
-    return obj
-
-# For two-sum, we need to sort both actual and expected before comparing
+# Special sorting for two-sum problem
 if "${problem.slug}" == "two-sum":
     expected_sorted = sorted(json.loads('${JSON.stringify(testCase.output)}'))
     actual_sorted = sorted(actual_result) if isinstance(actual_result, list) else actual_result
@@ -114,10 +153,15 @@ if "${problem.slug}" == "two-sum":
     expected_for_print = expected_sorted
 else:
     expected_json = '${JSON.stringify(testCase.output)}'
-    actual_json = json.dumps(actual_result, default=custom_serializer)
-    passed = actual_json == expected_json
-    actual_for_print = actual_result
-    expected_for_print = json.loads(expected_json)
+    try:
+        actual_json = json.dumps(actual_result)
+        passed = actual_json == expected_json
+        actual_for_print = actual_result
+        expected_for_print = json.loads(expected_json)
+    except Exception as e:
+        passed = False
+        actual_for_print = str(e)
+        expected_for_print = json.loads(expected_json)
 
 
 print(json.dumps({
@@ -128,38 +172,40 @@ print(json.dumps({
 }))
         `;
         
-        // This is a workaround to get the result from the python script
-        let caseResult: TestResult | null = null;
-        pyodide.setStdout({
-            batched: (text: string) => {
-                try {
-                    const res = JSON.parse(text);
-                    caseResult = {
-                        input: JSON.stringify(res.input),
-                        expected: JSON.stringify(res.expected),
-                        actual: JSON.stringify(res.actual),
-                        passed: res.passed,
-                    };
-                } catch {
-                   capturedOutput += text + '\n';
-                }
-            }
-        });
+        const [capturedOutput, resultJson] = await runPythonCode(testCode);
 
-        await pyodide.runPythonAsync(testCode);
-        if (caseResult) {
-            testResults.push(caseResult);
+        if (resultJson) {
+            results.push({
+                input: JSON.stringify(resultJson.input),
+                expected: JSON.stringify(resultJson.expected),
+                actual: JSON.stringify(resultJson.actual),
+                passed: resultJson.passed,
+            });
+            if (!resultJson.passed) {
+              allPassed = false;
+            }
+        } else {
+            allPassed = false;
+            // Handle cases where the test code itself failed to run
+             results.push({
+                input: JSON.stringify(testCase.input),
+                expected: JSON.stringify(testCase.output),
+                actual: `Execution Error: ${capturedOutput || 'Unknown error'}`,
+                passed: false,
+            });
         }
       }
-      setOutput(testResults);
-      setConsoleOutput(capturedOutput.trim() || '(No console output)');
+      setTestResults(results);
+
+      if (allPassed) {
+        setShowSuccessModal(true);
+      }
+
     } catch (error) {
       const err = error as Error;
-      setConsoleOutput(capturedOutput + err.message);
+      setConsoleOutput(err.message);
     } finally {
-      setIsLoading(false);
-      pyodide.setStdout({});
-      pyodide.setStderr({});
+      setIsSubmitting(false);
     }
   };
 
@@ -183,34 +229,55 @@ print(json.dumps({
           }}
         />
       </div>
-      <Button onClick={handleRunCode} disabled={isLoading || isPyodideLoading} className="mt-4">
-        {isPyodideLoading ? (
+      <div className="mt-4 flex gap-2">
+        <Button onClick={handleRunCode} disabled={isLoading || isPyodideLoading}>
+          {isPyodideLoading ? (
             <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Loading Python...
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Loading...
             </>
-        ) : isLoading ? (
+          ) : isRunningCode ? (
             <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Running...
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Running...
             </>
-        ) : (
+          ) : (
             <>
-                <PlayIcon className="mr-2 h-4 w-4" />
-                Run Code
+              <PlayIcon className="mr-2 h-4 w-4" />
+              Run Code
             </>
-        )}
-      </Button>
-      {(output.length > 0 || consoleOutput) && (
-        <Tabs defaultValue="test-results" className="mt-4">
+          )}
+        </Button>
+        <Button onClick={handleSubmit} disabled={isLoading || isPyodideLoading} variant="secondary">
+          {isPyodideLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Loading...
+            </>
+          ) : isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Submitting...
+            </>
+          ) : (
+            <>
+              <Rocket className="mr-2 h-4 w-4" />
+              Submit
+            </>
+          )}
+        </Button>
+      </div>
+
+      {(testResults.length > 0 || consoleOutput) && (
+        <Tabs defaultValue={testResults.length > 0 ? 'test-results' : 'console'} className="mt-4">
           <TabsList>
-            <TabsTrigger value="test-results">Test Results</TabsTrigger>
-            <TabsTrigger value="console">Console</TabsTrigger>
+            <TabsTrigger value="test-results" disabled={testResults.length === 0}>Test Results</TabsTrigger>
+            <TabsTrigger value="console" disabled={!consoleOutput}>Console</TabsTrigger>
           </TabsList>
           <TabsContent value="test-results">
             <Card>
               <CardContent className="p-4 space-y-4">
-                {output.map((result, i) => (
+                {testResults.map((result, i) => (
                   <div key={i} className="p-4 rounded-md bg-secondary font-code text-sm">
                     <div className="flex items-center gap-2 mb-2">
                       {result.passed ? (
@@ -242,6 +309,22 @@ print(json.dumps({
           </TabsContent>
         </Tabs>
       )}
+
+      <AlertDialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Congratulations!</AlertDialogTitle>
+            <AlertDialogDescription>
+              You've passed all the test cases. Great work!
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setShowSuccessModal(false)}>
+              Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
