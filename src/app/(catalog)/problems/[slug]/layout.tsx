@@ -73,6 +73,13 @@ function ProblemList() {
     return categories;
   }, [problems]);
 
+  const defaultOpenCategories = useMemo(() => {
+    if (!problems || !pathname) return [];
+    const slug = pathname.split('/').pop();
+    const currentProblem = problems.find(p => p.slug === slug);
+    return currentProblem?.tags || [];
+  }, [problems, pathname]);
+
   if (isLoadingProblems || isLoadingSolutions) {
     return <p>Loading problems...</p>;
   }
@@ -80,7 +87,7 @@ function ProblemList() {
   const sortedCategories = Object.keys(categorizedProblems).sort();
 
   return (
-    <Accordion type="multiple" className="w-full">
+    <Accordion type="multiple" className="w-full" defaultValue={defaultOpenCategories}>
       {sortedCategories.map((category) => (
         <AccordionItem value={category} key={category}>
           <AccordionTrigger className="px-2 py-1.5 text-sm font-medium hover:no-underline hover:bg-accent rounded-md">
