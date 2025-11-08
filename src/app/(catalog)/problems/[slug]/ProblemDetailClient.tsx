@@ -6,7 +6,7 @@ import Container from "@/components/container";
 import { Badge } from "@/components/ui/badge";
 import TopicBadge from "@/components/topic-badge";
 import { Button } from "@/components/ui/button";
-import { PlayIcon, Loader2, CheckCircle, XCircle, Rocket } from "lucide-react";
+import { PlayIcon, Loader2, CheckCircle, XCircle, Rocket, Info } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   AlertDialog,
@@ -17,6 +17,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Problem, TestCase } from "@/lib/data";
 import type { PyodideInterface } from "pyodide";
@@ -584,28 +589,39 @@ export default function ProblemDetailClient({ slug }: { slug: string }) {
     <div className="grid h-full grid-cols-1 gap-4 overflow-hidden p-4 md:grid-cols-2">
       <div className="h-full overflow-y-auto pr-4">
         <article className="container-prose">
-          <div className="flex items-center gap-4 mb-4">
-            <Badge
-              variant={
-                p.difficulty === "Easy"
-                  ? "secondary"
-                  : p.difficulty === "Medium"
-                    ? "default"
-                    : "destructive"
-              }
-              className={p.difficulty === "Medium" ? "bg-amber-500 hover:bg-amber-500/80" : ""}
-            >
-              {p.difficulty}
-            </Badge>
-            <div className="flex flex-wrap gap-1.5">
-              {p.tags.map((t: string) => (
-                <TopicBadge key={t} label={t} />
-              ))}
-            </div>
-          </div>
-
           <h1 className="text-4xl font-bold font-headline">{p.title}</h1>
+          <Collapsible>
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" size="sm" className="mt-2 -ml-2">
+                <Info className="mr-2 h-4 w-4" />
+                <span>Problem Info</span>
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="flex items-center gap-4 mt-4 mb-4">
+                <Badge
+                  variant={
+                    p.difficulty === "Easy"
+                      ? "secondary"
+                      : p.difficulty === "Medium"
+                        ? "default"
+                        : "destructive"
+                  }
+                  className={p.difficulty === "Medium" ? "bg-amber-500 hover:bg-amber-500/80" : ""}
+                >
+                  {p.difficulty}
+                </Badge>
+                <div className="flex flex-wrap gap-1.5">
+                  {p.tags.map((t: string) => (
+                    <TopicBadge key={t} label={t} />
+                  ))}
+                </div>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+          
           <hr className="my-6" />
+
           <ReactMarkdown
             className="prose dark:prose-invert max-w-none"
             components={{
