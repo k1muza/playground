@@ -44,7 +44,7 @@ type TestResult = {
   passed: boolean;
 };
 
-function CodeRunner({ problem, testCases }: { problem: Problem, testCases: TestCase[] }) {
+function CodeRunner({ problem, testCases, slug }: { problem: Problem, testCases: TestCase[], slug: string }) {
   const [code, setCode] = useState(problem.templateCode);
   const [testResults, setTestResults] = useState<TestResult[]>([]);
   const [consoleOutput, setConsoleOutput] = useState('');
@@ -169,7 +169,7 @@ import json
 actual_result = solution(${inputStr})
 
 # Special sorting for two-sum problem
-if "${problem.slug}" == "two-sum":
+if "${slug}" == "two-sum":
     expected_sorted = sorted(json.loads('${JSON.stringify(parsedOutput)}'))
     actual_sorted = sorted(actual_result) if isinstance(actual_result, list) else actual_result
     passed = actual_sorted == expected_sorted
@@ -229,7 +229,7 @@ print(json.dumps({
           try {
             const solutionsRef = collection(firestore, 'users', user.uid, 'solutions');
             await addDoc(solutionsRef, {
-              problemId: problem.slug,
+              problemId: slug,
               userId: user.uid,
               solutionCode: code,
               submissionDate: new Date().toISOString(),
@@ -446,8 +446,9 @@ function TestCasesDisplay({ slug }: { slug: string }) {
 }
 
 
-export default function ProblemDetail({ params: { slug } }: { params: { slug: string } }) {
+export default function ProblemDetail({ params }: { params: { slug: string } }) {
   const { firestore } = useFirebase();
+  const slug = params.slug;
 
   const problemRef = useMemoFirebase(
     () => (firestore ? doc(firestore, 'problems', slug) : null),
@@ -503,7 +504,7 @@ export default function ProblemDetail({ params: { slug } }: { params: { slug: st
           <hr className="my-6" />
           <p className="font-code text-sm whitespace-pre-wrap">{p.body}</p>
 
-          <TestCasesDisplay slug={p.slug} />
+          <TestCasesDisplay slug={slug} />
 
           <div className="mt-12 rounded-lg border bg-card p-6">
             <h2 className="text-xl font-semibold font-headline">Hint</h2>
@@ -515,10 +516,9 @@ export default function ProblemDetail({ params: { slug } }: { params: { slug: st
         </article>
         
         <div className="sticky top-20 h-full">
-          {testCases && <CodeRunner problem={p} testCases={testCases}/>}
+          {testCases && <CodeRunner problem={p} testCases={testCases} slug={slug} />}
         </div>
       </div>
     </Container>
   );
 }
-
