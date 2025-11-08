@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, use } from 'react';
+import { useState, useEffect, use } from 'react';
 import Container from '@/components/container';
 import { problems } from '@/lib/data';
 import { notFound } from 'next/navigation';
@@ -9,9 +9,16 @@ import { Badge } from '@/components/ui/badge';
 import TopicBadge from '@/components/topic-badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { PlayIcon } from 'lucide-react';
+import { PlayIcon, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Problem } from '@/lib/data';
+import type { PyodideInterface } from 'pyodide';
+
+declare global {
+  interface Window {
+    loadPyodide: () => Promise<PyodideInterface>;
+  }
+}
 
 function CodeRunner({ problem }: { problem: Problem }) {
   const [code, setCode] = useState(
@@ -19,27 +26,79 @@ function CodeRunner({ problem }: { problem: Problem }) {
   );
   const [output, setOutput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isPyodideLoading, setIsPyodideLoading] = useState(true);
+  const [pyodide, setPyodide] = useState<PyodideInterface | null>(null);
+
+  useEffect(() => {
+    if (window.loadPyodide) {
+      window
+        .loadPyodide()
+        .then((instance) => {
+          setPyodide(instance);
+          setIsPyodideLoading(false);
+        })
+        .catch((error) => {
+          console.error('Failed to load Pyodide:', error);
+          setOutput('Error: Could not load Python interpreter.');
+          setIsPyodideLoading(false);
+        });
+    } else {
+        // Handle case where pyodide script hasn't loaded yet
+        const script = document.querySelector('script[src*="pyodide.js"]');
+        const listener = () => {
+             window
+                .loadPyodide()
+                .then((instance) => {
+                setPyodide(instance);
+                setIsPyodideLoading(false);
+                })
+                .catch((error) => {
+                console.error('Failed to load Pyodide:', error);
+                setOutput('Error: Could not load Python interpreter.');
+                setIsPyodideLoading(false);
+                });
+        }
+        script?.addEventListener('load', listener);
+        return () => {
+            script?.removeEventListener('load', listener)
+        }
+    }
+  }, []);
 
   const handleRunCode = async () => {
+    if (!pyodide) {
+      setOutput('Pyodide is not loaded yet.');
+      return;
+    }
     setIsLoading(true);
     setOutput('');
     try {
-      const response = await fetch('/api/run-code', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code }),
-      });
-      if (!response.ok) {
-        throw new Error('Failed to run code');
+      // Redirect stdout to capture output
+      pyodide.globals.set('__output__', []);
+      const customStdout = {
+        write: (s: string) => {
+            const currentOutput = pyodide.globals.get('__output__');
+            currentOutput.push(s);
+            pyodide.globals.set('__output__', currentOutput);
+            return s.length;
+        }
       }
-      const result = await response.json();
-      setOutput(result.output);
+      pyodide.setStdout(customStdout);
+      pyodide.setStderr(customStdout);
+
+      await pyodide.loadPackagesFromImports(code);
+      await pyodide.runPythonAsync(code);
+      const capturedOutput = pyodide.globals.get('__output__').toJs().join('');
+      setOutput(capturedOutput || '(No output)');
     } catch (error) {
       setOutput(
         error instanceof Error ? error.message : 'An unknown error occurred.'
       );
     } finally {
       setIsLoading(false);
+      // Reset stdout
+      pyodide.setStdout({});
+      pyodide.setStderr({});
     }
   };
 
@@ -52,9 +111,23 @@ function CodeRunner({ problem }: { problem: Problem }) {
         placeholder="Enter your Python code here"
         className="font-code text-sm h-64 bg-background"
       />
-      <Button onClick={handleRunCode} disabled={isLoading} className="mt-4">
-        <PlayIcon className="mr-2 h-4 w-4" />
-        {isLoading ? 'Running...' : 'Run Code'}
+      <Button onClick={handleRunCode} disabled={isLoading || isPyodideLoading} className="mt-4">
+        {isPyodideLoading ? (
+            <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Loading Python...
+            </>
+        ) : isLoading ? (
+            <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Running...
+            </>
+        ) : (
+            <>
+                <PlayIcon className="mr-2 h-4 w-4" />
+                Run Code
+            </>
+        )}
       </Button>
       {output && (
         <Card className="mt-4">
