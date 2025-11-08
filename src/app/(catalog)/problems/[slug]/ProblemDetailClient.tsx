@@ -218,9 +218,8 @@ function CodeRunner({
   // ---------- helpers ----------
 
   const base64Encode = (obj: unknown) =>
-    typeof obj === "string"
-      ? btoa(unescape(encodeURIComponent(obj)))
-      : btoa(unescape(encodeURIComponent(JSON.stringify(obj))));
+    btoa(unescape(encodeURIComponent(JSON.stringify(obj))));
+
 
   const runPythonCode = async (codeToRun: string): Promise<[string, any]> => {
     const pyodide = pyodideRef.current;
