@@ -1,6 +1,7 @@
 
 'use client';
 
+import { useTransition } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -30,7 +31,8 @@ import { useFirebase } from '@/firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
-import { PlusCircle, Trash2 } from 'lucide-react';
+import { PlusCircle, Trash2, Database } from 'lucide-react';
+import { seedProblems } from '@/actions/seed-problems';
 
 // Zod schema for test cases where input/output are strings (JSON)
 const TestCaseSchema = z.object({
@@ -48,6 +50,48 @@ const FormSchema = ProblemSchema.omit({
 });
 
 type FormValues = z.infer<typeof FormSchema>;
+
+function Seeder() {
+  const [isPending, startTransition] = useTransition();
+  const { toast } = useToast();
+
+  const handleSeed = () => {
+    startTransition(async () => {
+      try {
+        const result = await seedProblems();
+        if (result.success) {
+          toast({
+            title: 'Success!',
+            description: result.message,
+          });
+        } else {
+          throw new Error(result.message);
+        }
+      } catch (error) {
+        toast({
+          variant: 'destructive',
+          title: 'Seeding Failed',
+          description: error instanceof Error ? error.message : 'An unknown error occurred.',
+        });
+      }
+    });
+  };
+
+  return (
+    <div className="mb-6 flex items-center justify-between rounded-lg border p-4">
+      <div>
+        <h2 className="font-semibold">Seed Database</h2>
+        <p className="text-sm text-muted-foreground">
+          Populate the Firestore `problems` collection with the default set of problems.
+        </p>
+      </div>
+      <Button onClick={handleSeed} disabled={isPending} variant="outline">
+        <Database className="mr-2 h-4 w-4" />
+        {isPending ? 'Seeding...' : 'Seed Problems'}
+      </Button>
+    </div>
+  );
+}
 
 export default function AddProblemPage() {
   const { firestore } = useFirebase();
@@ -124,7 +168,9 @@ export default function AddProblemPage() {
 
   return (
     <Container className="py-10">
-      <h1 className="text-3xl font-bold font-headline mb-6">Add New Problem</h1>
+      <h1 className="text-3xl font-bold font-headline mb-6">Admin</h1>
+      <Seeder />
+      <h2 className="text-2xl font-bold font-headline mb-4">Add New Problem</h2>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <Card>

@@ -9,8 +9,7 @@
     "build": "NODE_ENV=production next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit",
-    "db:seed": "bun src/scripts/seed.ts"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@codemirror/lang-python": "^6.1.6",
@@ -69,4 +68,3 @@
     "typescript": "^5"
   }
 }
-    
