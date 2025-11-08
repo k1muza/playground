@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { clsx } from 'clsx';
-import { Book, Code, FileText, Home, Search, Feather } from 'lucide-react';
+import { Book, Code, FileText, Home, Search, Feather, Shield } from 'lucide-react';
 
 const links = [
   { href: '/', label: 'Home', icon: Home },
@@ -11,6 +11,7 @@ const links = [
   { href: '/problems', label: 'Problems', icon: Code },
   { href: '/articles', label: 'Articles', icon: FileText },
   { href: '/search', label: 'Search', icon: Search },
+  { href: '/admin/add-problem', label: 'Admin', icon: Shield },
 ];
 
 export default function Navbar() {

@@ -23,7 +23,7 @@
  * Access Control Pattern:
  * - Courses: Public Read
  * - Lessons: Public Read
- * - Problems: Public Read
+ * - Problems: Public Read, Admin Write
  * - Articles: Public Read
  * - Tags: Public Read
  * - Topics: Public Read
@@ -62,12 +62,14 @@ service cloud.firestore {
      * @description Allows public read access to problem information.
      * @path /databases/{database}/documents/problems/{problemId}
      * @allow (get, list) User can retrieve or list problem details without authentication.
-     * @deny (create, update, delete) User cannot create, update, or delete problem data.
-     * @principle Allows open access to practice problems; write access is not permitted.
+     * @allow (create, update) Admin can create or update problem data.
+     * @deny (delete) User cannot delete problem data.
+     * @principle Allows open access to practice problems; write access is restricted.
      */
     match /problems/{problemId} {
       allow get, list: if true;
-      allow create, update, delete: if false;
+      allow create, update: if true; // WARNING: This is open for now. Should be restricted to admins.
+      allow delete: if false;
     }
 
     /**

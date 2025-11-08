@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 export type Course = {
   slug: string;
   title: string;
@@ -7,19 +9,26 @@ export type Course = {
   lessons: { id: string; title: string; content: string }[];
 };
 
-export type Problem = {
-  slug: string;
-  title: string;
-  summary: string;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
-  tags: string[];
-  body: string;
-  templateCode: string;
-  testCases: {
-    input: any[];
-    output: any;
-  }[];
-};
+export const ProblemSchema = z.object({
+  slug: z.string().min(1, 'Slug is required.'),
+  title: z.string().min(1, 'Title is required.'),
+  summary: z.string().min(1, 'Summary is required.'),
+  difficulty: z.enum(['Easy', 'Medium', 'Hard']),
+  tags: z.array(z.string()).min(1, 'At least one tag is required.'),
+  body: z.string().min(1, 'Problem body is required.'),
+  templateCode: z.string().min(1, 'Template code is required.'),
+  testCases: z
+    .array(
+      z.object({
+        input: z.any(),
+        output: z.any(),
+      })
+    )
+    .min(1, 'At least one test case is required.'),
+});
+
+export type Problem = z.infer<typeof ProblemSchema>;
+
 
 export type Article = {
   slug: string;
@@ -50,7 +59,7 @@ export const courses: Course[] = [
       {
         id: 'stacks-queues',
         title: 'Stacks & Queues',
-        content: "# Stacks & Queues\n\nStacks and Queues are abstract data types, often implemented using Arrays or Linked Lists. They define rules for how elements are added and removed.\n\n## Stacks (LIFO)\n\nA stack follows the **Last-In, First-Out (LIFO)** principle. The last element added to the stack is the first one to be removed. Think of a stack of plates.\n\n- **Push:** Add an element to the top of the stack.\n- **Pop:** Remove the element from the top of the stack.\n\n## Queues (FIFO)\n\nA queue follows the **First-In, First-Out (FIFO)** principle. The first element added is the first one to be removed. Think of a checkout line at a store.\n\n- **Enqueue:** Add an element to the back (tail) of the queue.\n- **Dequeue:** Remove the element from the front (head) of thequeue.",
+        content: "# Stacks & Queues\n\nStacks and Queues are abstract data types, often implemented using Arrays or Linked Lists. They define rules for how elements are added and removed.\n\n## Stacks (LIFO)\n\nA stack follows the **Last-In, First-Out (LIFO)** principle. The last element added to the stack is the first one to be removed. Think of a stack of plates.\n\n- **Push:** Add an element to the top of the stack.\n- **Pop:** Remove the element from the top of the stack.\n\n## Queues (FIFO)\n\nA queue follows the **First-In, First-Out (FIFO)** principle. The first element added is the first one to be removed. Think of a checkout line at a store.\n\n- **Enqueue:** Add an element to the back (tail) of the queue.\n- **Dequeue:** Remove the element from the front (head) of the queue.",
       },
     ],
   },
@@ -93,7 +102,9 @@ export const articles: Article[] = [
 ];
 
 // This is the data that will be seeded into Firestore.
-export const problemsForSeeding: Problem[] = [
+export const problemsForSeeding: Omit<Problem, 'testCases'> & {
+  testCases: { input: any[]; output: any }[];
+}[] = [
   {
     slug: 'two-sum',
     title: 'Two Sum',
@@ -168,5 +179,3 @@ export const problemsForSeeding: Problem[] = [
     ],
   },
 ];
-
-    
