@@ -96,6 +96,7 @@ function CodeRunner({ problem }: { problem: Problem }) {
   
     const stdoutCallback = (text: string) => {
         capturedOutput += text + '\n';
+        // Try to parse the last line as JSON, as that's where our result is.
         const lines = text.trim().split('\n');
         const lastLine = lines[lines.length - 1];
         try {
@@ -119,10 +120,12 @@ function CodeRunner({ problem }: { problem: Problem }) {
       const err = error as Error;
       capturedOutput += err.message;
     } finally {
+      // It's important to reset stdout/stderr to avoid memory leaks
       pyodide.setStdout({});
       pyodide.setStderr({});
     }
   
+    // Return the full captured output, and the parsed JSON result if any
     return [capturedOutput.trim(), executionResult];
   };
 
@@ -163,6 +166,7 @@ if "${problem.slug}" == "two-sum":
 else:
     expected_json = '${JSON.stringify(testCase.output)}'
     try:
+        # Compare JSON strings for deep equality
         actual_json = json.dumps(actual_result)
         passed = actual_json == expected_json
         actual_for_print = actual_result
@@ -173,6 +177,7 @@ else:
         expected_for_print = json.loads(expected_json)
 
 
+# This JSON result is what we'll capture
 print(json.dumps({
     "input": ${JSON.stringify(testCase.input)},
     "expected": expected_for_print,
@@ -385,10 +390,11 @@ function ProblemDetailSkeleton() {
 
 export default function ProblemDetail({ params }: { params: { slug: string } }) {
   const { firestore } = useFirebase();
+  const { slug } = params;
 
   const problemRef = useMemoFirebase(
-    () => (firestore ? doc(firestore, 'problems', params.slug) : null),
-    [firestore, params.slug]
+    () => (firestore ? doc(firestore, 'problems', slug) : null),
+    [firestore, slug]
   );
   const { data: p, isLoading } = useDoc<Problem>(problemRef);
 
@@ -462,5 +468,3 @@ export default function ProblemDetail({ params }: { params: { slug: string } }) 
     </Container>
   );
 }
-
-    
