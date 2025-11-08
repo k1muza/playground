@@ -638,7 +638,7 @@ export default function ProblemDetailClient({ slug }: { slug: string }) {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <div className="space-y-2 p-2">
+                  <div className="space-y-2 p-2 max-w-xs">
                     <Badge
                       variant={
                         p.difficulty <= 3
@@ -683,4 +683,3 @@ export default function ProblemDetailClient({ slug }: { slug: string }) {
     </div>
   );
 }
-    
