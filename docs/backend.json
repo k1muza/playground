@@ -83,7 +83,7 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Problem",
       "type": "object",
-      "description": "Represents a practice problem.",
+      "description": "Represents a practice problem. Test cases are stored in a subcollection.",
       "properties": {
         "slug": {
           "type": "string",
@@ -115,19 +115,6 @@
         "templateCode": {
           "type": "string",
           "description": "Boilerplate code for the user to start with."
-        },
-        "testCases": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "input": {
-                "type": "array"
-              },
-              "output": {}
-            },
-            "required": ["input", "output"]
-          }
         }
       },
       "required": [
@@ -137,9 +124,29 @@
         "difficulty",
         "tags",
         "body",
-        "templateCode",
-        "testCases"
+        "templateCode"
       ]
+    },
+    "TestCase": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Test Case",
+      "type": "object",
+      "description": "Represents a single test case for a problem.",
+      "properties": {
+        "problemId": {
+          "type": "string",
+          "description": "The slug of the problem this test case belongs to."
+        },
+        "input": {
+          "type": "string",
+          "description": "JSON string representing the arguments for the solution function."
+        },
+        "output": {
+          "type": "string",
+          "description": "JSON string representing the expected return value."
+        }
+      },
+      "required": ["problemId", "input", "output"]
     },
     "Article": {
       "$schema": "http://json-schema.org/draft-07/schema#",
@@ -348,6 +355,26 @@
         }
       },
       {
+        "path": "problems/{problemSlug}/testCases/{testCaseId}",
+        "definition": {
+          "entityName": "TestCase",
+          "schema": {
+            "$ref": "#/backend/entities/TestCase"
+          },
+          "description": "Stores test cases for a specific problem.",
+          "params": [
+            {
+              "name": "problemSlug",
+              "description": "The slug of the associated problem."
+            },
+            {
+              "name": "testCaseId",
+              "description": "Unique identifier for the test case."
+            }
+          ]
+        }
+      },
+      {
         "path": "articles/{articleId}",
         "definition": {
           "entityName": "Article",
@@ -432,7 +459,8 @@
         }
       }
     ],
-    "reasoning": "The Firestore structure is designed to reflect the relationships between courses, lessons, problems, articles, tags, and user solutions. For problems, the document ID is the URL slug for direct and efficient lookups. Solutions are stored within user documents to ensure clear ownership and facilitate secure access control. Denormalization is used to ensure authorization independence. Specifically, each solution document includes the `userId` and `problemId`. This allows security rules to validate that the authenticated user is the owner of the solution without needing to perform a `get()` request to a parent document.  This structure supports secure list operations (QAPs) by ensuring all documents in the `users/{userId}/solutions` collection share the same security requirements (ownership by the user)."
+    "reasoning": "The Firestore structure is designed to reflect the relationships between courses, lessons, problems, articles, tags, and user solutions. For problems, the document ID is the URL slug for direct and efficient lookups. Test cases are stored in a subcollection under each problem for scalability and to keep the main problem document lean. Solutions are stored within user documents to ensure clear ownership and facilitate secure access control. Denormalization is used to ensure authorization independence. Specifically, each solution document includes the `userId` and `problemId`. This allows security rules to validate that the authenticated user is the owner of the solution without needing to perform a `get()` request to a parent document.  This structure supports secure list operations (QAPs) by ensuring all documents in the `users/{userId}/solutions` collection share the same security requirements (ownership by the user)."
   }
 }
+
     

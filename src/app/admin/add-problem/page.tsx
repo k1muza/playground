@@ -25,21 +25,21 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ProblemSchema, type Problem } from '@/lib/data';
+import { ProblemSchema, TestCaseSchema, type Problem, type TestCase } from '@/lib/data';
 import Container from '@/components/container';
 import { useFirebase } from '@/firebase';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, writeBatch } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { PlusCircle, Trash2, Database } from 'lucide-react';
 import { seedProblems } from '@/actions/seed-problems';
 
-// We use the same schema for the form as for the Firestore data,
-// with test cases as strings.
+// Form schema combines problem data and an array of test cases
 const FormSchema = ProblemSchema.omit({
   tags: true,
 }).extend({
   tags: z.string().min(1, 'At least one tag is required.'),
+  testCases: z.array(TestCaseSchema).min(1, 'At least one test case is required.'),
 });
 
 type FormValues = z.infer<typeof FormSchema>;
@@ -75,7 +75,7 @@ function Seeder() {
       <div>
         <h2 className="font-semibold">Seed Database</h2>
         <p className="text-sm text-muted-foreground">
-          Populate the Firestore `problems` collection with the default set of problems.
+          Populate the Firestore `problems` collection with the default set of problems and their test cases.
         </p>
       </div>
       <Button onClick={handleSeed} disabled={isPending} variant="outline">
@@ -121,22 +121,33 @@ export default function AddProblemPage() {
     }
 
     try {
-      // Form data is already in the correct stringified format for Firestore.
-      // We just need to split the tags string into an array.
+      const { testCases, ...problemDataWithoutTags } = data;
       const problemData = {
-        ...data,
+        ...problemDataWithoutTags,
         tags: data.tags.split(',').map((tag) => tag.trim()),
       };
 
       // We still validate against the Zod schema to be safe.
       ProblemSchema.parse(problemData);
 
+      const batch = writeBatch(firestore);
+
+      // 1. Set the main problem document
       const problemRef = doc(firestore, 'problems', problemData.slug);
-      await setDoc(problemRef, problemData);
+      batch.set(problemRef, problemData);
+
+      // 2. Set the test case documents in the subcollection
+      const testCasesRef = doc(firestore, 'problems', problemData.slug);
+      testCases.forEach((tc) => {
+        const testCaseRef = doc(testCasesRef, 'testCases', crypto.randomUUID());
+        batch.set(testCaseRef, tc);
+      });
+      
+      await batch.commit();
 
       toast({
         title: 'Success!',
-        description: `Problem "${problemData.title}" has been saved.`,
+        description: `Problem "${problemData.title}" and its test cases have been saved.`,
       });
 
       router.push(`/problems/${problemData.slug}`);
@@ -361,3 +372,5 @@ export default function AddProblemPage() {
     </Container>
   );
 }
+
+    

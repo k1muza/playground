@@ -19,14 +19,14 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import type { Problem } from '@/lib/data';
+import type { Problem, TestCase } from '@/lib/data';
 import type { PyodideInterface } from 'pyodide';
 
 import CodeMirror from '@uiw/react-codemirror';
 import { python } from '@codemirror/lang-python';
 import { githubDark } from '@uiw/codemirror-theme-github';
 
-import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
+import { useFirebase, useDoc, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, addDoc, doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -43,7 +43,7 @@ type TestResult = {
   passed: boolean;
 };
 
-function CodeRunner({ problem }: { problem: Problem }) {
+function CodeRunner({ problem, testCases }: { problem: Problem, testCases: TestCase[] }) {
   const [code, setCode] = useState(problem.templateCode);
   const [testResults, setTestResults] = useState<TestResult[]>([]);
   const [consoleOutput, setConsoleOutput] = useState('');
@@ -144,11 +144,17 @@ function CodeRunner({ problem }: { problem: Problem }) {
     setTestResults([]);
     setConsoleOutput('');
 
+    if (!testCases || testCases.length === 0) {
+      setConsoleOutput('No test cases found for this problem.');
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       const results: TestResult[] = [];
       let allPassed = true;
 
-      for (const testCase of problem.testCases) {
+      for (const testCase of testCases) {
         // Parse the JSON string from Firestore
         const parsedInput = JSON.parse(testCase.input);
         const parsedOutput = JSON.parse(testCase.output);
@@ -172,8 +178,8 @@ else:
     expected_json = '${JSON.stringify(parsedOutput)}'
     try:
         # Compare JSON strings for deep equality
-        actual_json = json.dumps(actual_result)
-        passed = actual_json == expected_json
+        actual_json = json.dumps(actual_result, sort_keys=True)
+        passed = actual_json == json.dumps(json.loads(expected_json), sort_keys=True)
         actual_for_print = actual_result
         expected_for_print = json.loads(expected_json)
     except Exception as e:
@@ -393,16 +399,70 @@ function ProblemDetailSkeleton() {
   );
 }
 
-export default function ProblemDetail({ params }: { params: { slug: string } }) {
+function TestCasesDisplay({ slug }: { slug: string }) {
   const { firestore } = useFirebase();
 
-  const problemRef = useMemoFirebase(
-    () => (firestore ? doc(firestore, 'problems', params.slug) : null),
-    [firestore, params.slug]
+  const testCasesQuery = useMemoFirebase(
+    () => (firestore ? collection(firestore, 'problems', slug, 'testCases') : null),
+    [firestore, slug]
   );
-  const { data: p, isLoading } = useDoc<Problem>(problemRef);
+  const { data: testCases, isLoading } = useCollection<TestCase>(testCasesQuery);
 
   if (isLoading) {
+    return (
+      <div className="mt-8 space-y-4">
+        <Skeleton className="h-24 w-full" />
+        <Skeleton className="h-24 w-full" />
+      </div>
+    );
+  }
+
+  if (!testCases) return null;
+
+  return (
+    <div className="mt-8 space-y-4">
+      {testCases.map((tc, i) => {
+        let parsedInput;
+        try {
+          parsedInput = JSON.parse(tc.input);
+        } catch {
+          parsedInput = tc.input;
+        }
+        
+        return (
+          <div key={tc.id}>
+              <p className="font-semibold">Example {i + 1}:</p>
+              <pre className="mt-2 p-3 bg-secondary rounded-md text-sm font-code">
+                  <strong>Input:</strong> {slug === 'two-sum' && Array.isArray(parsedInput) ? `nums = ${JSON.stringify(parsedInput[0])}, target = ${parsedInput[1]}` : JSON.stringify(parsedInput)
+}<br />
+                  <strong>Output:</strong> {tc.output}
+              </pre>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+
+export default function ProblemDetail({ params }: { params: { slug: string } }) {
+  const { firestore } = useFirebase();
+  const { slug } = params;
+
+  const problemRef = useMemoFirebase(
+    () => (firestore ? doc(firestore, 'problems', slug) : null),
+    [firestore, slug]
+  );
+  const { data: p, isLoading: isProblemLoading } = useDoc<Problem>(problemRef);
+  
+  const testCasesQuery = useMemoFirebase(
+    () => (firestore ? collection(firestore, 'problems', slug, 'testCases') : null),
+    [firestore, slug]
+  );
+  const { data: testCases, isLoading: areTestCasesLoading } = useCollection<TestCase>(testCasesQuery);
+
+
+  if (isProblemLoading || areTestCasesLoading) {
     return (
       <Container className="py-8 lg:py-12">
         <ProblemDetailSkeleton />
@@ -443,21 +503,7 @@ export default function ProblemDetail({ params }: { params: { slug: string } }) 
           <hr className="my-6" />
           <p className="font-code text-sm whitespace-pre-wrap">{p.body}</p>
 
-          <div className="mt-8 space-y-4">
-            {p.testCases.map((tc, i) => {
-              const parsedInput = JSON.parse(tc.input);
-              return (
-                <div key={i}>
-                    <p className="font-semibold">Example {i + 1}:</p>
-                    <pre className="mt-2 p-3 bg-secondary rounded-md text-sm font-code">
-                        <strong>Input:</strong> {p.slug === 'two-sum' ? `nums = ${JSON.stringify(parsedInput[0])}, target = ${parsedInput[1]}` : JSON.stringify(parsedInput)
-}<br />
-                        <strong>Output:</strong> {tc.output}
-                    </pre>
-                </div>
-              );
-            })}
-          </div>
+          <TestCasesDisplay slug={p.slug} />
 
           <div className="mt-12 rounded-lg border bg-card p-6">
             <h2 className="text-xl font-semibold font-headline">Hint</h2>
@@ -469,9 +515,11 @@ export default function ProblemDetail({ params }: { params: { slug: string } }) 
         </article>
         
         <div className="sticky top-20 h-full">
-          <CodeRunner problem={p} />
+          {testCases && <CodeRunner problem={p} testCases={testCases}/>}
         </div>
       </div>
     </Container>
   );
 }
+
+    

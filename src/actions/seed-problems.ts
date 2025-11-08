@@ -21,23 +21,26 @@ export async function seedProblems() {
   try {
     console.log('Seeding database...');
     
-    const problemsCollection = collection(db, 'problems');
     const batch = writeBatch(db);
     
     for (const problem of problemsForSeeding) {
-      const problemRef = doc(problemsCollection, problem.slug);
-      
-      // Stringify test cases to avoid Firestore nested array issue
-      const problemDataForFirestore = {
-        ...problem,
-        testCases: problem.testCases.map(tc => ({
+      // 1. Create the main problem document
+      const problemRef = doc(db, 'problems', problem.slug);
+      const { testCases, ...problemData } = problem;
+      console.log(`  Queueing problem for write: ${problem.slug}`);
+      batch.set(problemRef, problemData);
+
+      // 2. Create a document for each test case in the subcollection
+      const testCasesCollection = collection(db, 'problems', problem.slug, 'testCases');
+      for (const tc of testCases) {
+        const testCaseRef = doc(testCasesCollection); // Auto-generate ID
+        const testCaseData = {
           input: JSON.stringify(tc.input),
           output: JSON.stringify(tc.output),
-        })),
-      };
-
-      console.log(`  Queueing problem for write: ${problem.slug}`);
-      batch.set(problemRef, problemDataForFirestore);
+        };
+        console.log(`    Queueing test case for ${problem.slug}`);
+        batch.set(testCaseRef, testCaseData);
+      }
     }
 
     await batch.commit();
@@ -50,3 +53,5 @@ export async function seedProblems() {
     return { success: false, message: error.message };
   }
 }
+
+    

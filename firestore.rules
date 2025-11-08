@@ -8,11 +8,12 @@
  * Data Structure:
  * - Courses, lessons, problems, articles, tags, and topics are stored in top-level collections
  *   (e.g., /courses/{courseId}, /lessons/{lessonId}).
+ * - Test cases are stored in a subcollection: /problems/{problemSlug}/testCases/{testCaseId}.
  * - User profiles are stored in /users/{userId}.
  * - Solutions are stored in a user-specific subcollection: /users/{userId}/solutions/{solutionId}.
  *
  * Key Security Decisions:
- * - Public read access is granted to course, lesson, problem, article, tag, and topic data to
+ * - Public read access is granted to course, lesson, problem, test case, article, tag, and topic data to
  *   enable open browsing and discovery.
  * - User listing is disallowed for privacy.
  * - Solutions are strictly owned by the user who created them.
@@ -24,6 +25,7 @@
  * - Courses: Public Read
  * - Lessons: Public Read
  * - Problems: Public Read, Admin Write
+ * - TestCases: Public Read, Admin Write
  * - Articles: Public Read
  * - Tags: Public Read
  * - Topics: Public Read
@@ -59,7 +61,7 @@ service cloud.firestore {
     }
 
     /**
-     * @description Allows public read access to problem information.
+     * @description Allows public read access to problem information and their test cases.
      * @path /databases/{database}/documents/problems/{problemId}
      * @allow (get, list) User can retrieve or list problem details without authentication.
      * @allow (create, update) Admin can create or update problem data.
@@ -70,6 +72,19 @@ service cloud.firestore {
       allow get, list: if true;
       allow create, update: if true; // WARNING: This is open for now. Should be restricted to admins.
       allow delete: if false;
+
+      /**
+       * @description Allows public read access to test cases for a problem.
+       * @path /databases/{database}/documents/problems/{problemId}/testCases/{testCaseId}
+       * @allow (get, list) User can read test cases.
+       * @allow (create, update) Admin can manage test cases.
+       * @principle Allows open access to test cases; write access is restricted.
+       */
+      match /testCases/{testCaseId} {
+        allow get, list: if true;
+        allow create, update: if true; // WARNING: This is open for now. Should be restricted to admins.
+        allow delete: if false;
+      }
     }
 
     /**
@@ -157,3 +172,5 @@ service cloud.firestore {
     }
   }
 }
+
+    

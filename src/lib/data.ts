@@ -1,4 +1,3 @@
-
 import { z } from 'zod';
 
 export type Course = {
@@ -10,6 +9,8 @@ export type Course = {
   lessons: { id: string; title: string; content: string }[];
 };
 
+// Represents the data stored in the main `problems/{slug}` document.
+// The `testCases` array is removed from here.
 export const ProblemSchema = z.object({
   slug: z.string().min(1, 'Slug is required.'),
   title: z.string().min(1, 'Title is required.'),
@@ -18,18 +19,18 @@ export const ProblemSchema = z.object({
   tags: z.array(z.string()).min(1, 'At least one tag is required.'),
   body: z.string().min(1, 'Problem body is required.'),
   templateCode: z.string().min(1, 'Template code is required.'),
-  testCases: z
-    .array(
-      z.object({
-        // Inputs and outputs are stored as JSON strings
-        input: z.string(),
-        output: z.string(),
-      })
-    )
-    .min(1, 'At least one test case is required.'),
 });
 
 export type Problem = z.infer<typeof ProblemSchema>;
+
+// Represents the data for a document in the `problems/{slug}/testCases` subcollection.
+export const TestCaseSchema = z.object({
+  // Inputs and outputs are stored as JSON strings
+  input: z.string(),
+  output: z.string(),
+});
+
+export type TestCase = z.infer<typeof TestCaseSchema>;
 
 
 export type Article = {
@@ -104,7 +105,7 @@ export const articles: Article[] = [
 ];
 
 // This is the data that will be seeded into Firestore.
-export const problemsForSeeding: Omit<Problem, 'testCases' | 'tags'> & { tags: string[]; testCases: { input: any[]; output: any }[] }[] = [
+export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; testCases: { input: any[]; output: any }[] })[] = [
   {
     slug: 'two-sum',
     title: 'Two Sum',
@@ -179,3 +180,5 @@ export const problemsForSeeding: Omit<Problem, 'testCases' | 'tags'> & { tags: s
     ],
   },
 ];
+
+    
