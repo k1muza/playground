@@ -1,0 +1,422 @@
+{
+  "entities": {
+    "Course": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Course",
+      "type": "object",
+      "description": "Represents a course offered on the platform.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the course."
+        },
+        "slug": {
+          "type": "string",
+          "description": "URL-friendly slug for the course."
+        },
+        "title": {
+          "type": "string",
+          "description": "Title of the course."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the course."
+        },
+        "level": {
+          "type": "string",
+          "description": "Difficulty level of the course (e.g., Beginner, Intermediate, Advanced)."
+        },
+        "topicIds": {
+          "type": "array",
+          "description": "References to Topics. (Relationship: Course 1:N Topic)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "lessonIds": {
+          "type": "array",
+          "description": "References to Lessons. (Relationship: Course 1:N Lesson)",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "slug",
+        "title",
+        "description",
+        "level"
+      ]
+    },
+    "Lesson": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Lesson",
+      "type": "object",
+      "description": "Represents a lesson within a course.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the lesson."
+        },
+        "courseId": {
+          "type": "string",
+          "description": "Reference to Course. (Relationship: Course 1:N Lesson)"
+        },
+        "title": {
+          "type": "string",
+          "description": "Title of the lesson."
+        },
+        "content": {
+          "type": "string",
+          "description": "Content of the lesson (e.g., Markdown or HTML)."
+        }
+      },
+      "required": [
+        "id",
+        "courseId",
+        "title",
+        "content"
+      ]
+    },
+    "Problem": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Problem",
+      "type": "object",
+      "description": "Represents a practice problem.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the problem."
+        },
+        "slug": {
+          "type": "string",
+          "description": "URL-friendly slug for the problem."
+        },
+        "title": {
+          "type": "string",
+          "description": "Title of the problem."
+        },
+        "summary": {
+          "type": "string",
+          "description": "Brief summary of the problem."
+        },
+        "difficulty": {
+          "type": "string",
+          "description": "Difficulty level of the problem (e.g., Easy, Medium, Hard)."
+        },
+        "tagIds": {
+          "type": "array",
+          "description": "References to Tags. (Relationship: Problem N:N Tag)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "body": {
+          "type": "string",
+          "description": "Full problem statement."
+        }
+      },
+      "required": [
+        "id",
+        "slug",
+        "title",
+        "summary",
+        "difficulty",
+        "body"
+      ]
+    },
+    "Article": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Article",
+      "type": "object",
+      "description": "Represents an article.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the article."
+        },
+        "slug": {
+          "type": "string",
+          "description": "URL-friendly slug for the article."
+        },
+        "title": {
+          "type": "string",
+          "description": "Title of the article."
+        },
+        "excerpt": {
+          "type": "string",
+          "description": "Short excerpt of the article."
+        },
+        "tagIds": {
+          "type": "array",
+          "description": "References to Tags. (Relationship: Article N:N Tag)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "body": {
+          "type": "string",
+          "description": "Full content of the article."
+        }
+      },
+      "required": [
+        "id",
+        "slug",
+        "title",
+        "excerpt",
+        "body"
+      ]
+    },
+    "Tag": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Tag",
+      "type": "object",
+      "description": "Represents a tag for categorizing content.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the tag."
+        },
+        "label": {
+          "type": "string",
+          "description": "Display name of the tag."
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ]
+    },
+    "Topic": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Topic",
+      "type": "object",
+      "description": "Represents a topic within a course.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the topic."
+        },
+        "label": {
+          "type": "string",
+          "description": "Display name of the topic."
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ]
+    },
+    "Solution": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Solution",
+      "type": "object",
+      "description": "Represents a user's solution to a specific problem.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the solution."
+        },
+        "problemId": {
+          "type": "string",
+          "description": "Reference to Problem. (Relationship: Problem 1:N Solution)"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Solution)"
+        },
+        "solutionCode": {
+          "type": "string",
+          "description": "The code the user submitted as a solution."
+        },
+        "submissionDate": {
+          "type": "string",
+          "description": "The date and time the solution was submitted.",
+          "format": "date-time"
+        },
+        "isCorrect": {
+          "type": "boolean",
+          "description": "Indicates whether the solution is correct or not."
+        }
+      },
+      "required": [
+        "id",
+        "problemId",
+        "userId",
+        "solutionCode",
+        "submissionDate",
+        "isCorrect"
+      ]
+    },
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user of the platform.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the user.",
+          "format": "email"
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name of the user."
+        }
+      },
+      "required": [
+        "id",
+        "email",
+        "name"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "courses/{courseId}",
+        "definition": {
+          "entityName": "Course",
+          "schema": {
+            "$ref": "#/backend/entities/Course"
+          },
+          "description": "Stores course information.",
+          "params": [
+            {
+              "name": "courseId",
+              "description": "Unique identifier for the course."
+            }
+          ]
+        }
+      },
+      {
+        "path": "lessons/{lessonId}",
+        "definition": {
+          "entityName": "Lesson",
+          "schema": {
+            "$ref": "#/backend/entities/Lesson"
+          },
+          "description": "Stores lesson information.",
+          "params": [
+            {
+              "name": "lessonId",
+              "description": "Unique identifier for the lesson."
+            }
+          ]
+        }
+      },
+      {
+        "path": "problems/{problemId}",
+        "definition": {
+          "entityName": "Problem",
+          "schema": {
+            "$ref": "#/backend/entities/Problem"
+          },
+          "description": "Stores problem information.",
+          "params": [
+            {
+              "name": "problemId",
+              "description": "Unique identifier for the problem."
+            }
+          ]
+        }
+      },
+      {
+        "path": "articles/{articleId}",
+        "definition": {
+          "entityName": "Article",
+          "schema": {
+            "$ref": "#/backend/entities/Article"
+          },
+          "description": "Stores article information.",
+          "params": [
+            {
+              "name": "articleId",
+              "description": "Unique identifier for the article."
+            }
+          ]
+        }
+      },
+      {
+        "path": "tags/{tagId}",
+        "definition": {
+          "entityName": "Tag",
+          "schema": {
+            "$ref": "#/backend/entities/Tag"
+          },
+          "description": "Stores tag information.",
+          "params": [
+            {
+              "name": "tagId",
+              "description": "Unique identifier for the tag."
+            }
+          ]
+        }
+      },
+      {
+        "path": "topics/{topicId}",
+        "definition": {
+          "entityName": "Topic",
+          "schema": {
+            "$ref": "#/backend/entities/Topic"
+          },
+          "description": "Stores topic information.",
+          "params": [
+            {
+              "name": "topicId",
+              "description": "Unique identifier for the topic."
+            }
+          ]
+        }
+      },
+      {
+        "path": "users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user information.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "Unique identifier for the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "users/{userId}/solutions/{solutionId}",
+        "definition": {
+          "entityName": "Solution",
+          "schema": {
+            "$ref": "#/backend/entities/Solution"
+          },
+          "description": "Stores solutions submitted by a user. Includes denormalized 'userId' and 'problemId' for authorization independence.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "Unique identifier for the user."
+            },
+            {
+              "name": "solutionId",
+              "description": "Unique identifier for the solution."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to reflect the relationships between courses, lessons, problems, articles, tags, and user solutions. Solutions are stored within user documents to ensure clear ownership and facilitate secure access control. Denormalization is used to ensure authorization independence. Specifically, each solution document includes the `userId` and `problemId`. This allows security rules to validate that the authenticated user is the owner of the solution without needing to perform a `get()` request to a parent document.  This structure supports secure list operations (QAPs) by ensuring all documents in the `users/{userId}/solutions` collection share the same security requirements (ownership by the user)."
+  }
+}

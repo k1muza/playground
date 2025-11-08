@@ -1,0 +1,157 @@
+/**
+ * @fileoverview Firestore Security Rules for the application.
+ *
+ * Core Philosophy:
+ * This ruleset enforces a strict user-ownership model for user-generated content (solutions),
+ * while allowing public read access to courses, lessons, problems, articles, and tags.
+ *
+ * Data Structure:
+ * - Courses, lessons, problems, articles, tags, and topics are stored in top-level collections
+ *   (e.g., /courses/{courseId}, /lessons/{lessonId}).
+ * - User profiles are stored in /users/{userId}.
+ * - Solutions are stored in a user-specific subcollection: /users/{userId}/solutions/{solutionId}.
+ *
+ * Key Security Decisions:
+ * - Public read access is granted to course, lesson, problem, article, tag, and topic data to
+ *   enable open browsing and discovery.
+ * - User listing is disallowed for privacy.
+ * - Solutions are strictly owned by the user who created them.
+ * - Denormalization is used on Solution documents to simplify and improve authorization. Each
+ *   solution includes the `userId` and `problemId`, removing the need for expensive `get()`
+ *   operations in the security rules.
+ *
+ * Access Control Pattern:
+ * - Courses: Public Read
+ * - Lessons: Public Read
+ * - Problems: Public Read
+ * - Articles: Public Read
+ * - Tags: Public Read
+ * - Topics: Public Read
+ * - Users: Owner Only (Self-Creation)
+ * - Solutions: Owner Only
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Allows public read access to course information.
+     * @path /databases/{database}/documents/courses/{courseId}
+     * @allow (get, list) User can retrieve or list course details without authentication.
+     * @deny (create, update, delete) User cannot create, update, or delete course data.
+     * @principle Allows open browsing of course content; write access is not permitted.
+     */
+    match /courses/{courseId} {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+    }
+
+    /**
+     * @description Allows public read access to lesson information.
+     * @path /databases/{database}/documents/lessons/{lessonId}
+     * @allow (get, list) User can retrieve or list lesson details without authentication.
+     * @deny (create, update, delete) User cannot create, update, or delete lesson data.
+     * @principle Allows open access to lesson content; write access is not permitted.
+     */
+    match /lessons/{lessonId} {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+    }
+
+    /**
+     * @description Allows public read access to problem information.
+     * @path /databases/{database}/documents/problems/{problemId}
+     * @allow (get, list) User can retrieve or list problem details without authentication.
+     * @deny (create, update, delete) User cannot create, update, or delete problem data.
+     * @principle Allows open access to practice problems; write access is not permitted.
+     */
+    match /problems/{problemId} {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+    }
+
+    /**
+     * @description Allows public read access to article information.
+     * @path /databases/{database}/documents/articles/{articleId}
+     * @allow (get, list) User can retrieve or list article details without authentication.
+     * @deny (create, update, delete) User cannot create, update, or delete article data.
+     * @principle Allows open access to articles; write access is not permitted.
+     */
+    match /articles/{articleId} {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+    }
+
+    /**
+     * @description Allows public read access to tag information.
+     * @path /databases/{database}/documents/tags/{tagId}
+     * @allow (get, list) User can retrieve or list tag details without authentication.
+     * @deny (create, update, delete) User cannot create, update, or delete tag data.
+     * @principle Allows open access to tags; write access is not permitted.
+     */
+    match /tags/{tagId} {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+    }
+
+    /**
+     * @description Allows public read access to topic information.
+     * @path /databases/{database}/documents/topics/{topicId}
+     * @allow (get, list) User can retrieve or list topic details without authentication.
+     * @deny (create, update, delete) User cannot create, update, or delete topic data.
+     * @principle Allows open access to topics; write access is not permitted.
+     */
+    match /topics/{topicId} {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+    }
+
+    /**
+     * @description Controls access to user profiles, allowing self-creation but no listing.
+     * @path /databases/{database}/documents/users/{userId}
+     * @allow (create) User can create their own profile if the userId matches their auth UID.
+     * @allow (get, update, delete) User can read, update, and delete their own profile if the userId matches their auth UID.
+     * @deny (list) User cannot list all user profiles for privacy reasons.
+     * @deny (create) User cannot create a profile for another user.
+     * @principle Enforces user ownership and prevents unauthorized data access.
+     */
+    match /users/{userId} {
+      allow create: if isSignedIn() && isOwner(userId);
+      allow get: if isOwner(userId);
+      allow update: if isExistingOwner(userId);
+      allow delete: if isExistingOwner(userId);
+      allow list: if false;
+    }
+
+    /**
+     * @description Controls access to user solutions, enforcing ownership.
+     * @path /databases/{database}/documents/users/{userId}/solutions/{solutionId}
+     * @allow (create) User can create a solution if the userId matches their auth UID.
+     * @allow (get, list, update, delete) User can read, list, update, and delete their own solutions if the userId matches their auth UID.
+     * @deny (create) User cannot create solutions for other users.
+     * @principle Enforces strict user ownership of solutions.
+     */
+    match /users/{userId}/solutions/{solutionId} {
+      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.userId == userId;
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow update: if isExistingOwner(userId) && resource.data.userId == userId;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     *  Helper functions
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    function isExistingOwner(userId) {
+        return isSignedIn() && isOwner(userId) && resource != null;
+    }
+  }
+}
