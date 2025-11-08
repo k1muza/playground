@@ -282,6 +282,19 @@ export default function ProblemDetail({ params }: { params: { slug: string } }) 
           <hr className="my-6" />
           <p className="font-code text-sm whitespace-pre-wrap">{p.body}</p>
 
+          <div className="mt-8 space-y-4">
+            {p.testCases.map((tc, i) => (
+                <div key={i}>
+                    <p className="font-semibold">Example {i + 1}:</p>
+                    <pre className="mt-2 p-3 bg-secondary rounded-md text-sm font-code">
+                        <strong>Input:</strong> {p.slug === 'two-sum' ? `nums = ${JSON.stringify(tc.input[0])}, target = ${tc.input[1]}` : JSON.stringify(tc.input)
+}<br />
+                        <strong>Output:</strong> {JSON.stringify(tc.output)}
+                    </pre>
+                </div>
+            ))}
+          </div>
+
           <div className="mt-12 rounded-lg border bg-card p-6">
             <h2 className="text-xl font-semibold font-headline">Hint</h2>
             <p className="mt-2 text-muted-foreground">
