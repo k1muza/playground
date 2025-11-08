@@ -119,7 +119,7 @@ export default function ProblemLayout({ children }: { children: ReactNode }) {
             </div>
           </SidebarHeader>
           <SidebarContent>
-            <div className="p-2">
+            <div className="p-2 group-data-[collapsible=icon]:hidden">
               <ProblemList />
             </div>
           </SidebarContent>
