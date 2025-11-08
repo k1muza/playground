@@ -1,6 +1,7 @@
+
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, useMemo } from 'react';
 import {
   SidebarProvider,
   Sidebar,
