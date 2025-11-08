@@ -1,3 +1,4 @@
+
 'use client';
 
 import { ReactNode, useMemo } from 'react';
@@ -144,8 +145,8 @@ function ProblemList() {
 
 export default function ProblemLayout({ children }: { children: ReactNode }) {
   return (
-    <SidebarProvider>
-      <div className="relative flex h-[calc(100vh-var(--header-height,4rem))] overflow-hidden">
+    <SidebarProvider defaultOpen={false}>
+      <div className="relative flex h-[calc(100vh-var(--header-height,4rem)-1px)] overflow-hidden">
         <Sidebar collapsible="icon">
           <SidebarHeader>
             <div className="flex items-center justify-between p-2">
