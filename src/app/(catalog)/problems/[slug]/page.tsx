@@ -390,11 +390,10 @@ function ProblemDetailSkeleton() {
 
 export default function ProblemDetail({ params }: { params: { slug: string } }) {
   const { firestore } = useFirebase();
-  const { slug } = params;
 
   const problemRef = useMemoFirebase(
-    () => (firestore ? doc(firestore, 'problems', slug) : null),
-    [firestore, slug]
+    () => (firestore ? doc(firestore, 'problems', params.slug) : null),
+    [firestore, params.slug]
   );
   const { data: p, isLoading } = useDoc<Problem>(problemRef);
 
