@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import Navbar from '@/components/navbar';
-import Footer from '@/components/footer';
+import ConditionalFooter from '@/components/conditional-footer';
 import { Toaster } from '@/components/ui/toaster';
 import Script from 'next/script';
 import { FirebaseClientProvider } from '@/firebase';
@@ -30,12 +30,10 @@ export default function RootLayout({
         <FirebaseClientProvider>
           <Navbar />
           <main className="flex-1">{children}</main>
-          <Footer />
+          <ConditionalFooter />
           <Toaster />
         </FirebaseClientProvider>
       </body>
     </html>
   );
 }
-
-    
