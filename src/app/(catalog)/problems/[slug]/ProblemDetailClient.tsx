@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
@@ -44,15 +45,9 @@ type TestResult = {
 
 function ProblemDetailSkeleton() {
   return (
-    <div className="grid gap-12 lg:grid-cols-2">
-      <article className="container-prose">
-        <div className="flex items-center gap-4 mb-4">
-          <Skeleton className="h-6 w-16" />
-          <div className="flex flex-wrap gap-1.5">
-            <Skeleton className="h-6 w-20" />
-            <Skeleton className="h-6 w-20" />
-          </div>
-        </div>
+    <div className="grid h-full grid-cols-1 gap-4 overflow-hidden p-4 md:grid-cols-2">
+      <div className="h-full overflow-y-auto">
+        <Skeleton className="h-6 w-16 mb-4" />
         <Skeleton className="h-10 w-3/4 mb-4" />
         <hr className="my-6" />
         <div className="space-y-4">
@@ -60,8 +55,8 @@ function ProblemDetailSkeleton() {
           <Skeleton className="h-6 w-5/6" />
           <Skeleton className="h-6 w-full" />
         </div>
-      </article>
-      <div className="sticky top-20 h-full">
+      </div>
+      <div className="h-full overflow-y-auto">
         <Skeleton className="h-[320px] w-full" />
         <div className="mt-4 flex gap-2">
           <Skeleton className="h-10 w-28" />
@@ -71,6 +66,7 @@ function ProblemDetailSkeleton() {
     </div>
   );
 }
+
 
 function TestCasesDisplay({ slug }: { slug: string }) {
   const { firestore } = useFirebase();
@@ -95,12 +91,20 @@ function TestCasesDisplay({ slug }: { slug: string }) {
   return (
     <div className="mt-8 space-y-4">
       {testCases.map((tc, i) => {
-        let parsedInput: unknown = tc.input;
+        let parsedInput: unknown;
         try {
           parsedInput = JSON.parse(tc.input);
         } catch {
-          /* ignore */
+          parsedInput = tc.input;
         }
+
+        let parsedOutput: unknown;
+        try {
+          parsedOutput = JSON.parse(tc.output);
+        } catch {
+          parsedOutput = tc.output;
+        }
+
 
         return (
           <div key={tc.id}>
@@ -111,7 +115,7 @@ function TestCasesDisplay({ slug }: { slug: string }) {
                 ? `nums = ${JSON.stringify((parsedInput as any[])[0])}, target = ${(parsedInput as any[])[1]}`
                 : JSON.stringify(parsedInput)}
               {"\n"}
-              <strong>Output:</strong> {tc.output}
+              <strong>Output:</strong> {JSON.stringify(parsedOutput)}
             </pre>
           </div>
         );
@@ -557,11 +561,7 @@ export default function ProblemDetailClient({ slug }: { slug: string }) {
   const loading = isProblemLoading || areTestCasesLoading;
 
   if (loading) {
-    return (
-      <Container className="py-8 lg:py-12">
-        <ProblemDetailSkeleton />
-      </Container>
-    );
+    return <ProblemDetailSkeleton />;
   }
 
   if (!p) {
@@ -581,8 +581,8 @@ export default function ProblemDetailClient({ slug }: { slug: string }) {
   }
 
   return (
-    <Container className="py-8 lg:py-12">
-      <div className="grid gap-12 lg:grid-cols-2">
+    <div className="grid h-full grid-cols-1 gap-4 overflow-hidden p-4 md:grid-cols-2">
+      <div className="h-full overflow-y-auto pr-4">
         <article className="container-prose">
           <div className="flex items-center gap-4 mb-4">
             <Badge
@@ -617,11 +617,12 @@ export default function ProblemDetailClient({ slug }: { slug: string }) {
 
           <TestCasesDisplay slug={slug} />
         </article>
-
-        <div className="sticky top-20 h-full">
-          {testCases && <CodeRunner problem={p} testCases={testCases} slug={slug} />}
-        </div>
       </div>
-    </Container>
+
+      <div className="h-full overflow-y-auto pl-4">
+        {testCases && <CodeRunner problem={p} testCases={testCases} slug={slug} />}
+      </div>
+    </div>
   );
 }
+
