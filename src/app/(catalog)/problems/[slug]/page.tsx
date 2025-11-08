@@ -1,8 +1,6 @@
-
-
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Container from '@/components/container';
 import { problems } from '@/lib/data';
 import { notFound } from 'next/navigation';
@@ -28,76 +26,57 @@ function CodeRunner({ problem }: { problem: Problem }) {
   const [output, setOutput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isPyodideLoading, setIsPyodideLoading] = useState(true);
-  const [pyodide, setPyodide] = useState<PyodideInterface | null>(null);
+  const pyodideRef = useRef<PyodideInterface | null>(null);
 
   useEffect(() => {
+    const load = async () => {
+      try {
+        const pyodide = await window.loadPyodide();
+        pyodideRef.current = pyodide;
+        setIsPyodideLoading(false);
+      } catch (error) {
+        console.error('Failed to load Pyodide:', error);
+        setOutput('Error: Could not load Python interpreter.');
+        setIsPyodideLoading(false);
+      }
+    };
+    
     if (window.loadPyodide) {
-      window
-        .loadPyodide()
-        .then((instance) => {
-          setPyodide(instance);
-          setIsPyodideLoading(false);
-        })
-        .catch((error) => {
-          console.error('Failed to load Pyodide:', error);
-          setOutput('Error: Could not load Python interpreter.');
-          setIsPyodideLoading(false);
-        });
+        load();
     } else {
-        // Handle case where pyodide script hasn't loaded yet
         const script = document.querySelector('script[src*="pyodide.js"]');
-        const listener = () => {
-             window
-                .loadPyodide()
-                .then((instance) => {
-                setPyodide(instance);
-                setIsPyodideLoading(false);
-                })
-                .catch((error) => {
-                console.error('Failed to load Pyodide:', error);
-                setOutput('Error: Could not load Python interpreter.');
-                setIsPyodideLoading(false);
-                });
-        }
-        script?.addEventListener('load', listener);
+        script?.addEventListener('load', load);
         return () => {
-            script?.removeEventListener('load', listener)
+            script?.removeEventListener('load', load)
         }
     }
   }, []);
 
   const handleRunCode = async () => {
+    const pyodide = pyodideRef.current;
     if (!pyodide) {
       setOutput('Pyodide is not loaded yet.');
       return;
     }
     setIsLoading(true);
-    setOutput('');
-    try {
-      // Redirect stdout to capture output
-      pyodide.globals.set('__output__', []);
-      const customStdout = {
-        write: (s: string) => {
-            const currentOutput = pyodide.globals.get('__output__');
-            currentOutput.push(s);
-            pyodide.globals.set('__output__', currentOutput);
-            return s.length;
-        }
-      }
-      pyodide.setStdout(customStdout);
-      pyodide.setStderr(customStdout);
+    let capturedOutput = '';
+    
+    const stdoutCallback = (text: string) => {
+        capturedOutput += text + '\n';
+    }
 
+    pyodide.setStdout({ batched: stdoutCallback });
+    pyodide.setStderr({ batched: stdoutCallback });
+
+    try {
       await pyodide.loadPackagesFromImports(code);
       await pyodide.runPythonAsync(code);
-      const capturedOutput = pyodide.globals.get('__output__').toJs().join('');
       setOutput(capturedOutput || '(No output)');
     } catch (error) {
-      setOutput(
-        error instanceof Error ? error.message : 'An unknown error occurred.'
-      );
+      const err = error as Error;
+      setOutput(capturedOutput + err.message);
     } finally {
       setIsLoading(false);
-      // Reset stdout
       pyodide.setStdout({});
       pyodide.setStderr({});
     }
