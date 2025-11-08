@@ -6,12 +6,16 @@ import { problems } from '@/lib/data';
 import { notFound } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import TopicBadge from '@/components/topic-badge';
-import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { PlayIcon, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Problem } from '@/lib/data';
 import type { PyodideInterface } from 'pyodide';
+
+import Editor from 'react-simple-code-editor';
+import { highlight, languages } from 'prismjs/components/prism-core';
+import 'prismjs/components/prism-python';
+
 
 declare global {
   interface Window {
@@ -21,7 +25,7 @@ declare global {
 
 function CodeRunner({ problem }: { problem: Problem }) {
   const [code, setCode] = useState(
-    `# Write your solution for "${problem.title}" here.\n`
+    `# Write your solution for "${problem.title}" here.\ndef solution():\n  # Your code here\n  print("Hello, Python!")\n\nsolution()`
   );
   const [output, setOutput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -71,7 +75,7 @@ function CodeRunner({ problem }: { problem: Problem }) {
     try {
       await pyodide.loadPackagesFromImports(code);
       await pyodide.runPythonAsync(code);
-      setOutput(capturedOutput || '(No output)');
+      setOutput(capturedOutput.trim() || '(No output)');
     } catch (error) {
       const err = error as Error;
       setOutput(capturedOutput + err.message);
@@ -85,12 +89,18 @@ function CodeRunner({ problem }: { problem: Problem }) {
   return (
     <div className="mt-8">
       <h2 className="text-2xl font-bold font-headline mb-4">Solution</h2>
-      <Textarea
-        value={code}
-        onChange={(e) => setCode(e.target.value)}
-        placeholder="Enter your Python code here"
-        className="font-code text-sm h-64 bg-background"
-      />
+        <div className="rounded-md border bg-background font-code text-sm p-4 h-80 overflow-auto code-editor">
+            <Editor
+                value={code}
+                onValueChange={code => setCode(code)}
+                highlight={code => highlight(code, languages.python, 'python')}
+                padding={0}
+                style={{
+                    fontFamily: 'var(--font-code)',
+                    fontSize: '0.875rem',
+                }}
+            />
+        </div>
       <Button onClick={handleRunCode} disabled={isLoading || isPyodideLoading} className="mt-4">
         {isPyodideLoading ? (
             <>

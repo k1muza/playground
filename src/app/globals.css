@@ -102,4 +102,11 @@
   .container-prose code {
     @apply font-code;
   }
+  .code-editor {
+    font-variant-ligatures: common-ligatures;
+  }
+
+  .code-editor > textarea {
+    @apply !outline-none;
+  }
 }

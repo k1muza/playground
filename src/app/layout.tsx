@@ -4,6 +4,8 @@ import Navbar from '@/components/navbar';
 import Footer from '@/components/footer';
 import { Toaster } from '@/components/ui/toaster';
 import Script from 'next/script';
+import "prismjs/themes/prism-tomorrow.css";
+
 
 export const metadata: Metadata = {
   title: 'LearnVerse',
