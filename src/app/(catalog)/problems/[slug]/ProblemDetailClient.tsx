@@ -35,6 +35,7 @@ import { githubDark } from "@uiw/codemirror-theme-github";
 import { useFirebase, useDoc, useCollection, useMemoFirebase } from "@/firebase";
 import { collection, addDoc, doc, query, where, orderBy, limit } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
+import Confetti from "react-confetti";
 
 declare global {
   interface Window {
@@ -146,6 +147,7 @@ function CodeRunner({
   const [isRunningCode, setIsRunningCode] = useState(false);
   const [isPyodideLoading, setIsPyodideLoading] = useState(true);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
   const pyodideRef = useRef<PyodideInterface | null>(null);
 
   const { firestore, user } = useFirebase();
@@ -415,7 +417,14 @@ print(json.dumps({
       setTestResults(results);
 
       if (allPassed) {
+        // Check if there was already a correct solution
+        const alreadySolved = latestSolutionData?.some(s => s.isCorrect) ?? false;
+        
+        if (!alreadySolved) {
+          setShowConfetti(true);
+        }
         setShowSuccessModal(true);
+
         if (user && firestore) {
           try {
             const solutionsRef = collection(firestore, "users", user.uid, "solutions");
@@ -442,6 +451,13 @@ print(json.dumps({
 
   return (
     <div>
+      {showConfetti && (
+        <Confetti
+          recycle={false}
+          numberOfPieces={400}
+          onConfettiComplete={() => setShowConfetti(false)}
+        />
+      )}
       <h2 className="text-2xl font-bold font-headline mb-4">Solution</h2>
 
       <div className="rounded-md border bg-background font-code text-sm overflow-hidden code-editor">
@@ -669,5 +685,3 @@ export default function ProblemDetailClient({ slug }: { slug: string }) {
   );
 }
 
-
-    
