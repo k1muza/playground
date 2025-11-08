@@ -138,24 +138,24 @@ service cloud.firestore {
       allow update: if isExistingOwner(userId);
       allow delete: if isExistingOwner(userId);
       allow list: if false;
-    }
 
-    /**
-     * @description Controls access to user solutions, enforcing ownership.
-     * @path /databases/{database}/documents/users/{userId}/solutions/{solutionId}
-     * @allow (create) User can create a solution if the userId matches their auth UID.
-     * @allow (get, list, update, delete) User can read, list, update, and delete their own solutions if the userId matches their auth UID.
-     * @deny (create) User cannot create solutions for other users.
-     * @principle Enforces strict user ownership of solutions.
-     */
-    match /users/{userId}/solutions/{solutionId} {
-      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.userId == userId;
-      allow get: if isOwner(userId);
-      allow list: if isOwner(userId);
-      allow update: if isExistingOwner(userId) && resource.data.userId == userId;
-      allow delete: if isExistingOwner(userId);
+      /**
+       * @description Controls access to user solutions, enforcing ownership.
+       * @path /databases/{database}/documents/users/{userId}/solutions/{solutionId}
+       * @allow (create) User can create a solution if the userId matches their auth UID.
+       * @allow (get, list, update, delete) User can read, list, update, and delete their own solutions if the userId matches their auth UID.
+       * @deny (create) User cannot create solutions for other users.
+       * @principle Enforces strict user ownership of solutions.
+       */
+      match /solutions/{solutionId} {
+        allow list: if isOwner(userId); // <-- This is the key change to allow collection queries.
+        allow create: if isSignedIn() && isOwner(userId) && request.resource.data.userId == userId;
+        allow get: if isOwner(userId);
+        allow update: if isExistingOwner(userId) && resource.data.userId == userId;
+        allow delete: if isExistingOwner(userId);
+      }
     }
-
+    
     /**
      *  Helper functions
      */
@@ -172,5 +172,3 @@ service cloud.firestore {
     }
   }
 }
-
-    
