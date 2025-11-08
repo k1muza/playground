@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, use } from 'react';
 import Container from '@/components/container';
 import { problems } from '@/lib/data';
 import { notFound } from 'next/navigation';
@@ -73,8 +73,9 @@ function CodeRunner({ problem }: { problem: Problem }) {
 }
 
 
-export default function ProblemDetail({ params }: { params: { slug: string } }) {
-  const p = problems.find((i) => i.slug === params.slug);
+export default function ProblemDetail({ params }: { params: { slug: string } | Promise<{ slug: string }> }) {
+  const resolvedParams = use(params);
+  const p = problems.find((i) => i.slug === resolvedParams.slug);
   if (!p) return notFound();
 
   return (
