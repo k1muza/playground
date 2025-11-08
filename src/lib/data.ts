@@ -25,12 +25,24 @@ export type Problem = z.infer<typeof ProblemSchema>;
 
 // Represents the data for a document in the `problems/{slug}/testCases` subcollection.
 export const TestCaseSchema = z.object({
+  problemId: z.string().optional(), // Not always present on the object
   // Inputs and outputs are stored as JSON strings
   input: z.string(),
   output: z.string(),
 });
 
 export type TestCase = z.infer<typeof TestCaseSchema>;
+
+
+export const SolutionSchema = z.object({
+  problemId: z.string(),
+  userId: z.string(),
+  solutionCode: z.string(),
+  submissionDate: z.string(),
+  isCorrect: z.boolean(),
+});
+
+export type Solution = z.infer<typeof SolutionSchema>;
 
 
 export type Article = {

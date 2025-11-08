@@ -9,12 +9,14 @@ import {
   SidebarTrigger,
   SidebarContent,
 } from '@/components/ui/sidebar';
-import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
+import { useFirebase, useCollection, useMemoFirebase, useUser } from '@/firebase';
 import { collection, query } from 'firebase/firestore';
 import type { Problem } from '@/lib/data';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { CheckCircle } from 'lucide-react';
+import type { Solution } from '@/lib/data';
 
 const difficultyOrder: { [key: string]: number } = {
   'Easy': 1,
@@ -24,13 +26,28 @@ const difficultyOrder: { [key: string]: number } = {
 
 function ProblemList() {
   const pathname = usePathname();
-  const { firestore } = useFirebase();
+  const { firestore, user } = useFirebase();
 
+  // Fetch all problems
   const problemsQuery = useMemoFirebase(
     () => (firestore ? query(collection(firestore, 'problems')) : null),
     [firestore]
   );
-  const { data: problems, isLoading } = useCollection<Problem>(problemsQuery);
+  const { data: problems, isLoading: isLoadingProblems } = useCollection<Problem>(problemsQuery);
+
+  // Fetch user's solutions if they are logged in
+  const solutionsQuery = useMemoFirebase(
+    () => (user && firestore ? collection(firestore, 'users', user.uid, 'solutions') : null),
+    [user, firestore]
+  );
+  const { data: solutions, isLoading: isLoadingSolutions } = useCollection<Solution>(solutionsQuery);
+
+  // Create a set of solved problem IDs for quick lookup
+  const solvedProblemSlugs = useMemo(() => {
+    if (!solutions) return new Set();
+    return new Set(solutions.filter(s => s.isCorrect).map(s => s.problemId));
+  }, [solutions]);
+
 
   const categorizedProblems = useMemo(() => {
     if (!problems) return {};
@@ -56,7 +73,7 @@ function ProblemList() {
     return categories;
   }, [problems]);
 
-  if (isLoading) {
+  if (isLoadingProblems || isLoadingSolutions) {
     return <p>Loading problems...</p>;
   }
 
@@ -83,7 +100,12 @@ function ProblemList() {
                         }
                       `}
                     >
-                      <span className="truncate flex-1">{problem.title}</span>
+                      <span className="truncate flex-1 flex items-center gap-2">
+                        {solvedProblemSlugs.has(problem.slug) && (
+                          <CheckCircle className="h-3 w-3 text-green-500 flex-shrink-0" />
+                        )}
+                        {problem.title}
+                      </span>
                       <span
                         className={`
                           text-xs ml-2
