@@ -109,23 +109,25 @@ function ProblemList() {
 
 export default function ProblemLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="relative flex h-[calc(100vh-4rem)]">
-      <Sidebar collapsible="icon">
-        <SidebarHeader>
-          <div className="flex items-center justify-between p-2">
-            <span className="font-semibold text-lg group-data-[collapsible=icon]:hidden">Problems</span>
-            <SidebarTrigger />
-          </div>
-        </SidebarHeader>
-        <SidebarContent>
-          <div className="p-2">
-            <ProblemList />
-          </div>
-        </SidebarContent>
-      </Sidebar>
-      <div className="flex-1 overflow-y-auto">
-        {children}
+    <SidebarProvider>
+      <div className="relative flex h-[calc(100vh-4rem)]">
+        <Sidebar collapsible="icon">
+          <SidebarHeader>
+            <div className="flex items-center justify-between p-2">
+              <span className="font-semibold text-lg group-data-[collapsible=icon]:hidden">Problems</span>
+              <SidebarTrigger />
+            </div>
+          </SidebarHeader>
+          <SidebarContent>
+            <div className="p-2">
+              <ProblemList />
+            </div>
+          </SidebarContent>
+        </Sidebar>
+        <div className="flex-1 overflow-y-auto">
+          {children}
+        </div>
       </div>
-    </div>
+    </SidebarProvider>
   );
 }
