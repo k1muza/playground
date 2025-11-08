@@ -26,6 +26,9 @@ import CodeMirror from '@uiw/react-codemirror';
 import { python } from '@codemirror/lang-python';
 import { githubDark } from '@uiw/codemirror-theme-github';
 
+import { useFirebase } from '@/firebase';
+import { collection, addDoc } from 'firebase/firestore';
+
 declare global {
   interface Window {
     loadPyodide: () => Promise<PyodideInterface>;
@@ -48,6 +51,8 @@ function CodeRunner({ problem }: { problem: Problem }) {
   const [isPyodideLoading, setIsPyodideLoading] = useState(true);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const pyodideRef = useRef<PyodideInterface | null>(null);
+
+  const { firestore, user } = useFirebase();
 
   const isLoading = isSubmitting || isRunningCode;
 
@@ -84,10 +89,8 @@ function CodeRunner({ problem }: { problem: Problem }) {
     let capturedOutput = '';
     let executionResult: any = null;
   
-    pyodide.setStdout({
-      batched: (text: string) => {
+    const stdoutCallback = (text: string) => {
         capturedOutput += text + '\n';
-        // Try to capture the last JSON line for test results
         const lines = text.trim().split('\n');
         const lastLine = lines[lines.length - 1];
         try {
@@ -95,13 +98,14 @@ function CodeRunner({ problem }: { problem: Problem }) {
         } catch (e) {
             // Not a JSON line, ignore
         }
-      },
-    });
-    pyodide.setStderr({
-      batched: (text: string) => {
+    };
+  
+    const stderrCallback = (text: string) => {
         capturedOutput += text + '\n';
-      },
-    });
+    };
+  
+    pyodide.setStdout({ batched: stdoutCallback });
+    pyodide.setStderr({ batched: stderrCallback });
   
     try {
       await pyodide.loadPackagesFromImports(codeToRun);
@@ -199,6 +203,21 @@ print(json.dumps({
 
       if (allPassed) {
         setShowSuccessModal(true);
+        if (user && firestore) {
+          try {
+            const solutionsRef = collection(firestore, 'users', user.uid, 'solutions');
+            await addDoc(solutionsRef, {
+              problemId: problem.slug,
+              userId: user.uid,
+              solutionCode: code,
+              submissionDate: new Date().toISOString(),
+              isCorrect: true,
+            });
+          } catch (e) {
+            console.error("Error saving solution to Firestore:", e);
+            // Optionally notify the user that saving failed
+          }
+        }
       }
 
     } catch (error) {
@@ -248,7 +267,7 @@ print(json.dumps({
             </>
           )}
         </Button>
-        <Button onClick={handleSubmit} disabled={isLoading || isPyodideLoading} variant="secondary">
+        <Button onClick={handleSubmit} disabled={isLoading || isPyodideLoading || !user} variant="secondary">
           {isPyodideLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -315,7 +334,7 @@ print(json.dumps({
           <AlertDialogHeader>
             <AlertDialogTitle>Congratulations!</AlertDialogTitle>
             <AlertDialogDescription>
-              You've passed all the test cases. Great work!
+              You've passed all the test cases. Your solution has been saved.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -387,10 +406,12 @@ export default function ProblemDetail({ params }: { params: { slug: string } }) 
           </div>
         </article>
         
-        <div className="code-editor">
+        <div className="sticky top-20 h-full">
           <CodeRunner problem={p} />
         </div>
       </div>
     </Container>
   );
 }
+
+    
