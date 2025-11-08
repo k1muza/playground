@@ -1,7 +1,8 @@
 
+
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect } from 'react';
 import Container from '@/components/container';
 import { problems } from '@/lib/data';
 import { notFound } from 'next/navigation';
@@ -146,9 +147,8 @@ function CodeRunner({ problem }: { problem: Problem }) {
 }
 
 
-export default function ProblemDetail({ params }: { params: { slug: string } | Promise<{ slug: string }> }) {
-  const resolvedParams = use(params);
-  const p = problems.find((i) => i.slug === resolvedParams.slug);
+export default function ProblemDetail({ params }: { params: { slug: string } }) {
+  const p = problems.find((i) => i.slug === params.slug);
   if (!p) return notFound();
 
   return (
