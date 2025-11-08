@@ -19,6 +19,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Problem, TestCase } from "@/lib/data";
 import type { PyodideInterface } from "pyodide";
+import ReactMarkdown from "react-markdown";
 
 import CodeMirror from "@uiw/react-codemirror";
 import { python } from "@codemirror/lang-python";
@@ -605,7 +606,14 @@ export default function ProblemDetailClient({ slug }: { slug: string }) {
 
           <h1 className="text-4xl font-bold font-headline">{p.title}</h1>
           <hr className="my-6" />
-          <p className="font-code text-sm whitespace-pre-wrap">{p.body}</p>
+          <ReactMarkdown
+            className="prose dark:prose-invert max-w-none"
+            components={{
+              code: ({node, ...props}) => <code className="font-code" {...props} />,
+            }}
+          >
+            {p.body}
+          </ReactMarkdown>
 
           <TestCasesDisplay slug={slug} />
         </article>

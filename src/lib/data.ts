@@ -125,9 +125,9 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
     difficulty: 'Easy',
     tags: ['Array', 'Hash Map'],
     body:
-      'Given an array of integers `nums` and an integer `target`, return indices i and j (with i < j) such that `nums[i] + nums[j] = target`.\n\n' +
+      'Given an array of integers `nums` and an integer `target`, return indices `i` and `j` such that `nums[i] + nums[j] = target`.\n\n' +
       'You may assume that each input has **exactly one solution**, and you may not use the same element twice.\n\n' +
-      'Return the indices as `[i, j]` with `i < j`.',
+      'Return the indices as `[i, j]`.',
     templateCode:
       `def solution(nums, target):
   # Your code here
@@ -148,7 +148,6 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
     tags: ['Stack', 'String'],
     body:
       'Given a string `s` containing just the characters `(`, `)`, `{`, `}`, `[` and `]`, determine if the input string is valid.\n\n' +
-      'Assume `s` contains **only** these bracket characters (no letters or spaces).\n\n' +
       'An input string is valid if:\n' +
       '1. Open brackets must be closed by the same type of brackets.\n' +
       '2. Open brackets must be closed in the correct order.\n' +
@@ -362,7 +361,7 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
       'Across groups, sort groups by their **first** word.\n\n' +
       'Example: `["eat","tea","tan","ate","nat","bat"]` → `[[' +
       "ate','eat','tea'],['bat'],['nat','tan']" +
-      ']`.',
+      ']]`.',
     templateCode:
       `def solution(strs):
   # strs: List[str]
