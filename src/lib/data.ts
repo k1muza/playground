@@ -1,3 +1,4 @@
+
 import { z } from 'zod';
 
 export type Course = {
@@ -47,6 +48,8 @@ export const ProblemSchema = z.object({
   difficulty: z.number().int().min(1).max(10),
   // single canonical category to avoid duplication when listing
   categorySlug: z.string().min(1, 'Category is required.'),
+  // The name of the function to be tested
+  entryPoint: z.string().min(1, 'Entry point is required.'),
   // keep tags for search/facets; they can repeat across problems
   tags: z.array(z.string()).min(1, 'At least one tag is required.'),
   body: z.string().min(1, 'Problem body is required.'),
@@ -163,12 +166,13 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
     difficulty: 1,
     tags: ['Array', 'Loop'],
     categorySlug: 'warm-ups',
+    entryPoint: 'max_value',
     body:
       'Write a function, `max_value`, that takes in a list of numbers as an argument. ' +
       'The function should return the largest number in the list.\n\n' +
       'Assume the list is non-empty.',
     templateCode:
-      `def solution(nums):
+      `def max_value(nums):
   # Your code here
   pass`,
     testCases: [
@@ -187,11 +191,12 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
     difficulty: 1,
     tags: ['Array', 'Loop'],
     categorySlug: 'warm-ups',
+    entryPoint: 'sum_list',
     body:
       'Write a function, `sum_list`, that takes in a list of numbers as an argument. ' +
       'The function should return the total sum of all numbers in the list.',
     templateCode:
-      `def solution(nums):
+      `def sum_list(nums):
   # Your code here
   pass`,
     testCases: [
@@ -210,12 +215,13 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
     difficulty: 2,
     tags: ['String', 'Loop'],
     categorySlug: 'warm-ups',
+    entryPoint: 'longest_word',
     body:
       'Write a function, `longest_word`, that takes in a sentence string as an argument. ' +
       'The function should return the longest word in the sentence. If there is a tie, return the word that occurs later in the sentence.\n\n' +
       'Assume the sentence is non-empty and words are space-separated.',
     templateCode:
-      `def solution(sentence):
+      `def longest_word(sentence):
   # Your code here
   pass`,
     testCases: [
@@ -235,13 +241,14 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
     difficulty: 2,
     tags: ['Array', 'Set'],
     categorySlug: 'warm-ups',
+    entryPoint: 'intersection',
     body:
       'Write a function, `intersection`, that takes in two lists, `a` and `b`, as arguments. ' +
       'The function should return a new list containing elements that are in **both** of the two lists.\n\n' +
       'You may assume that each input list does **not** contain duplicate elements.\n' +
       'Return the result in the order those elements appear in the first list `a`.',
     templateCode:
-      `def solution(a, b):
+      `def intersection(a, b):
   # Your code here
   pass`,
     testCases: [
@@ -264,6 +271,7 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
     difficulty: 2,
     tags: ['Array', 'Hash Map'],
     categorySlug: 'hashing',
+    entryPoint: 'two_sum',
     body: `Given an array of integers \`nums\` and an integer \`target\`, return indices \`i\` and \`j\` such that \`nums[i] + nums[j] = target\`.
 
 ### Requirements
@@ -271,7 +279,7 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
 - You may not use the same element twice.
 - Return the indices as \`[i, j]\`.`,
     templateCode:
-      `def solution(nums, target):
+      `def two_sum(nums, target):
   # Your code here
   pass`,
     testCases: [
@@ -290,13 +298,14 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
     difficulty: 2,
     tags: ['String', 'Counting'],
     categorySlug: 'hashing',
+    entryPoint: 'most_frequent_char',
     body:
       'Write a function, `most_frequent_char`, that takes in a string as an argument. ' +
       'The function should return the most frequent character of the string. ' +
       'If there are ties, return the character that appears earlier in the string.\n\n' +
       'Assume the input is a non-empty ASCII string.',
     templateCode:
-      `def solution(s):
+      `def most_frequent_char(s):
   # Your code here
   pass`,
     testCases: [
@@ -315,13 +324,14 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
     difficulty: 2,
     tags: ['String', 'Hash Map', 'Counting'],
     categorySlug: 'hashing',
+    entryPoint: 'are_anagrams',
     body:
-      'Write a function, `anagrams`, that takes in two strings as arguments. ' +
+      'Write a function, `are_anagrams`, that takes in two strings as arguments. ' +
       'The function should return a boolean indicating whether or not the strings are anagrams. ' +
       'Anagrams are strings that contain the same characters, but in any order.\n\n' +
       'Assume ASCII and ignore spaces; compare case-insensitively.',
     templateCode:
-      `def solution(s1, s2):
+      `def are_anagrams(s1, s2):
   # Your code here
   pass`,
     testCases: [
@@ -346,11 +356,12 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
     difficulty: 1,
     tags: ['String', 'Two Pointer'],
     categorySlug: 'warm-ups',
+    entryPoint: 'reverse_string',
     body: `Write a function that reverses a string. Use an iterative approach.
 
-For example, \`solution("hello")\` should return \`"olleh"\`.`,
+For example, \`reverse_string("hello")\` should return \`"olleh"\`.`,
     templateCode:
-      `def solution(s):
+      `def reverse_string(s):
   # Your code here
   pass`,
     testCases: [
@@ -370,12 +381,13 @@ For example, \`solution("hello")\` should return \`"olleh"\`.`,
     difficulty: 2,
     tags: ['String', 'Two Pointer'],
     categorySlug: 'warm-ups',
+    entryPoint: 'is_palindrome',
     body:
       'Write a function, `is_palindrome`, that takes in a string as an argument. ' +
       'The function should return a boolean indicating whether or not the string is a palindrome.\n\n' +
       'A palindrome is a string that reads the same forwards and backwards.',
     templateCode:
-      `def solution(s):
+      `def is_palindrome(s):
   # Your code here
   pass`,
     testCases: [
@@ -396,12 +408,13 @@ For example, \`solution("hello")\` should return \`"olleh"\`.`,
     difficulty: 3,
     tags: ['Math', 'Primality', 'Loop'],
     categorySlug: 'recursion-dp',
+    entryPoint: 'is_prime',
     body:
       'Write a function, `is_prime`, that takes in a number `n` as an argument. ' +
       'The function should return a boolean indicating whether or not `n` is prime.\n\n' +
       'A prime number is an integer greater than 1 with no positive divisors other than 1 and itself.',
     templateCode:
-      `def solution(n):
+      `def is_prime(n):
   # Your code here
   pass`,
     testCases: [
@@ -426,12 +439,13 @@ For example, \`solution("hello")\` should return \`"olleh"\`.`,
     difficulty: 2,
     tags: ['Stack', 'String'],
     categorySlug: 'stacks',
+    entryPoint: 'paired_parentheses',
     body:
       'Write a function, `paired_parentheses`, that takes in a string as an argument. ' +
       'The function should return a boolean indicating whether or not the string has well-formed parentheses.\n\n' +
       'You only need to consider `(` and `)`. Use a simple counter approach.',
     templateCode:
-      `def solution(s):
+      `def paired_parentheses(s):
   # Your code here
   pass`,
     testCases: [
@@ -452,6 +466,7 @@ For example, \`solution("hello")\` should return \`"olleh"\`.`,
     difficulty: 3,
     tags: ['Stack', 'String'],
     categorySlug: 'stacks',
+    entryPoint: 'is_valid_parentheses',
     body: `Given a string \`s\` containing just the characters \`(\`, \`)\`, \`{\`, \`}\`, \`[\` and \`]\`, determine if the input string is valid.
 
 An input string is valid if:
@@ -459,7 +474,7 @@ An input string is valid if:
 2. Open brackets must be closed in the correct order.
 3. Every close bracket has a corresponding open bracket of the same type.`,
     templateCode:
-      `def solution(s):
+      `def is_valid_parentheses(s):
   # Your code here
   pass`,
     testCases: [
@@ -484,6 +499,7 @@ An input string is valid if:
     difficulty: 2,
     tags: ['Recursion', 'Math'],
     categorySlug: 'recursion-dp',
+    entryPoint: 'factorial',
     body:
       'Write a function, `factorial`, that takes in a non-negative integer `n`. ' +
       'The function should return the factorial of `n`.\n\n' +
@@ -491,7 +507,7 @@ An input string is valid if:
       'For example, `factorial(5)` is `5 * 4 * 3 * 2 * 1 = 120`.\n\n' +
       'Use recursion to solve this problem.',
     templateCode:
-      `def solution(n):
+      `def factorial(n):
   # Your code here
   pass`,
     testCases: [
@@ -510,9 +526,10 @@ An input string is valid if:
     difficulty: 3,
     tags: ['Recursion', 'Math', 'DP'],
     categorySlug: 'recursion-dp',
+    entryPoint: 'fib',
     body: "The Fibonacci numbers are defined by `F(0)=0`, `F(1)=1`, and `F(n)=F(n-1)+F(n-2)` for `n>1`.\n\nGiven `n`, calculate `F(n)`.\n\nConstraints: `0 ≤ n ≤ 30`. Use any approach (iterative, memoized recursion, etc.).",
     templateCode:
-      `def solution(n):
+      `def fib(n):
   # Your code here
   pass`,
     testCases: [
@@ -534,11 +551,12 @@ An input string is valid if:
     difficulty: 2,
     tags: ['String', 'Recursion'],
     categorySlug: 'recursion-dp',
+    entryPoint: 'reverse_string_recursive',
     body: `Write a function that reverses a string. Do this recursively.
 
-For example, \`solution("hello")\` should return \`"olleh"\`.`,
+For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
     templateCode:
-      `def solution(s):
+      `def reverse_string_recursive(s):
   # Your code here
   pass`,
     testCases: [
@@ -562,13 +580,14 @@ For example, \`solution("hello")\` should return \`"olleh"\`.`,
     difficulty: 4,
     tags: ['Hash Map', 'Counting', 'String'],
     categorySlug: 'hashing',
+    entryPoint: 'group_anagrams',
     body:
       'Given an array of strings `strs`, group the anagrams together and return the groups.\n\n' +
       '**Determinism for tests**: Within each group, return words sorted lexicographically. ' +
       'Across groups, sort groups by their **first** word.\n\n' +
       'Example: `["eat","tea","tan","ate","nat","bat"]` → `[["ate","eat","tea"],["bat"],["nat","tan"]]`.',
     templateCode:
-      `def solution(strs):
+      `def group_anagrams(strs):
   # strs: List[str]
   # return List[List[str]] following the deterministic sorting rules above
   pass`,
@@ -599,11 +618,12 @@ For example, \`solution("hello")\` should return \`"olleh"\`.`,
     difficulty: 5,
     tags: ['Hash Set', 'Array'],
     categorySlug: 'hashing',
+    entryPoint: 'longest_consecutive',
     body:
       'Given an unsorted array of integers `nums`, return the length of the longest consecutive elements sequence.\n\n' +
       'You must write an algorithm that runs in O(n) average time using a hash set.',
     templateCode:
-      `def solution(nums):
+      `def longest_consecutive(nums):
   # nums: List[int]
   # return int
   pass`,
@@ -623,11 +643,12 @@ For example, \`solution("hello")\` should return \`"olleh"\`.`,
     difficulty: 5,
     tags: ['Hash Map', 'Prefix Sum', 'Array'],
     categorySlug: 'hashing',
+    entryPoint: 'subarray_sum',
     body:
       'Given an array of integers `nums` and an integer `k`, return the total number of continuous subarrays whose sum equals `k`.\n\n' +
       'Use a prefix-sum hash map to achieve O(n).',
     templateCode:
-      `def solution(nums, k):
+      `def subarray_sum(nums, k):
   # nums: List[int], k: int
   # return int
   pass`,
@@ -647,11 +668,12 @@ For example, \`solution("hello")\` should return \`"olleh"\`.`,
     difficulty: 4,
     tags: ['Hash Map', 'Counting', 'Heap'],
     categorySlug: 'hashing',
+    entryPoint: 'top_k_frequent',
     body:
       'Given an integer array `nums` and an integer `k`, return the `k` most frequent elements.\n\n' +
       '**Determinism for tests**: Sort the result by decreasing frequency; break ties by ascending element value.',
     templateCode:
-      `def solution(nums, k):
+      `def top_k_frequent(nums, k):
   # nums: List[int], k: int
   # return List[int] sorted by (-freq, value) as specified
   pass`,
@@ -675,13 +697,14 @@ For example, \`solution("hello")\` should return \`"olleh"\`.`,
     difficulty: 5,
     tags: ['Array', 'Two Pointer'],
     categorySlug: 'two-pointers',
+    entryPoint: 'max_area',
     body:
       'Given an integer array `height` of length `n`, where `height[i]` represents the height of a line at position `i`, ' +
       'find two lines that together with the x-axis form a container, such that the container contains the most water.\n\n' +
       'Return the maximum amount of water a container can store.\n\n' +
       'The width between indices `i` and `j` is `j - i`. The height is `min(height[i], height[j])`.',
     templateCode:
-      `def solution(height):
+      `def max_area(height):
   # height: List[int]
   # return int
   pass`,
@@ -700,11 +723,12 @@ For example, \`solution("hello")\` should return \`"olleh"\`.`,
     difficulty: 4,
     tags: ['Array', 'Sorting'],
     categorySlug: 'sets-ordering',
+    entryPoint: 'merge_intervals',
     body:
       'Given an array of `intervals` where `intervals[i] = [starti, endi]`, merge all overlapping intervals.\n' +
       'Intervals may be unsorted. Return merged intervals sorted by start.',
     templateCode:
-      `def solution(intervals):
+      `def merge_intervals(intervals):
   # Your code here
   pass`,
     testCases: [
@@ -727,12 +751,13 @@ For example, \`solution("hello")\` should return \`"olleh"\`.`,
     difficulty: 2,
     tags: ['Tree', 'Recursion', 'DFS'],
     categorySlug: 'trees',
+    entryPoint: 'max_depth',
     body:
       'Given the root of a binary tree, return its maximum depth.\n\n' +
       "A binary tree's maximum depth is the number of nodes along the longest path from the root node down to the farthest leaf node.\n\n" +
       'The tree node is a dict: `{"val": int, "left": node|None, "right": node|None}`.',
     templateCode:
-      `def solution(root):
+      `def max_depth(root):
   # root: dict|None with keys val,left,right
   pass`,
     testCases: [
@@ -750,11 +775,12 @@ For example, \`solution("hello")\` should return \`"olleh"\`.`,
     difficulty: 3,
     tags: ['Tree', 'Stack', 'Recursion'],
     categorySlug: 'trees',
+    entryPoint: 'inorder_traversal',
     body:
       'The tree node is a dict: `{"val": int, "left": node|None, "right": node|None}`.\n' +
       'Return the inorder traversal (left, root, right) as a list of values.',
     templateCode:
-      `def solution(root):
+      `def inorder_traversal(root):
   # root: dict|None with keys val,left,right
   pass`,
     testCases: [
@@ -772,12 +798,13 @@ For example, \`solution("hello")\` should return \`"olleh"\`.`,
     difficulty: 2,
     tags: ['Tree', 'Recursion', 'DFS'],
     categorySlug: 'trees',
+    entryPoint: 'is_same_tree',
     body:
       'Given the roots of two binary trees `p` and `q`, write a function to check if they are the same.\n\n' +
       'Two binary trees are considered the same if they are structurally identical, and the nodes have the same value.\n\n' +
       'The tree node is a dict: `{"val": int, "left": node|None, "right": node|None}`.',
     templateCode:
-      `def solution(p, q):
+      `def is_same_tree(p, q):
   # p, q: dict|None with keys val,left,right
   pass`,
     testCases: [
@@ -799,13 +826,14 @@ For example, \`solution("hello")\` should return \`"olleh"\`.`,
     difficulty: 4,
     tags: ['Hash Set', 'Grid'],
     categorySlug: 'hashing',
+    entryPoint: 'is_valid_sudoku',
     body:
       'Determine if a 9×9 Sudoku board is valid. Only the filled cells need to be validated.\n\n' +
       'A board is valid if each row, each column, and each of the nine 3×3 sub-boxes contains no duplicate digits 1–9. ' +
       'Empty cells are represented by `"."`.\n\n' +
       'Return `True` if valid, else `False`.',
     templateCode:
-      `def solution(board):
+      `def is_valid_sudoku(board):
   # board: List[List[str]] with digits '1'-'9' or '.'
   # return bool
   pass`,
@@ -848,11 +876,12 @@ For example, \`solution("hello")\` should return \`"olleh"\`.`,
     difficulty: 5,
     tags: ['String', 'Sliding Window', 'Hash Set'],
     categorySlug: 'hashing',
+    entryPoint: 'length_of_longest_substring',
     body:
       'Given a string `s`, find the length of the longest substring without repeating characters.\n\n' +
       'Use a sliding window approach with a hash set.',
     templateCode:
-      `def solution(s):
+      `def length_of_longest_substring(s):
   # s: str
   # return int
   pass`,
@@ -873,13 +902,14 @@ For example, \`solution("hello")\` should return \`"olleh"\`.`,
     difficulty: 6,
     tags: ['Graph', 'DFS', 'Topological Sort'],
     categorySlug: 'graphs',
+    entryPoint: 'can_finish',
     body:
       'There are a total of `numCourses` courses you have to take, labeled from `0` to `numCourses - 1`. ' +
       'You are given an array `prerequisites` where `prerequisites[i] = [ai, bi]` indicates that you must take course `bi` first if you want to take course `ai`.\n\n' +
       'Return `True` if you can finish all courses. Otherwise, return `False`.\n\n' +
       'This is essentially cycle detection in a directed graph.',
     templateCode:
-      `def solution(numCourses, prerequisites):
+      `def can_finish(numCourses, prerequisites):
   # numCourses: int
   # prerequisites: List[List[int]]
   # return bool
@@ -900,12 +930,13 @@ For example, \`solution("hello")\` should return \`"olleh"\`.`,
     difficulty: 6,
     tags: ['Grid', 'Backtracking', 'DFS'],
     categorySlug: 'grids-backtracking',
+    entryPoint: 'exist',
     body:
       'Given an `m x n` grid of characters `board` and a string `word`, return `True` if `word` exists in the grid.\n\n' +
       'The word can be constructed from letters of sequentially adjacent cells, where adjacent cells are horizontally or vertically neighboring. ' +
       'The same letter cell may not be used more than once.',
     templateCode:
-      `def solution(board, word):
+      `def exist(board, word):
   # board: List[List[str]]
   # word: str
   # return bool
@@ -941,12 +972,13 @@ For example, \`solution("hello")\` should return \`"olleh"\`.`,
     difficulty: 7,
     tags: ['Array', 'Two Pointer', 'Stack'],
     categorySlug: 'heaps',
+    entryPoint: 'trap',
     body:
       'Given `n` non-negative integers representing an elevation map where the width of each bar is `1`, ' +
       'compute how much water it can trap after raining.\n\n' +
       'Use a two-pointer approach or stack to solve in O(n) time.',
     templateCode:
-      `def solution(height):
+      `def trap(height):
   # height: List[int]
   # return int
   pass`,
@@ -965,12 +997,13 @@ For example, \`solution("hello")\` should return \`"olleh"\`.`,
     difficulty: 7,
     tags: ['Heap', 'Array', 'Priority Queue'],
     categorySlug: 'heaps',
+    entryPoint: 'merge_k_lists',
     body:
       'You are given an array of `k` sorted arrays `lists`.\n\n' +
       'Merge them into a single sorted array and return it.\n\n' +
       'Example: `lists=[[1,4,5],[1,3,4],[2,6]]` → `[1,1,2,3,4,4,5,6]`',
     templateCode:
-      `def solution(lists):
+      `def merge_k_lists(lists):
   # lists: List[List[int]]
   # return a single sorted list
   pass`,
@@ -989,13 +1022,14 @@ For example, \`solution("hello")\` should return \`"olleh"\`.`,
     difficulty: 8,
     tags: ['Grid', 'DFS', 'Memoization', 'Dynamic Programming'],
     categorySlug: 'grids-backtracking',
+    entryPoint: 'longest_increasing_path',
     body:
       'Given an `m x n` integers matrix, return the length of the longest increasing path in the matrix.\n\n' +
       'From each cell, you can move in four directions: left, right, up, or down. ' +
       'You may not move diagonally or move outside the boundary.\n\n' +
       'Use DFS with memoization to achieve optimal time complexity.',
     templateCode:
-      `def solution(matrix):
+      `def longest_increasing_path(matrix):
   # matrix: List[List[int]]
   # return int
   pass`,
@@ -1014,13 +1048,14 @@ For example, \`solution("hello")\` should return \`"olleh"\`.`,
     difficulty: 9,
     tags: ['Array', 'Binary Search'],
     categorySlug: 'advanced-binary-search',
+    entryPoint: 'find_median_sorted_arrays',
     body:
       'Given two sorted arrays `nums1` and `nums2` of size `m` and `n` respectively, ' +
       'return the median of the two sorted arrays.\n\n' +
       'The overall run time complexity should be O(log (m+n)).\n\n' +
       'Use binary search to partition the arrays efficiently.',
     templateCode:
-      `def solution(nums1, nums2):
+      `def find_median_sorted_arrays(nums1, nums2):
   # nums1: List[int]
   # nums2: List[int]
   # return float
@@ -1041,6 +1076,7 @@ For example, \`solution("hello")\` should return \`"olleh"\`.`,
     difficulty: 8,
     tags: ['String', 'Dynamic Programming', 'Recursion'],
     categorySlug: 'recursion-dp',
+    entryPoint: 'is_match',
     body:
       "Given an input string `s` and a pattern `p`, implement wildcard pattern matching with support for `?` and `*` where:\n\n" +
       "- `?` matches any single character\n" +
@@ -1048,7 +1084,7 @@ For example, \`solution("hello")\` should return \`"olleh"\`.`,
       "Return `True` if the pattern matches the entire input string, else `False`.\n\n" +
       "Use dynamic programming for an efficient solution.",
     templateCode:
-      `def solution(s, p):
+      `def is_match(s, p):
   # s: str
   # p: str (pattern)
   # return bool
@@ -1064,4 +1100,5 @@ For example, \`solution("hello")\` should return \`"olleh"\`.`,
     ],
   },
 ];
+    
     

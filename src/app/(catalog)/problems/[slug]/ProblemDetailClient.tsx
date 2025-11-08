@@ -272,7 +272,13 @@ function CodeRunner({
   // - decodes input/expected via base64 -> JSON
   // - calls solution(*args)/(**kwargs)/single
   // - compares using compare_mode
-  const buildTestSnippet = (userCode: string, inputJSON: unknown, expectedJSON: unknown, compareMode?: string) => {
+  const buildTestSnippet = (
+    userCode: string,
+    entryPoint: string,
+    inputJSON: unknown,
+    expectedJSON: unknown,
+    compareMode?: string
+  ) => {
     const b64Input = base64Encode(inputJSON);
     const b64Expected = base64Encode(expectedJSON);
     // compareMode examples:
@@ -292,11 +298,11 @@ def _b64_to_obj(b64s):
 def _call_solution(inp):
     # array -> *args, object -> **kwargs, else -> single positional
     if isinstance(inp, list):
-        return solution(*inp)
+        return ${entryPoint}(*inp)
     elif isinstance(inp, dict):
-        return solution(**inp)
+        return ${entryPoint}(**inp)
     else:
-        return solution(inp)
+        return ${entryPoint}(inp)
 
 def _norm_unordered_list(v):
     if isinstance(v, list):
@@ -398,7 +404,7 @@ print(json.dumps({
         // Examples: "unordered_list", "set", "multiset", "float_tol:1e-6", "ordered"
         const compareMode: string | undefined = (tc as any).compare;
 
-        const snippet = buildTestSnippet(code, inp, out, compareMode);
+        const snippet = buildTestSnippet(code, problem.entryPoint, inp, out, compareMode);
         const [capturedOutput, resultJson] = await runPythonCode(snippet);
 
         if (resultJson) {
