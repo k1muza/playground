@@ -124,12 +124,20 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
     summary: 'Find two numbers in an array that add up to a specific target.',
     difficulty: 'Easy',
     tags: ['Array', 'Hash Map'],
-    body: 'Given an array of integers `nums` and an integer `target`, return indices of the two numbers such that they add up to `target`.\n\nYou may assume that each input would have **exactly one solution**, and you may not use the same element twice.\n\nYou can return the answer in any order.',
-    templateCode: 'def solution(nums, target):\n  # Your code here\n  pass',
+    body:
+      'Given an array of integers `nums` and an integer `target`, return indices i and j (with i < j) such that `nums[i] + nums[j] = target`.\n\n' +
+      'You may assume that each input has **exactly one solution**, and you may not use the same element twice.\n\n' +
+      'Return the indices as `[i, j]` with `i < j`.',
+    templateCode:
+      `def solution(nums, target):
+  # Your code here
+  pass`,
     testCases: [
       { input: [[2, 7, 11, 15], 9], output: [0, 1] },
       { input: [[3, 2, 4], 6], output: [1, 2] },
       { input: [[3, 3], 6], output: [0, 1] },
+      { input: [[-1, -2, -3, -4, -5], -8], output: [2, 4] },
+      { input: [[0, 4, 3, 0], 0], output: [0, 3] }
     ],
   },
   {
@@ -138,14 +146,25 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
     summary: 'Determine if a string of brackets is valid and well-formed using a stack.',
     difficulty: 'Easy',
     tags: ['Stack', 'String'],
-    body: 'Given a string `s` containing just the characters `(`, `)`, `{`, `}`, `[` and `]`, determine if the input string is valid.\n\nAn input string is valid if:\n1. Open brackets must be closed by the same type of brackets.\n2. Open brackets must be closed in the correct order.\n3. Every close bracket has a corresponding open bracket of the same type.',
-    templateCode: 'def solution(s):\n  # Your code here\n  pass',
+    body:
+      'Given a string `s` containing just the characters `(`, `)`, `{`, `}`, `[` and `]`, determine if the input string is valid.\n\n' +
+      'Assume `s` contains **only** these bracket characters (no letters or spaces).\n\n' +
+      'An input string is valid if:\n' +
+      '1. Open brackets must be closed by the same type of brackets.\n' +
+      '2. Open brackets must be closed in the correct order.\n' +
+      '3. Every close bracket has a corresponding open bracket of the same type.',
+    templateCode:
+      `def solution(s):
+  # Your code here
+  pass`,
     testCases: [
       { input: ['()'], output: true },
       { input: ['()[]{}'], output: true },
       { input: ['(]'], output: false },
       { input: ['([)]'], output: false },
       { input: ['{[]}'], output: true },
+      { input: [''], output: true },
+      { input: [']'], output: false }
     ],
   },
   {
@@ -154,41 +173,67 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
     summary: 'Write a recursive function that reverses a string.',
     difficulty: 'Easy',
     tags: ['String', 'Recursion'],
-    body: 'Write a function that reverses a string. Do this recursively.\n\nFor example, `solution("hello")` should return `"olleh"`.',
-    templateCode: 'def solution(s):\n  # Your code here\n  pass',
+    body:
+      'Write a function that reverses a string. Do this recursively.\n\n' +
+      'For example, `solution("hello")` should return `"olleh"`.',
+    templateCode:
+      `def solution(s):
+  # Your code here
+  pass`,
     testCases: [
       { input: ['hello'], output: 'olleh' },
       { input: ['world'], output: 'dlrow' },
       { input: [''], output: '' },
       { input: ['a'], output: 'a' },
+      { input: ['racecar'], output: 'racecar' },
+      { input: ['  ab!'], output: '!ba  ' }
     ],
   },
   {
     slug: 'fibonacci-number',
     title: 'Fibonacci Number',
-    summary: 'Calculate the nth Fibonacci number using recursion.',
+    summary: 'Calculate the nth Fibonacci number.',
     difficulty: 'Easy',
     tags: ['Recursion', 'Math'],
-    body: 'The Fibonacci numbers, commonly denoted F(n), form a sequence, called the Fibonacci sequence, such that each number is the sum of the two preceding ones, starting from 0 and 1.\n\nThat is, F(0) = 0, F(1) = 1, and F(n) = F(n-1) + F(n-2) for n > 1.\n\nGiven n, calculate F(n).',
-    templateCode: 'def solution(n):\n  # Your code here\n  pass',
+    body:
+      'The Fibonacci numbers are defined by `F(0)=0`, `F(1)=1`, and `F(n)=F(n-1)+F(n-2)` for `n>1`.\n\n' +
+      'Given `n`, calculate `F(n)`.\n\n' +
+      'Constraints: `0 ≤ n ≤ 30`. Use any approach (iterative, memoized recursion, etc.).',
+    templateCode:
+      `def solution(n):
+  # Your code here
+  pass`,
     testCases: [
+      { input: [0], output: 0 },
+      { input: [1], output: 1 },
       { input: [2], output: 1 },
       { input: [3], output: 2 },
       { input: [4], output: 3 },
       { input: [5], output: 5 },
       { input: [10], output: 55 },
+      { input: [30], output: 832040 }
     ],
   },
   {
     slug: 'merge-k-lists',
-    title: 'Merge k Sorted Lists',
-    summary: 'Use a min-heap to efficiently merge k sorted linked lists.',
+    title: 'Merge k Sorted Arrays',
+    summary: 'Use a min-heap to efficiently merge k sorted arrays.',
     difficulty: 'Hard',
-    tags: ['Heap', 'Linked List'],
-    body: 'You are given an array of `k` linked-lists `lists`, where each linked-list is sorted in ascending order.\n\nMerge all the linked-lists into one sorted linked-list and return it.\n\n*(Note: For this problem, the runner does not yet support Linked List data structures. The tests will pass with an empty list implementation for now.)*',
-    templateCode: 'def solution(lists):\n  # Your code here\n  return []',
+    tags: ['Heap', 'Array', 'Priority Queue'],
+    body:
+      'You are given an array of `k` sorted arrays `lists`.\n\n' +
+      'Merge them into a single sorted array and return it.\n\n' +
+      'Example: `lists=[[1,4,5],[1,3,4],[2,6]]` → `[1,1,2,3,4,4,5,6]`',
+    templateCode:
+      `def solution(lists):
+  # lists: List[List[int]]
+  # return a single sorted list
+  pass`,
     testCases: [
-      { input: [[]], output: [] },
+      { input: [[[1, 4, 5], [1, 3, 4], [2, 6]]], output: [1, 1, 2, 3, 4, 4, 5, 6] },
+      { input: [[[]]], output: [] },
+      { input: [[[], [0]]], output: [0] },
+      { input: [[[1], [2], [3]]], output: [1, 2, 3] }
     ],
   },
   {
@@ -197,10 +242,18 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
     summary: 'Traverse a binary tree in the order: left, root, right.',
     difficulty: 'Easy',
     tags: ['Tree', 'Stack', 'Recursion'],
-    body: 'Given the `root` of a binary tree, return the inorder traversal of its nodes\' values.\n\n*(Note: For this problem, the runner does not yet support Tree data structures. The tests will pass with an empty list implementation for now.)*',
-    templateCode: 'def solution(root):\n  # Your code here\n  return []',
+    body:
+      'The tree node is a dict: `{"val": int, "left": node|None, "right": node|None}`.\n' +
+      'Return the inorder traversal (left, root, right) as a list of values.',
+    templateCode:
+      `def solution(root):
+  # root: dict|None with keys val,left,right
+  pass`,
     testCases: [
-      { input: [[]], output: [] },
+      { input: [null], output: [] },
+      { input: [{ val: 1, left: null, right: null }], output: [1] },
+      { input: [{ val: 1, left: { val: 2, left: null, right: null }, right: { val: 3, left: null, right: null } }], output: [2, 1, 3] },
+      { input: [{ val: 2, left: { val: 1, left: null, right: null }, right: { val: 4, left: { val: 3, left: null, right: null }, right: null } }], output: [1, 2, 3, 4] }
     ],
   },
   {
@@ -209,17 +262,318 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
     summary: 'Given a collection of intervals, merge all overlapping intervals.',
     difficulty: 'Medium',
     tags: ['Array', 'Sorting'],
-    body: 'Given an array of `intervals` where `intervals[i] = [starti, endi]`, merge all overlapping intervals, and return an array of the non-overlapping intervals that cover all the intervals in the input.',
-    templateCode: 'def solution(intervals):\n  # Your code here\n  pass',
+    body:
+      'Given an array of `intervals` where `intervals[i] = [starti, endi]`, merge all overlapping intervals.\n' +
+      'Intervals may be unsorted. Return merged intervals sorted by start.',
+    templateCode:
+      `def solution(intervals):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[[1, 3], [2, 6], [8, 10], [15, 18]]], output: [[1, 6], [8, 10], [15, 18]] },
+      { input: [[[1, 4], [4, 5]]], output: [[1, 5]] },
+      { input: [[[6, 8], [1, 9], [2, 4], [4, 7]]], output: [[1, 9]] },
+      { input: [[[1, 2]]], output: [[1, 2]] },
+      { input: [[[-3, -1], [-2, 2], [3, 4]]], output: [[-3, 2], [3, 4]] }
+    ],
+  },
+
+  // --- Simple loop problems ---
+
+  {
+    slug: 'max-value',
+    title: 'Max Value',
+    summary: 'Return the largest number in the list.',
+    difficulty: 'Easy',
+    tags: ['Array', 'Loop'],
+    body:
+      'Write a function, `max_value`, that takes in a list of numbers as an argument. ' +
+      'The function should return the largest number in the list.\n\n' +
+      'Assume the list is non-empty.',
+    templateCode:
+      `def solution(nums):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[5, 3, 9, 2]], output: 9 },
+      { input: [[-5, -1, -10]], output: -1 },
+      { input: [[1]], output: 1 },
+      { input: [[7, 7, 7]], output: 7 },
+      { input: [[0, -1, -2]], output: 0 }
+    ],
+  },
+  {
+    slug: 'longest-word',
+    title: 'Longest Word',
+    summary: 'Return the longest word in a sentence; ties go to the later word.',
+    difficulty: 'Easy',
+    tags: ['String', 'Loop'],
+    body:
+      'Write a function, `longest_word`, that takes in a sentence string as an argument. ' +
+      'The function should return the longest word in the sentence. If there is a tie, return the word that occurs later in the sentence.\n\n' +
+      'Assume the sentence is non-empty and words are space-separated.',
+    templateCode:
+      `def solution(sentence):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: ['what a wonderful world'], output: 'wonderful' },
+      { input: ['have a nice day'], output: 'nice' },
+      { input: ['the quick brown fox jumped over the lazy dog'], output: 'jumped' },
+      { input: ['who did eat the ham'], output: 'ham' },
+      { input: ['potato'], output: 'potato' },
+      { input: ['a ab abc abd'], output: 'abd' }
+    ],
+  },
+  {
+    slug: 'is-prime',
+    title: 'Is Prime',
+    summary: 'Return whether a number is prime.',
+    difficulty: 'Easy',
+    tags: ['Math', 'Primality', 'Loop'],
+    body:
+      'Write a function, `is_prime`, that takes in a number `n` as an argument. ' +
+      'The function should return a boolean indicating whether or not `n` is prime.\n\n' +
+      'A prime number is an integer greater than 1 with no positive divisors other than 1 and itself.',
+    templateCode:
+      `def solution(n):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [2], output: true },
+      { input: [3], output: true },
+      { input: [4], output: false },
+      { input: [1], output: false },
+      { input: [0], output: false },
+      { input: [-7], output: false },
+      { input: [97], output: true }
+    ],
+  },
+
+  {
+    slug: 'group-anagrams',
+    title: 'Group Anagrams',
+    summary: 'Group words that are anagrams of each other.',
+    difficulty: 'Medium',
+    tags: ['Hash Map', 'Counting', 'String'],
+    body:
+      'Given an array of strings `strs`, group the anagrams together and return the groups.\n\n' +
+      '**Determinism for tests**: Within each group, return words sorted lexicographically. ' +
+      'Across groups, sort groups by their **first** word.\n\n' +
+      'Example: `["eat","tea","tan","ate","nat","bat"]` → `[[' +
+      "ate','eat','tea'],['bat'],['nat','tan']" +
+      ']`.',
+    templateCode:
+      `def solution(strs):
+  # strs: List[str]
+  # return List[List[str]] following the deterministic sorting rules above
+  pass`,
     testCases: [
       {
-        input: [[[1, 3], [2, 6], [8, 10], [15, 18]]],
-        output: [[1, 6], [8, 10], [15, 18]],
+        input: [['eat', 'tea', 'tan', 'ate', 'nat', 'bat']],
+        output: [['ate', 'eat', 'tea'], ['bat'], ['nat', 'tan']]
       },
       {
-        input: [[[1, 4], [4, 5]]],
-        output: [[1, 5]],
+        input: [['']],
+        output: [['']]
       },
+      {
+        input: [['a']],
+        output: [['a']]
+      },
+      {
+        input: [['ab', 'ba', 'abc', 'bca', 'cab', 'zzz']],
+        output: [['ab', 'ba'], ['abc', 'bca', 'cab'], ['zzz']]
+      },
+    ],
+  },
+
+  {
+    slug: 'longest-consecutive-sequence',
+    title: 'Longest Consecutive Sequence',
+    summary: 'Find the length of the longest run of consecutive integers.',
+    difficulty: 'Medium',
+    tags: ['Hash Set', 'Array'],
+    body:
+      'Given an unsorted array of integers `nums`, return the length of the longest consecutive elements sequence.\n\n' +
+      'You must write an algorithm that runs in O(n) average time using a hash set.',
+    templateCode:
+      `def solution(nums):
+  # nums: List[int]
+  # return int
+  pass`,
+    testCases: [
+      { input: [[100, 4, 200, 1, 3, 2]], output: 4 },           // 1,2,3,4
+      { input: [[0, 3, 7, 2, 5, 8, 4, 6, 0, 1]], output: 9 },       // 0..8
+      { input: [[9]], output: 1 },
+      { input: [[-1, -2, -3, 10, 11]], output: 3 },        // -3,-2,-1
+      { input: [[]], output: 0 },
+    ],
+  },
+
+  {
+    slug: 'subarray-sum-equals-k',
+    title: 'Subarray Sum Equals K',
+    summary: 'Count the number of subarrays whose sum equals k.',
+    difficulty: 'Medium',
+    tags: ['Hash Map', 'Prefix Sum', 'Array'],
+    body:
+      'Given an array of integers `nums` and an integer `k`, return the total number of continuous subarrays whose sum equals `k`.\n\n' +
+      'Use a prefix-sum hash map to achieve O(n).',
+    templateCode:
+      `def solution(nums, k):
+  # nums: List[int], k: int
+  # return int
+  pass`,
+    testCases: [
+      { input: [[1, 1, 1], 2], output: 2 },
+      { input: [[1, 2, 3], 3], output: 2 },                  // [1,2], [3]
+      { input: [[-1, -1, 1], 0], output: 1 },                // [-1,-1,1]
+      { input: [[0, 0, 0], 0], output: 6 },                  // all subarrays
+      { input: [[3, 4, 7, 2, -3, 1, 4, 2], 7], output: 4 },
+    ],
+  },
+
+  {
+    slug: 'top-k-frequent-elements',
+    title: 'Top K Frequent Elements',
+    summary: 'Return the k most frequent elements in the array.',
+    difficulty: 'Medium',
+    tags: ['Hash Map', 'Counting', 'Heap'],
+    body:
+      'Given an integer array `nums` and an integer `k`, return the `k` most frequent elements.\n\n' +
+      '**Determinism for tests**: Sort the result by decreasing frequency; break ties by ascending element value.',
+    templateCode:
+      `def solution(nums, k):
+  # nums: List[int], k: int
+  # return List[int] sorted by (-freq, value) as specified
+  pass`,
+    testCases: [
+      { input: [[1, 1, 1, 2, 2, 3], 2], output: [1, 2] },
+      { input: [[1], 1], output: [1] },
+      { input: [[4, 4, 1, 1, 2, 2], 2], output: [1, 2] },        // tie freq=2 -> 1,2
+      { input: [[5, 3, 5, 2, 2, 2, 3], 2], output: [2, 3] },      // freq: 2->3, 3->2, 5->2
+      { input: [[9, 8, 7, 7, 8, 9, 9], 1], output: [9] },
+    ],
+  },
+
+  {
+    slug: 'valid-sudoku',
+    title: 'Valid Sudoku',
+    summary: 'Check whether a partially filled 9×9 Sudoku board is valid.',
+    difficulty: 'Medium',
+    tags: ['Hash Set', 'Grid'],
+    body:
+      'Determine if a 9×9 Sudoku board is valid. Only the filled cells need to be validated.\n\n' +
+      'A board is valid if each row, each column, and each of the nine 3×3 sub-boxes contains no duplicate digits 1–9. ' +
+      'Empty cells are represented by `"."`.\n\n' +
+      'Return `True` if valid, else `False`.',
+    templateCode:
+      `def solution(board):
+  # board: List[List[str]] with digits '1'-'9' or '.'
+  # return bool
+  pass`,
+    testCases: [
+      {
+        input: [[
+          ['5', '3', '.', '.', '7', '.', '.', '.', '.'],
+          ['6', '.', '.', '1', '9', '5', '.', '.', '.'],
+          ['.', '9', '8', '.', '.', '.', '.', '6', '.'],
+          ['8', '.', '.', '.', '6', '.', '.', '.', '3'],
+          ['4', '.', '.', '8', '.', '3', '.', '.', '1'],
+          ['7', '.', '.', '.', '2', '.', '.', '.', '6'],
+          ['.', '6', '.', '.', '.', '.', '2', '8', '.'],
+          ['.', '.', '.', '4', '1', '9', '.', '.', '5'],
+          ['.', '.', '.', '.', '8', '.', '.', '7', '9'],
+        ]],
+        output: true
+      },
+      {
+        input: [[
+          ['8', '3', '.', '.', '7', '.', '.', '.', '.'],
+          ['6', '.', '.', '1', '9', '5', '.', '.', '.'],
+          ['.', '9', '8', '.', '.', '.', '.', '6', '.'],
+          ['8', '.', '.', '.', '6', '.', '.', '.', '3'],
+          ['4', '.', '.', '8', '.', '3', '.', '.', '1'],
+          ['7', '.', '.', '.', '2', '.', '.', '.', '6'],
+          ['.', '6', '.', '.', '.', '.', '2', '8', '.'],
+          ['.', '.', '.', '4', '1', '9', '.', '.', '5'],
+          ['.', '.', '.', '.', '8', '.', '.', '7', '9'],
+        ]],
+        output: false                                        // duplicate '8' in col/box
+      }
+    ],
+  },
+
+  {
+    slug: 'anagrams',
+    title: 'Anagrams',
+    summary: 'Return whether two strings are anagrams.',
+    difficulty: 'Easy',
+    tags: ['String', 'Hash Map', 'Counting'],
+    body:
+      'Write a function, `anagrams`, that takes in two strings as arguments. ' +
+      'The function should return a boolean indicating whether or not the strings are anagrams. ' +
+      'Anagrams are strings that contain the same characters, but in any order.\n\n' +
+      'Assume ASCII and ignore spaces; compare case-insensitively.',
+    templateCode:
+      `def solution(s1, s2):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: ['restful', 'fluster'], output: true },
+      { input: ['listen', 'silent'], output: true },
+      { input: ['cats', 'tocs'], output: false },
+      { input: ['monkeys', 'donkeys'], output: false },
+      { input: ['paper', 'reapp'], output: true },
+      { input: ['Dormitory', 'dirty room'], output: true },
+      { input: ['', ''], output: true }
+    ],
+  },
+  {
+    slug: 'most-frequent-char',
+    title: 'Most Frequent Character',
+    summary: 'Return the most frequent character; ties go to earliest appearance.',
+    difficulty: 'Easy',
+    tags: ['String', 'Counting'],
+    body:
+      'Write a function, `most_frequent_char`, that takes in a string as an argument. ' +
+      'The function should return the most frequent character of the string. ' +
+      'If there are ties, return the character that appears earlier in the string.\n\n' +
+      'Assume the input is a non-empty ASCII string.',
+    templateCode:
+      `def solution(s):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: ['bookeeper'], output: 'e' },
+      { input: ['mississippi'], output: 'i' }, // tie (i,s) -> earliest is 'i'
+      { input: ['abc'], output: 'a' },
+      { input: ['aabbccdde'], output: 'a' },
+      { input: ['zzzza'], output: 'z' }
+    ],
+  },
+  {
+    slug: 'intersection',
+    title: 'Intersection',
+    summary: 'Return the elements common to both lists.',
+    difficulty: 'Easy',
+    tags: ['Array', 'Set'],
+    body:
+      'Write a function, `intersection`, that takes in two lists, `a` and `b`, as arguments. ' +
+      'The function should return a new list containing elements that are in **both** of the two lists.\n\n' +
+      'You may assume that each input list does **not** contain duplicate elements.\n' +
+      'Return the result in the order those elements appear in the first list `a`.',
+    templateCode:
+      `def solution(a, b):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[1, 2, 3], [2, 3, 4]], output: [2, 3] },
+      { input: [[4, 2, 1], [1, 2, 4]], output: [4, 2, 1] },
+      { input: [[1, 2, 3], [4, 5, 6]], output: [] },
+      { input: [['a', 'b', 'c'], ['b', 'x']], output: ['b'] },
+      { input: [[], [1, 2, 3]], output: [] }
     ],
   },
 ];
