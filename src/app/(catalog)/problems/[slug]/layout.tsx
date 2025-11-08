@@ -8,13 +8,6 @@ import {
   SidebarHeader,
   SidebarTrigger,
   SidebarContent,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarMenuSub,
-  SidebarMenuSubItem,
-  SidebarMenuSubButton,
-  SidebarInset,
 } from '@/components/ui/sidebar';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query } from 'firebase/firestore';
@@ -116,25 +109,23 @@ function ProblemList() {
 
 export default function ProblemLayout({ children }: { children: ReactNode }) {
   return (
-    <SidebarProvider>
-      <div className="flex">
-        <Sidebar collapsible="icon">
-          <SidebarHeader>
-            <div className="flex items-center justify-between">
-              <span className="font-semibold text-lg group-data-[collapsible=icon]:hidden">Problems</span>
-              <SidebarTrigger />
-            </div>
-          </SidebarHeader>
-          <SidebarContent>
-            <div className="p-2">
-              <ProblemList />
-            </div>
-          </SidebarContent>
-        </Sidebar>
-        <SidebarInset>
-          {children}
-        </SidebarInset>
+    <div className="relative flex h-[calc(100vh-4rem)]">
+      <Sidebar collapsible="icon">
+        <SidebarHeader>
+          <div className="flex items-center justify-between p-2">
+            <span className="font-semibold text-lg group-data-[collapsible=icon]:hidden">Problems</span>
+            <SidebarTrigger />
+          </div>
+        </SidebarHeader>
+        <SidebarContent>
+          <div className="p-2">
+            <ProblemList />
+          </div>
+        </SidebarContent>
+      </Sidebar>
+      <div className="flex-1 overflow-y-auto">
+        {children}
       </div>
-    </SidebarProvider>
+    </div>
   );
 }
