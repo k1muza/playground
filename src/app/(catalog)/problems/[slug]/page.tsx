@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
@@ -445,9 +446,8 @@ function TestCasesDisplay({ slug }: { slug: string }) {
 }
 
 
-export default function ProblemDetail({ params }: { params: { slug: string } }) {
+export default function ProblemDetail({ params: { slug } }: { params: { slug: string } }) {
   const { firestore } = useFirebase();
-  const { slug } = params;
 
   const problemRef = useMemoFirebase(
     () => (firestore ? doc(firestore, 'problems', slug) : null),
@@ -522,4 +522,3 @@ export default function ProblemDetail({ params }: { params: { slug: string } }) 
   );
 }
 
-    
