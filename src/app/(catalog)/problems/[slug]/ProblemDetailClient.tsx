@@ -1,15 +1,19 @@
+
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Container from "@/components/container";
 import { Badge } from "@/components/ui/badge";
 import TopicBadge from "@/components/topic-badge";
 import { Button } from "@/components/ui/button";
-import { PlayIcon, Loader2, CheckCircle, XCircle, Rocket, Info } from "lucide-react";
+import { PlayIcon, Loader2, CheckCircle, XCircle, Rocket, Info, ArrowRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   AlertDialog,
   AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -23,7 +27,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { Problem, TestCase, Submission } from "@/lib/data";
+import type { Problem, TestCase, Submission, Category } from "@/lib/data";
+import { categories } from "@/lib/data";
 import type { PyodideInterface } from "pyodide";
 import ReactMarkdown from "react-markdown";
 
@@ -48,6 +53,10 @@ type TestResult = {
   actual: string;
   passed: boolean;
 };
+
+// Sort categories once by the 'order' property
+const sortedCategories = [...categories].sort((a, b) => a.order - b.order);
+
 
 function ProblemDetailSkeleton() {
   return (
@@ -134,11 +143,14 @@ function CodeRunner({
   problem,
   testCases,
   slug,
+  nextProblemSlug,
 }: {
   problem: Problem;
   testCases: TestCase[];
   slug: string;
+  nextProblemSlug: string | null;
 }) {
+  const router = useRouter();
   const [code, setCode] = useState(problem.templateCode);
   const [testResults, setTestResults] = useState<TestResult[]>([]);
   const [consoleOutput, setConsoleOutput] = useState("");
@@ -446,6 +458,14 @@ print(json.dumps({
   };
 
   const onCodeChange = useCallback((value: string) => setCode(value), []);
+  
+  const handleGoToNextProblem = () => {
+    if (nextProblemSlug) {
+      router.push(`/problems/${nextProblemSlug}`);
+    }
+    setShowSuccessModal(false);
+  };
+
 
   return (
     <div>
@@ -469,7 +489,7 @@ print(json.dumps({
         />
       </div>
 
-      <div className="mt-4 flex gap-2">
+      <div className="mt-4 flex flex-wrap gap-2">
         <Button onClick={handleRunCode} disabled={isLoading || isPyodideLoading || isSubmissionLoading}>
           {isPyodideLoading || isSubmissionLoading ? (
             <>
@@ -512,6 +532,14 @@ print(json.dumps({
             </>
           )}
         </Button>
+        {nextProblemSlug && (
+           <Button asChild variant="outline" className="ml-auto">
+             <Link href={`/problems/${nextProblemSlug}`}>
+                Next Problem
+               <ArrowRight className="ml-2 h-4 w-4" />
+             </Link>
+           </Button>
+         )}
       </div>
 
       {(testResults.length > 0 || consoleOutput) && (
@@ -574,9 +602,16 @@ print(json.dumps({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction onClick={() => setShowSuccessModal(false)}>
-              Continue
-            </AlertDialogAction>
+            <AlertDialogCancel>Continue Practice</AlertDialogCancel>
+            {nextProblemSlug ? (
+              <AlertDialogAction onClick={handleGoToNextProblem}>
+                Next Problem <ArrowRight className="ml-2 h-4 w-4" />
+              </AlertDialogAction>
+            ) : (
+              <AlertDialogAction onClick={() => setShowSuccessModal(false)}>
+                Finish
+              </AlertDialogAction>
+            )}
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -588,12 +623,21 @@ print(json.dumps({
 export default function ProblemDetailClient({ slug }: { slug: string }) {
   const { firestore } = useFirebase();
 
+  // Fetch the current problem
   const problemRef = useMemoFirebase(
     () => (firestore ? doc(firestore, "problems", slug) : null),
     [firestore, slug]
   );
   const { data: p, isLoading: isProblemLoading } = useDoc<Problem>(problemRef);
 
+  // Fetch all problems for navigation
+  const problemsQuery = useMemoFirebase(
+    () => (firestore ? query(collection(firestore, "problems")) : null),
+    [firestore]
+  );
+  const { data: allProblems, isLoading: areProblemsLoading } = useCollection<Problem>(problemsQuery);
+
+  // Fetch test cases for the current problem
   const testCasesQuery = useMemoFirebase(
     () => (firestore ? collection(firestore, "problems", slug, "testCases") : null),
     [firestore, slug]
@@ -601,7 +645,38 @@ export default function ProblemDetailClient({ slug }: { slug: string }) {
   const { data: testCases, isLoading: areTestCasesLoading } =
     useCollection<TestCase>(testCasesQuery);
 
-  const loading = isProblemLoading || areTestCasesLoading;
+  const { sortedProblems, nextProblemSlug } = useMemo(() => {
+    if (!allProblems) return { sortedProblems: [], nextProblemSlug: null };
+    
+    const problemGroups: { [key: string]: Problem[] } = {};
+    allProblems.forEach((problem) => {
+      const catSlug = problem.categorySlug;
+      if (!catSlug) return;
+      if (!problemGroups[catSlug]) {
+        problemGroups[catSlug] = [];
+      }
+      problemGroups[catSlug].push(problem);
+    });
+
+    for (const catSlug in problemGroups) {
+      problemGroups[catSlug].sort((a, b) => a.difficulty - b.difficulty);
+    }
+    
+    const sortedProblems: Problem[] = [];
+    sortedCategories.forEach(category => {
+      if (problemGroups[category.slug]) {
+        sortedProblems.push(...problemGroups[category.slug]);
+      }
+    });
+
+    const currentIndex = sortedProblems.findIndex(prob => prob.slug === slug);
+    const nextProblem = currentIndex !== -1 && currentIndex < sortedProblems.length - 1 ? sortedProblems[currentIndex + 1] : null;
+
+    return { sortedProblems, nextProblemSlug: nextProblem?.slug || null };
+
+  }, [allProblems, slug]);
+  
+  const loading = isProblemLoading || areTestCasesLoading || areProblemsLoading;
 
   if (loading) {
     return <ProblemDetailSkeleton />;
@@ -677,8 +752,10 @@ export default function ProblemDetailClient({ slug }: { slug: string }) {
       </div>
 
       <div className="h-full overflow-y-auto pl-4">
-        {testCases && <CodeRunner problem={p} testCases={testCases} slug={slug} />}
+        {testCases && <CodeRunner problem={p} testCases={testCases} slug={slug} nextProblemSlug={nextProblemSlug}/>}
       </div>
     </div>
   );
 }
+
+    
