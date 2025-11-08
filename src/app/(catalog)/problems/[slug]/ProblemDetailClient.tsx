@@ -8,8 +8,8 @@ import Container from "@/components/container";
 import { Badge } from "@/components/ui/badge";
 import TopicBadge from "@/components/topic-badge";
 import { Button } from "@/components/ui/button";
-import { PlayIcon, Loader2, CheckCircle, XCircle, Rocket, Info, ArrowRight } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { PlayIcon, Loader2, CheckCircle, XCircle, Rocket, Info, ArrowRight, Wand2 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -40,6 +40,7 @@ import { useFirebase, useDoc, useCollection, useMemoFirebase } from "@/firebase"
 import { collection, addDoc, doc, query, where, orderBy, limit } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import Confetti from "react-confetti";
+import { suggestSolution } from "@/ai/flows/suggest-solution";
 
 declare global {
   interface Window {
@@ -139,6 +140,94 @@ function TestCasesDisplay({ slug }: { slug: string }) {
   );
 }
 
+function AiSuggestion({
+  problem,
+  userCode,
+}: {
+  problem: Problem;
+  userCode: string;
+}) {
+  const [suggestion, setSuggestion] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleGetSuggestion = async () => {
+    setIsLoading(true);
+    setError(null);
+    setSuggestion('');
+    try {
+      const result = await suggestSolution({
+        problemBody: problem.body,
+        userCode: userCode,
+      });
+      setSuggestion(result.suggestion);
+    } catch (e) {
+      console.error('AI suggestion failed:', e);
+      setError(e instanceof Error ? e.message : 'An unknown error occurred.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="mt-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Wand2 className="h-5 w-5 text-primary" />
+            AI Suggestion
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {!suggestion && !isLoading && !error && (
+            <>
+              <p className="text-sm text-muted-foreground mb-4">
+                Get an AI-powered suggestion for a more elegant or efficient solution.
+              </p>
+              <Button onClick={handleGetSuggestion} disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  'Get Suggestion'
+                )}
+              </Button>
+            </>
+          )}
+
+          {isLoading && (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <p>Generating suggestion...</p>
+            </div>
+          )}
+
+          {error && (
+            <div className="text-destructive text-sm">
+              <p>Sorry, something went wrong:</p>
+              <pre className="mt-2 whitespace-pre-wrap font-code">{error}</pre>
+            </div>
+          )}
+
+          {suggestion && (
+            <div className="prose prose-sm dark:prose-invert max-w-none">
+              <ReactMarkdown
+                 components={{
+                  code: ({node, ...props}) => <code className="font-code" {...props} />,
+                }}
+              >
+                {suggestion}
+              </ReactMarkdown>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 function CodeRunner({
   problem,
   testCases,
@@ -178,6 +267,8 @@ function CodeRunner({
     [firestore, user, slug]
   );
   const { data: latestSubmissionData, isLoading: isSubmissionLoading } = useCollection<Submission>(latestSubmissionQuery);
+
+  const hasSubmissions = useMemo(() => (latestSubmissionData?.length ?? 0) > 0, [latestSubmissionData]);
 
   useEffect(() => {
     if (!isSubmissionLoading) {
@@ -599,6 +690,10 @@ print(json.dumps({
         </Tabs>
       )}
 
+      {hasSubmissions && (
+        <AiSuggestion problem={problem} userCode={code} />
+      )}
+
       <AlertDialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -763,5 +858,3 @@ export default function ProblemDetailClient({ slug }: { slug: string }) {
     </div>
   );
 }
-
-    
