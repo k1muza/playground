@@ -138,15 +138,10 @@ function CodeRunner({
   const pyodideRef = useRef<PyodideInterface | null>(null);
 
   const { firestore, user } = useFirebase();
-
   const isLoading = isSubmitting || isRunningCode;
 
-  // Keep user edits when the problem changes route
-  useEffect(() => {
-    setCode(problem.templateCode);
-  }, [problem]);
+  useEffect(() => { setCode(problem.templateCode); }, [problem]);
 
-  // Load Pyodide once; also handle the case where the script loads later
   useEffect(() => {
     let cancelled = false;
 
@@ -176,45 +171,42 @@ function CodeRunner({
       };
     }
 
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, []);
 
   const cmExtensions = useMemo(() => [python()], []);
   const cmStyle = useMemo(
-    () => ({
-      fontFamily: "var(--font-code)",
-      fontSize: "0.875rem",
-    }),
+    () => ({ fontFamily: "var(--font-code)", fontSize: "0.875rem" }),
     []
   );
+
+  // ---------- helpers ----------
+
+  const base64Encode = (obj: unknown) =>
+    typeof obj === "string"
+      ? btoa(unescape(encodeURIComponent(obj)))
+      : btoa(unescape(encodeURIComponent(JSON.stringify(obj))));
 
   const runPythonCode = async (codeToRun: string): Promise<[string, any]> => {
     const pyodide = pyodideRef.current;
     if (!pyodide) return ["Pyodide is not loaded yet.", null];
 
     let capturedOutput = "";
-    let executionResult: any = null;
+    let parsedLastJSON: any = null;
 
-    const stdoutCallback = (text: string) => {
+    const onBatch = (text: string) => {
       capturedOutput += text + "\n";
-      const lines = text.trim().split("\n");
-      const lastLine = lines[lines.length - 1];
-      try {
-        executionResult = JSON.parse(lastLine);
-      } catch {
-        /* ignore non-JSON */
+      // Try parse last non-empty line as JSON
+      const trimmed = capturedOutput.trim().split("\n");
+      for (let i = trimmed.length - 1; i >= 0; i--) {
+        const line = trimmed[i].trim();
+        if (!line) continue;
+        try { parsedLastJSON = JSON.parse(line); break; } catch { /* ignore */ }
       }
     };
 
-    const stderrCallback = (text: string) => {
-      capturedOutput += text + "\n";
-    };
-
-    // Attach, run, detach to avoid leaks
-    pyodide.setStdout({ batched: stdoutCallback });
-    pyodide.setStderr({ batched: stderrCallback });
+    pyodide.setStdout({ batched: onBatch });
+    pyodide.setStderr({ batched: (t: string) => { capturedOutput += t + "\n"; } });
 
     try {
       await pyodide.loadPackagesFromImports(codeToRun);
@@ -226,7 +218,104 @@ function CodeRunner({
       pyodide.setStderr({});
     }
 
-    return [capturedOutput.trim(), executionResult];
+    return [capturedOutput.trim(), parsedLastJSON];
+  };
+
+  // Build a Python snippet that:
+  // - imports user code
+  // - decodes input/expected via base64 -> JSON
+  // - calls solution(*args)/(**kwargs)/single
+  // - compares using compare_mode
+  const buildTestSnippet = (userCode: string, inputJSON: unknown, expectedJSON: unknown, compareMode?: string) => {
+    const b64Input = base64Encode(inputJSON);
+    const b64Expected = base64Encode(expectedJSON);
+    // compareMode examples:
+    //   undefined or "ordered"
+    //   "unordered_list"
+    //   "set"
+    //   "multiset"
+    //   "float_tol:1e-6"
+    return `
+${userCode}
+
+import json, base64, math, collections
+
+def _b64_to_obj(b64s):
+    return json.loads(base64.b64decode(b64s).decode())
+
+def _call_solution(inp):
+    # array -> *args, object -> **kwargs, else -> single positional
+    if isinstance(inp, list):
+        return solution(*inp)
+    elif isinstance(inp, dict):
+        return solution(**inp)
+    else:
+        return solution(inp)
+
+def _norm_unordered_list(v):
+    if isinstance(v, list):
+        try:
+            return sorted(v)
+        except TypeError:
+            return sorted([json.dumps(x, sort_keys=True) for x in v])
+    return v
+
+def _as_set(v):
+    try:
+        return set(v)
+    except TypeError:
+        return set([json.dumps(x, sort_keys=True) for x in v])
+
+def _as_multiset(v):
+    try:
+        return collections.Counter(v)
+    except TypeError:
+        return collections.Counter([json.dumps(x, sort_keys=True) for x in v])
+
+def _floatclose(a, b, tol):
+    try:
+        return abs(float(a) - float(b)) <= tol
+    except Exception:
+        return False
+
+inp = _b64_to_obj("${b64Input}")
+expected = _b64_to_obj("${b64Expected}")
+actual = None
+passed = False
+err = None
+
+try:
+    actual = _call_solution(inp)
+    mode = ${JSON.stringify(compareMode || "ordered")}
+    if mode == "unordered_list":
+        passed = (_norm_unordered_list(actual) == _norm_unordered_list(expected))
+    elif mode == "set":
+        passed = (_as_set(actual) == _as_set(expected))
+    elif mode == "multiset":
+        passed = (_as_multiset(actual) == _as_multiset(expected))
+    elif isinstance(mode, str) and mode.startswith("float_tol:"):
+        try:
+            tol = float(mode.split(":")[1])
+        except Exception:
+            tol = 1e-6
+        passed = _floatclose(actual, expected, tol)
+    else:
+        # deterministic structural equality
+        try:
+            passed = (json.dumps(actual, sort_keys=True) == json.dumps(expected, sort_keys=True))
+        except TypeError:
+            # fallback for non-JSON-serializables
+            passed = (actual == expected)
+except Exception as e:
+    err = str(e)
+
+print(json.dumps({
+    "input": inp,
+    "expected": expected,
+    "actual": actual if err is None else ("Execution Error: " + err),
+    "passed": False if err is not None else bool(passed)
+}))
+`.trim();
   };
 
   const handleRunCode = async () => {
@@ -237,9 +326,6 @@ function CodeRunner({
     setConsoleOutput(output || "(No console output)");
     setIsRunningCode(false);
   };
-
-  const safeJSONString = (obj: unknown) =>
-    JSON.stringify(obj).replace(/\\/g, "\\\\").replace(/`/g, "\\`").replace(/\$/g, "\\$");
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
@@ -256,64 +342,36 @@ function CodeRunner({
       const results: TestResult[] = [];
       let allPassed = true;
 
-      for (const testCase of testCases) {
-        // Parse input/output once
-        const parsedInput = JSON.parse(testCase.input);
-        const parsedOutput = JSON.parse(testCase.output);
+      for (const tc of testCases) {
+        // Parse once
+        let inp: unknown, out: unknown;
+        try { inp = JSON.parse(tc.input); } catch { inp = tc.input; }
+        try { out = JSON.parse(tc.output); } catch { out = tc.output; }
 
-        // Turn ["a",1] into 'a,1' for solution(a,1)
-        const inputStr = JSON.stringify(parsedInput).slice(1, -1);
+        // Optional comparison mode on each test case (string)
+        // Examples: "unordered_list", "set", "multiset", "float_tol:1e-6", "ordered"
+        const compareMode: string | undefined = (tc as any).compare;
 
-        const expectedJSON = safeJSONString(parsedOutput);
-
-        const testCode = `
-${code}
-import json
-
-actual_result = solution(${inputStr})
-
-if "${slug}" == "two-sum":
-    expected_sorted = sorted(json.loads("${expectedJSON}"))
-    actual_sorted = sorted(actual_result) if isinstance(actual_result, list) else actual_result
-    passed = actual_sorted == expected_sorted
-    actual_for_print = actual_sorted
-    expected_for_print = expected_sorted
-else:
-    try:
-        expected = json.loads("${expectedJSON}")
-        actual_json = json.dumps(actual_result, sort_keys=True)
-        expected_json = json.dumps(expected, sort_keys=True)
-        passed = (actual_json == expected_json)
-        actual_for_print = actual_result
-        expected_for_print = expected
-    except Exception as e:
-        passed = False
-        actual_for_print = str(e)
-        expected_for_print = json.loads("${expectedJSON}")
-
-print(json.dumps({
-    "input": ${JSON.stringify(parsedInput)},
-    "expected": expected_for_print,
-    "actual": actual_for_print,
-    "passed": passed
-}))
-`.trim();
-
-        const [capturedOutput, resultJson] = await runPythonCode(testCode);
+        const snippet = buildTestSnippet(code, inp, out, compareMode);
+        const [capturedOutput, resultJson] = await runPythonCode(snippet);
 
         if (resultJson) {
-          results.push({
+          const tr: TestResult = {
             input: JSON.stringify(resultJson.input),
             expected: JSON.stringify(resultJson.expected),
-            actual: JSON.stringify(resultJson.actual),
+            actual:
+              typeof resultJson.actual === "string"
+                ? resultJson.actual
+                : JSON.stringify(resultJson.actual),
             passed: !!resultJson.passed,
-          });
-          if (!resultJson.passed) allPassed = false;
+          };
+          results.push(tr);
+          if (!tr.passed) allPassed = false;
         } else {
           allPassed = false;
           results.push({
-            input: JSON.stringify(parsedInput),
-            expected: JSON.stringify(parsedOutput),
+            input: JSON.stringify(inp),
+            expected: JSON.stringify(out),
             actual: `Execution Error: ${capturedOutput || "Unknown error"}`,
             passed: false,
           });
@@ -438,15 +496,9 @@ print(json.dumps({
                         {result.passed ? "Passed" : "Failed"}
                       </Badge>
                     </div>
-                    <p>
-                      <strong>Input:</strong> {result.input}
-                    </p>
-                    <p>
-                      <strong>Expected:</strong> {result.expected}
-                    </p>
-                    <p>
-                      <strong>Actual:</strong> {result.actual}
-                    </p>
+                    <p><strong>Input:</strong> {result.input}</p>
+                    <p><strong>Expected:</strong> {result.expected}</p>
+                    <p><strong>Actual:</strong> {result.actual}</p>
                   </div>
                 ))}
               </CardContent>
@@ -483,6 +535,7 @@ print(json.dumps({
     </div>
   );
 }
+
 
 export default function ProblemDetailClient({ slug }: { slug: string }) {
   const { firestore } = useFirebase();
@@ -536,8 +589,8 @@ export default function ProblemDetailClient({ slug }: { slug: string }) {
                 p.difficulty === "Easy"
                   ? "secondary"
                   : p.difficulty === "Medium"
-                  ? "default"
-                  : "destructive"
+                    ? "default"
+                    : "destructive"
               }
               className={p.difficulty === "Medium" ? "bg-amber-500 hover:bg-amber-500/80" : ""}
             >
