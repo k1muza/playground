@@ -1,3 +1,4 @@
+
 import { z } from 'zod';
 
 export type Course = {
@@ -67,6 +68,7 @@ export type TestCase = z.infer<typeof TestCaseSchema>;
 
 
 export const SolutionSchema = z.object({
+  id: z.string().optional(),
   problemId: z.string(),
   userId: z.string(),
   solutionCode: z.string(),
@@ -144,7 +146,7 @@ export const articles: Article[] = [
     title: 'When Should You Use a Hash Map?',
     excerpt: 'Hash Maps are incredibly versatile. Learn the common patterns where they are the ideal data structure.',
     tags: ['Hash Map', 'Data Structures', 'Patterns'],
-    body: "# The Power of Hash Maps\n\nA Hash Map (or Hash Table, Dictionary) is one of the most powerful and commonly used data structures in programming. Its key strength is providing average-case **O(1)** time complexity for insertions, deletions, and lookups.\n\n## Common Use Cases\n\n1.  **Frequency Counting:** Easily count occurrences of items in a list. The keys are the items, and the values are their counts.\n2.  **Two-Sum Problem:** The classic 'Two Sum' problem is efficiently solved by storing numbers and their indices in a hash map to quickly find a complementary number.\n3 Analytica 3rd party logistics provider.  **Caching/Memoization:** Store the results of function calls to avoid re-computation. The function arguments can be hashed to form a key, and the result stored as the value.\n4.  **Checking for Duplicates:** As you iterate through a collection, add elements to a hash set (a hash map where you only care about keys). If you encounter an element already in the set, it's a duplicate.",
+    body: "# The Power of Hash Maps\n\nA Hash Map (or Hash Table, Dictionary) is one of the most powerful and commonly used data structures in programming. Its key strength is providing average-case **O(1)** time complexity for insertions, deletions, and lookups.\n\n## Common Use Cases\n\n1.  **Frequency Counting:** Easily count occurrences of items in a list. The keys are the items, and the values are their counts.\n2.  **Two-Sum Problem:** The classic 'Two Sum' problem is efficiently solved by storing numbers and their indices in a hash map to quickly find a complementary number.\n3. Analytica 3rd party logistics provider.  **Caching/Memoization:** Store the results of function calls to avoid re-computation. The function arguments can be hashed to form a key, and the result stored as the value.\n4.  **Checking for Duplicates:** As you iterate through a collection, add elements to a hash set (a hash map where you only care about keys). If you encounter an element already in the set, it's a duplicate.",
   },
 ];
 
@@ -263,12 +265,7 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
     difficulty: 2,
     tags: ['Array', 'Hash Map'],
     categorySlug: 'hashing',
-    body:
-      "Given an array of integers `nums` and an integer `target`, return indices `i` and `j` such that `nums[i] + nums[j] = target`.\n\n" +
-      "### Requirements\n" +
-      "- You may assume that each input has **exactly one solution**.\n" +
-      "- You may not use the same element twice.\n" +
-      "- Return the indices as `[i, j]`.",
+    body: "Given an array of integers `nums` and an integer `target`, return indices `i` and `j` such that `nums[i] + nums[j] = target`.\n\n### Requirements\n- You may assume that each input has **exactly one solution**.\n- You may not use the same element twice.\n- Return the indices as `[i, j]`.",
     templateCode:
       `def solution(nums, target):
   # Your code here
@@ -345,9 +342,7 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
     difficulty: 1,
     tags: ['String', 'Two Pointer'],
     categorySlug: 'warm-ups',
-    body:
-      'Write a function that reverses a string. Use an iterative approach.\n\n' +
-      'For example, `solution("hello")` should return `"olleh"`.',
+    body: "Write a function that reverses a string. Use an iterative approach.\n\nFor example, `solution(\"hello\")` should return `\"olleh\"`.",
     templateCode:
       `def solution(s):
   # Your code here
@@ -451,12 +446,7 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
     difficulty: 3,
     tags: ['Stack', 'String'],
     categorySlug: 'stacks',
-    body:
-      "Given a string `s` containing just the characters `(`, `)`, `{`, `}`, `[` and `]`, determine if the input string is valid.\n\n" +
-      "An input string is valid if:\n" +
-      "1. Open brackets must be closed by the same type of brackets.\n" +
-      "2. Open brackets must be closed in the correct order.\n" +
-      "3. Every close bracket has a corresponding open bracket of the same type.",
+    body: "Given a string `s` containing just the characters `(`, `)`, `{`, `}`, `[` and `]`, determine if the input string is valid.\n\nAn input string is valid if:\n1. Open brackets must be closed by the same type of brackets.\n2. Open brackets must be closed in the correct order.\n3. Every close bracket has a corresponding open bracket of the same type.",
     templateCode:
       `def solution(s):
   # Your code here
@@ -509,10 +499,7 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
     difficulty: 3,
     tags: ['Recursion', 'Math', 'DP'],
     categorySlug: 'recursion-dp',
-    body:
-      "The Fibonacci numbers are defined by `F(0)=0`, `F(1)=1`, and `F(n)=F(n-1)+F(n-2)` for `n>1`.\n\n" +
-      "Given `n`, calculate `F(n)`.\n\n" +
-      "Constraints: `0 ≤ n ≤ 30`. Use any approach (iterative, memoized recursion, etc.).",
+    body: "The Fibonacci numbers are defined by `F(0)=0`, `F(1)=1`, and `F(n)=F(n-1)+F(n-2)` for `n>1`.\n\nGiven `n`, calculate `F(n)`.\n\nConstraints: `0 ≤ n ≤ 30`. Use any approach (iterative, memoized recursion, etc.).",
     templateCode:
       `def solution(n):
   # Your code here
@@ -536,9 +523,7 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
     difficulty: 2,
     tags: ['String', 'Recursion'],
     categorySlug: 'recursion-dp',
-    body:
-      'Write a function that reverses a string. Do this recursively.\n\n' +
-      'For example, `solution("hello")` should return `"olleh"`.',
+    body: "Write a function that reverses a string. Do this recursively.\n\nFor example, `solution(\"hello\")` should return `\"olleh\"`.",
     templateCode:
       `def solution(s):
   # Your code here
@@ -1066,3 +1051,5 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
     ],
   },
 ];
+
+    

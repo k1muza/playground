@@ -24,7 +24,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { Problem, TestCase } from "@/lib/data";
+import type { Problem, TestCase, Solution } from "@/lib/data";
 import type { PyodideInterface } from "pyodide";
 import ReactMarkdown from "react-markdown";
 
@@ -33,7 +33,7 @@ import { python } from "@codemirror/lang-python";
 import { githubDark } from "@uiw/codemirror-theme-github";
 
 import { useFirebase, useDoc, useCollection, useMemoFirebase } from "@/firebase";
-import { collection, addDoc, doc } from "firebase/firestore";
+import { collection, addDoc, doc, query, where, orderBy, limit } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 
 declare global {
@@ -150,8 +150,31 @@ function CodeRunner({
 
   const { firestore, user } = useFirebase();
   const isLoading = isSubmitting || isRunningCode;
+  
+  // Query for the user's most recent solution to this problem
+  const latestSolutionQuery = useMemoFirebase(
+    () =>
+      user && firestore
+        ? query(
+            collection(firestore, "users", user.uid, "solutions"),
+            where("problemId", "==", slug),
+            orderBy("submissionDate", "desc"),
+            limit(1)
+          )
+        : null,
+    [firestore, user, slug]
+  );
+  const { data: latestSolutionData, isLoading: isSolutionLoading } = useCollection<Solution>(latestSolutionQuery);
 
-  useEffect(() => { setCode(problem.templateCode); }, [problem]);
+  useEffect(() => {
+    if (!isSolutionLoading) {
+      if (latestSolutionData && latestSolutionData.length > 0) {
+        setCode(latestSolutionData[0].solutionCode);
+      } else {
+        setCode(problem.templateCode);
+      }
+    }
+  }, [latestSolutionData, isSolutionLoading, problem.templateCode]);
 
   useEffect(() => {
     let cancelled = false;
@@ -433,8 +456,8 @@ print(json.dumps({
       </div>
 
       <div className="mt-4 flex gap-2">
-        <Button onClick={handleRunCode} disabled={isLoading || isPyodideLoading}>
-          {isPyodideLoading ? (
+        <Button onClick={handleRunCode} disabled={isLoading || isPyodideLoading || isSolutionLoading}>
+          {isPyodideLoading || isSolutionLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Loading...
@@ -454,11 +477,11 @@ print(json.dumps({
 
         <Button
           onClick={handleSubmit}
-          disabled={isLoading || isPyodideLoading || !user}
+          disabled={isLoading || isPyodideLoading || !user || isSolutionLoading}
           variant="secondary"
           title={!user ? "Sign in to submit" : undefined}
         >
-          {isPyodideLoading ? (
+          {isPyodideLoading || isSolutionLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Loading...
@@ -646,3 +669,5 @@ export default function ProblemDetailClient({ slug }: { slug: string }) {
   );
 }
 
+
+    
