@@ -7,8 +7,9 @@ import { notFound } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import TopicBadge from '@/components/topic-badge';
 import { Button } from '@/components/ui/button';
-import { PlayIcon, Loader2 } from 'lucide-react';
+import { PlayIcon, Loader2, CheckCircle, XCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { Problem } from '@/lib/data';
 import type { PyodideInterface } from 'pyodide';
 
@@ -22,11 +23,17 @@ declare global {
   }
 }
 
+type TestResult = {
+  input: string;
+  expected: string;
+  actual: string;
+  passed: boolean;
+};
+
 function CodeRunner({ problem }: { problem: Problem }) {
-  const [code, setCode] = useState(
-    `# Write your solution for "${problem.title}" here.\ndef solution():\n  # Your code here\n  print("Hello, Python!")\n\nsolution()`
-  );
-  const [output, setOutput] = useState('');
+  const [code, setCode] = useState(problem.templateCode);
+  const [output, setOutput] = useState<TestResult[]>([]);
+  const [consoleOutput, setConsoleOutput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isPyodideLoading, setIsPyodideLoading] = useState(true);
   const pyodideRef = useRef<PyodideInterface | null>(null);
@@ -39,7 +46,7 @@ function CodeRunner({ problem }: { problem: Problem }) {
         setIsPyodideLoading(false);
       } catch (error) {
         console.error('Failed to load Pyodide:', error);
-        setOutput('Error: Could not load Python interpreter.');
+        setConsoleOutput('Error: Could not load Python interpreter.');
         setIsPyodideLoading(false);
       }
     };
@@ -58,12 +65,14 @@ function CodeRunner({ problem }: { problem: Problem }) {
   const handleRunCode = async () => {
     const pyodide = pyodideRef.current;
     if (!pyodide) {
-      setOutput('Pyodide is not loaded yet.');
+      setConsoleOutput('Pyodide is not loaded yet.');
       return;
     }
     setIsLoading(true);
+    setOutput([]);
+    setConsoleOutput('');
+
     let capturedOutput = '';
-    
     pyodide.setStdout({
       batched: (text: string) => {
         capturedOutput += text + '\n';
@@ -77,11 +86,76 @@ function CodeRunner({ problem }: { problem: Problem }) {
 
     try {
       await pyodide.loadPackagesFromImports(code);
-      await pyodide.runPythonAsync(code);
-      setOutput(capturedOutput.trim() || '(No output)');
+      const testResults: TestResult[] = [];
+      for (const testCase of problem.testCases) {
+        const inputStr = JSON.stringify(testCase.input).slice(1, -1);
+        const testCode = `
+${code}
+import json
+
+# The result of the user's function
+actual_result = solution(${inputStr})
+
+# Convert Python result to JSON string for comparison
+def custom_serializer(obj):
+    if isinstance(obj, (list, tuple)):
+        # Sort lists of numbers/simple types if order doesn't matter for the problem
+        # For Two Sum, the order of indices can vary.
+        if "${problem.slug}" == "two-sum":
+             return sorted(obj)
+    return obj
+
+# For two-sum, we need to sort both actual and expected before comparing
+if "${problem.slug}" == "two-sum":
+    expected_sorted = sorted(json.loads('${JSON.stringify(testCase.output)}'))
+    actual_sorted = sorted(actual_result) if isinstance(actual_result, list) else actual_result
+    passed = actual_sorted == expected_sorted
+    actual_for_print = actual_sorted
+    expected_for_print = expected_sorted
+else:
+    expected_json = '${JSON.stringify(testCase.output)}'
+    actual_json = json.dumps(actual_result, default=custom_serializer)
+    passed = actual_json == expected_json
+    actual_for_print = actual_result
+    expected_for_print = json.loads(expected_json)
+
+
+print(json.dumps({
+    "input": ${JSON.stringify(testCase.input)},
+    "expected": expected_for_print,
+    "actual": actual_for_print,
+    "passed": passed
+}))
+        `;
+        
+        // This is a workaround to get the result from the python script
+        let caseResult: TestResult | null = null;
+        pyodide.setStdout({
+            batched: (text: string) => {
+                try {
+                    const res = JSON.parse(text);
+                    caseResult = {
+                        input: JSON.stringify(res.input),
+                        expected: JSON.stringify(res.expected),
+                        actual: JSON.stringify(res.actual),
+                        passed: res.passed,
+                    };
+                } catch {
+                   capturedOutput += text + '\n';
+                }
+            }
+        });
+
+        await pyodide.runPythonAsync(testCode);
+        if (caseResult) {
+            testResults.push(caseResult);
+        }
+      }
+      setOutput(testResults);
+      setConsoleOutput(capturedOutput.trim() || '(No console output)');
     } catch (error) {
       const err = error as Error;
-      setOutput(capturedOutput + err.message);
+      setConsoleOutput(capturedOutput + err.message);
     } finally {
       setIsLoading(false);
       pyodide.setStdout({});
@@ -127,17 +201,46 @@ function CodeRunner({ problem }: { problem: Problem }) {
             </>
         )}
       </Button>
-      {output && (
-        <Card className="mt-4">
-          <CardHeader>
-            <CardTitle>Output</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <pre className="p-4 bg-secondary rounded-md text-sm font-code whitespace-pre-wrap">
-              {output}
-            </pre>
-          </CardContent>
-        </Card>
+      {(output.length > 0 || consoleOutput) && (
+        <Tabs defaultValue="test-results" className="mt-4">
+          <TabsList>
+            <TabsTrigger value="test-results">Test Results</TabsTrigger>
+            <TabsTrigger value="console">Console</TabsTrigger>
+          </TabsList>
+          <TabsContent value="test-results">
+            <Card>
+              <CardContent className="p-4 space-y-4">
+                {output.map((result, i) => (
+                  <div key={i} className="p-4 rounded-md bg-secondary font-code text-sm">
+                    <div className="flex items-center gap-2 mb-2">
+                      {result.passed ? (
+                        <CheckCircle className="h-5 w-5 text-green-500" />
+                      ) : (
+                        <XCircle className="h-5 w-5 text-red-500" />
+                      )}
+                      <span className="font-semibold">Test Case {i + 1}</span>
+                      <Badge variant={result.passed ? 'secondary' : 'destructive'}>
+                        {result.passed ? 'Passed' : 'Failed'}
+                      </Badge>
+                    </div>
+                    <p><strong>Input:</strong> {result.input}</p>
+                    <p><strong>Expected:</strong> {result.expected}</p>
+                    <p><strong>Actual:</strong> {result.actual}</p>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="console">
+            <Card>
+              <CardContent className="p-0">
+                <pre className="p-4 bg-secondary rounded-md text-sm font-code whitespace-pre-wrap">
+                  {consoleOutput}
+                </pre>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       )}
     </div>
   );
@@ -188,7 +291,7 @@ export default function ProblemDetail({ params }: { params: { slug: string } }) 
           </div>
         </article>
         
-        <div>
+        <div className="code-editor">
           <CodeRunner problem={p} />
         </div>
       </div>

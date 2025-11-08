@@ -14,12 +14,17 @@ export type Problem = {
   difficulty: 'Easy' | 'Medium' | 'Hard';
   tags: string[];
   body: string;
+  templateCode: string;
+  testCases: {
+    input: any[];
+    output: any;
+  }[];
 };
 
 export type Article = {
   slug: string;
   title: string;
-excerpt: string;
+  excerpt: string;
   tags: string[];
   body: string;
 };
@@ -78,6 +83,12 @@ export const problems: Problem[] = [
     difficulty: 'Easy',
     tags: ['Array', 'Hash Map'],
     body: 'Given an array of integers `nums` and an integer `target`, return indices of the two numbers such that they add up to `target`.\n\nYou may assume that each input would have **exactly one solution**, and you may not use the same element twice.\n\nYou can return the answer in any order.',
+    templateCode: 'def solution(nums, target):\n  # Your code here\n  pass',
+    testCases: [
+      { input: [[2, 7, 11, 15], 9], output: [0, 1] },
+      { input: [[3, 2, 4], 6], output: [1, 2] },
+      { input: [[3, 3], 6], output: [0, 1] },
+    ],
   },
   {
     slug: 'valid-parentheses',
@@ -86,6 +97,14 @@ export const problems: Problem[] = [
     difficulty: 'Easy',
     tags: ['Stack', 'String'],
     body: 'Given a string `s` containing just the characters `(`, `)`, `{`, `}`, `[` and `]`, determine if the input string is valid.\n\nAn input string is valid if:\n1. Open brackets must be closed by the same type of brackets.\n2. Open brackets must be closed in the correct order.\n3. Every close bracket has a corresponding open bracket of the same type.',
+    templateCode: 'def solution(s):\n  # Your code here\n  pass',
+    testCases: [
+      { input: ['()'], output: true },
+      { input: ['()[]{}'], output: true },
+      { input: ['(]'], output: false },
+      { input: ['([)]'], output: false },
+      { input: ['{[]}'], output: true },
+    ],
   },
   {
     slug: 'merge-k-lists',
@@ -93,7 +112,11 @@ export const problems: Problem[] = [
     summary: 'Use a min-heap to efficiently merge k sorted linked lists.',
     difficulty: 'Hard',
     tags: ['Heap', 'Linked List'],
-    body: 'You are given an array of `k` linked-lists `lists`, where each linked-list is sorted in ascending order.\n\nMerge all the linked-lists into one sorted linked-list and return it.',
+    body: 'You are given an array of `k` linked-lists `lists`, where each linked-list is sorted in ascending order.\n\nMerge all the linked-lists into one sorted linked-list and return it.\n\n*(Note: For this problem, the runner does not yet support Linked List data structures. The tests will pass with an empty list implementation for now.)*',
+    templateCode: 'def solution(lists):\n  # Your code here\n  return []',
+    testCases: [
+      { input: [[]], output: [] },
+    ],
   },
   {
     slug: 'binary-tree-inorder-traversal',
@@ -101,7 +124,11 @@ export const problems: Problem[] = [
     summary: 'Traverse a binary tree in the order: left, root, right.',
     difficulty: 'Easy',
     tags: ['Tree', 'Stack', 'Recursion'],
-    body: 'Given the `root` of a binary tree, return the inorder traversal of its nodes\' values.',
+    body: 'Given the `root` of a binary tree, return the inorder traversal of its nodes\' values.\n\n*(Note: For this problem, the runner does not yet support Tree data structures. The tests will pass with an empty list implementation for now.)*',
+    templateCode: 'def solution(root):\n  # Your code here\n  return []',
+    testCases: [
+      { input: [[]], output: [] },
+    ],
   },
   {
     slug: 'merge-intervals',
@@ -110,6 +137,17 @@ export const problems: Problem[] = [
     difficulty: 'Medium',
     tags: ['Array', 'Sorting'],
     body: 'Given an array of `intervals` where `intervals[i] = [starti, endi]`, merge all overlapping intervals, and return an array of the non-overlapping intervals that cover all the intervals in the input.',
+    templateCode: 'def solution(intervals):\n  # Your code here\n  pass',
+    testCases: [
+      {
+        input: [[[1, 3], [2, 6], [8, 10], [15, 18]]],
+        output: [[1, 6], [8, 10], [15, 18]],
+      },
+      {
+        input: [[[1, 4], [4, 5]]],
+        output: [[1, 5]],
+      },
+    ],
   },
 ];
 
