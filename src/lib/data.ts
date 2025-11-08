@@ -137,6 +137,37 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
     ],
   },
   {
+    slug: 'reverse-string',
+    title: 'Reverse String',
+    summary: 'Write a recursive function that reverses a string.',
+    difficulty: 'Easy',
+    tags: ['String', 'Recursion'],
+    body: 'Write a function that reverses a string. Do this recursively.\n\nFor example, `solution("hello")` should return `"olleh"`.',
+    templateCode: 'def solution(s):\n  # Your code here\n  pass',
+    testCases: [
+      { input: ['hello'], output: 'olleh' },
+      { input: ['world'], output: 'dlrow' },
+      { input: [''], output: '' },
+      { input: ['a'], output: 'a' },
+    ],
+  },
+  {
+    slug: 'fibonacci-number',
+    title: 'Fibonacci Number',
+    summary: 'Calculate the nth Fibonacci number using recursion.',
+    difficulty: 'Easy',
+    tags: ['Recursion', 'Math'],
+    body: 'The Fibonacci numbers, commonly denoted F(n), form a sequence, called the Fibonacci sequence, such that each number is the sum of the two preceding ones, starting from 0 and 1.\n\nThat is, F(0) = 0, F(1) = 1, and F(n) = F(n-1) + F(n-2) for n > 1.\n\nGiven n, calculate F(n).',
+    templateCode: 'def solution(n):\n  # Your code here\n  pass',
+    testCases: [
+      { input: [2], output: 1 },
+      { input: [3], output: 2 },
+      { input: [4], output: 3 },
+      { input: [5], output: 5 },
+      { input: [10], output: 55 },
+    ],
+  },
+  {
     slug: 'merge-k-lists',
     title: 'Merge k Sorted Lists',
     summary: 'Use a min-heap to efficiently merge k sorted linked lists.',
@@ -180,5 +211,3 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
     ],
   },
 ];
-
-    
