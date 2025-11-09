@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
@@ -324,142 +325,186 @@ function CodeRunner({
     btoa(unescape(encodeURIComponent(JSON.stringify(obj))));
 
 
-  const runPythonCode = async (codeToRun: string): Promise<[string, any]> => {
-    const pyodide = pyodideRef.current;
-    if (!pyodide) return ["Pyodide is not loaded yet.", null];
-
-    let capturedOutput = "";
-    let parsedLastJSON: any = null;
-
-    const onBatch = (text: string) => {
-      capturedOutput += text + "\n";
-      // Try parse last non-empty line as JSON
-      const trimmed = capturedOutput.trim().split("\n");
-      for (let i = trimmed.length - 1; i >= 0; i--) {
-        const line = trimmed[i].trim();
-        if (!line) continue;
-        try { parsedLastJSON = JSON.parse(line); break; } catch { /* ignore */ }
+    const runPythonCode = async (codeToRun: string, isClassBased = false): Promise<[string, any]> => {
+      const pyodide = pyodideRef.current;
+      if (!pyodide) return ["Pyodide is not loaded yet.", null];
+  
+      let capturedOutput = "";
+      let parsedLastJSON: any = null;
+  
+      const onBatch = (text: string) => {
+        capturedOutput += text + "\n";
+        if (isClassBased) return;
+        // Try parse last non-empty line as JSON
+        const trimmed = capturedOutput.trim().split("\n");
+        for (let i = trimmed.length - 1; i >= 0; i--) {
+          const line = trimmed[i].trim();
+          if (!line) continue;
+          try { parsedLastJSON = JSON.parse(line); break; } catch { /* ignore */ }
+        }
+      };
+  
+      pyodide.setStdout({ batched: onBatch });
+      pyodide.setStderr({ batched: (t: string) => { capturedOutput += t + "\n"; } });
+  
+      try {
+        await pyodide.loadPackagesFromImports(codeToRun);
+        await pyodide.runPythonAsync(codeToRun);
+      } catch (error) {
+        capturedOutput += (error as Error).message;
+      } finally {
+        pyodide.setStdout({});
+        pyodide.setStderr({});
       }
+  
+      return [capturedOutput.trim(), parsedLastJSON];
     };
-
-    pyodide.setStdout({ batched: onBatch });
-    pyodide.setStderr({ batched: (t: string) => { capturedOutput += t + "\n"; } });
-
-    try {
-      await pyodide.loadPackagesFromImports(codeToRun);
-      await pyodide.runPythonAsync(codeToRun);
-    } catch (error) {
-      capturedOutput += (error as Error).message;
-    } finally {
-      pyodide.setStdout({});
-      pyodide.setStderr({});
-    }
-
-    return [capturedOutput.trim(), parsedLastJSON];
-  };
-
-  // Build a Python snippet that:
-  // - imports user code
-  // - decodes input/expected via base64 -> JSON
-  // - calls solution(*args)/(**kwargs)/single
-  // - compares using compare_mode
-  const buildTestSnippet = (
-    userCode: string,
-    entryPoint: string,
-    inputJSON: unknown,
-    expectedJSON: unknown,
-    compareMode?: string
-  ) => {
-    const b64Input = base64Encode(inputJSON);
-    const b64Expected = base64Encode(expectedJSON);
-    // compareMode examples:
-    //   undefined or "ordered"
-    //   "unordered_list"
-    //   "set"
-    //   "multiset"
-    //   "float_tol:1e-6"
-    return `
-${userCode}
-
-import json, base64, math, collections
-
-def _b64_to_obj(b64s):
-    return json.loads(base64.b64decode(b64s).decode())
-
-def _call_solution(inp):
-    # array -> *args, object -> **kwargs, else -> single positional
-    if isinstance(inp, list):
-        return ${entryPoint}(*inp)
-    elif isinstance(inp, dict):
-        return ${entryPoint}(**inp)
-    else:
-        return ${entryPoint}(inp)
-
-def _norm_unordered_list(v):
-    if isinstance(v, list):
-        try:
-            return sorted(v)
-        except TypeError:
-            return sorted([json.dumps(x, sort_keys=True) for x in v])
-    return v
-
-def _as_set(v):
-    try:
-        return set(v)
-    except TypeError:
-        return set([json.dumps(x, sort_keys=True) for x in v])
-
-def _as_multiset(v):
-    try:
-        return collections.Counter(v)
-    except TypeError:
-        return collections.Counter([json.dumps(x, sort_keys=True) for x in v])
-
-def _floatclose(a, b, tol):
-    try:
-        return abs(float(a) - float(b)) <= tol
-    except Exception:
-        return False
-
-inp = _b64_to_obj("${b64Input}")
-expected = _b64_to_obj("${b64Expected}")
-actual = None
-passed = False
-err = None
-
-try:
-    actual = _call_solution(inp)
-    mode = ${JSON.stringify(compareMode || "ordered")}
-    if mode == "unordered_list":
-        passed = (_norm_unordered_list(actual) == _norm_unordered_list(expected))
-    elif mode == "set":
-        passed = (_as_set(actual) == _as_set(expected))
-    elif mode == "multiset":
-        passed = (_as_multiset(actual) == _as_multiset(expected))
-    elif isinstance(mode, str) and mode.startswith("float_tol:"):
-        try:
-            tol = float(mode.split(":")[1])
-        except Exception:
-            tol = 1e-6
-        passed = _floatclose(actual, expected, tol)
-    else:
-        # deterministic structural equality
-        try:
-            passed = (json.dumps(actual, sort_keys=True) == json.dumps(expected, sort_keys=True))
-        except TypeError:
-            # fallback for non-JSON-serializables
-            passed = (actual == expected)
-except Exception as e:
-    err = str(e)
-
-print(json.dumps({
-    "input": inp,
-    "expected": expected,
-    "actual": actual if err is None else ("Execution Error: " + err),
-    "passed": False if err is not None else bool(passed)
-}))
-`.trim();
-  };
+  
+    // Build a Python snippet for function-based problems
+    const buildTestSnippet = (
+      userCode: string,
+      entryPoint: string,
+      inputJSON: unknown,
+      expectedJSON: unknown,
+      compareMode?: string
+    ) => {
+      const b64Input = base64Encode(inputJSON);
+      const b64Expected = base64Encode(expectedJSON);
+      // compareMode examples:
+      //   undefined or "ordered"
+      //   "unordered_list"
+      //   "set"
+      //   "multiset"
+      //   "float_tol:1e-6"
+      return `
+  ${userCode}
+  
+  import json, base64, math, collections
+  
+  def _b64_to_obj(b64s):
+      return json.loads(base64.b64decode(b64s).decode())
+  
+  def _call_solution(inp):
+      # array -> *args, object -> **kwargs, else -> single positional
+      if isinstance(inp, list):
+          return ${entryPoint}(*inp)
+      elif isinstance(inp, dict):
+          return ${entryPoint}(**inp)
+      else:
+          return ${entryPoint}(inp)
+  
+  def _norm_unordered_list(v):
+      if isinstance(v, list):
+          try:
+              return sorted(v)
+          except TypeError:
+              return sorted([json.dumps(x, sort_keys=True) for x in v])
+      return v
+  
+  def _as_set(v):
+      try:
+          return set(v)
+      except TypeError:
+          return set([json.dumps(x, sort_keys=True) for x in v])
+  
+  def _as_multiset(v):
+      try:
+          return collections.Counter(v)
+      except TypeError:
+          return collections.Counter([json.dumps(x, sort_keys=True) for x in v])
+  
+  def _floatclose(a, b, tol):
+      try:
+          return abs(float(a) - float(b)) <= tol
+      except Exception:
+          return False
+  
+  inp = _b64_to_obj("${b64Input}")
+  expected = _b64_to_obj("${b64Expected}")
+  actual = None
+  passed = False
+  err = None
+  
+  try:
+      actual = _call_solution(inp)
+      mode = ${JSON.stringify(compareMode || "ordered")}
+      if mode == "unordered_list":
+          passed = (_norm_unordered_list(actual) == _norm_unordered_list(expected))
+      elif mode == "set":
+          passed = (_as_set(actual) == _as_set(expected))
+      elif mode == "multiset":
+          passed = (_as_multiset(actual) == _as_multiset(expected))
+      elif isinstance(mode, str) and mode.startswith("float_tol:"):
+          try:
+              tol = float(mode.split(":")[1])
+          except Exception:
+              tol = 1e-6
+          passed = _floatclose(actual, expected, tol)
+      else:
+          # deterministic structural equality
+          try:
+              passed = (json.dumps(actual, sort_keys=True) == json.dumps(expected, sort_keys=True))
+          except TypeError:
+              # fallback for non-JSON-serializables
+              passed = (actual == expected)
+  except Exception as e:
+      err = str(e)
+  
+  print(json.dumps({
+      "input": inp,
+      "expected": expected,
+      "actual": actual if err is None else ("Execution Error: " + err),
+      "passed": False if err is not None else bool(passed)
+  }))
+  `.trim();
+    };
+  
+    // Build a Python snippet for class-based problems like MinStack
+    const buildClassTestSnippet = (userCode: string, entryPoint: string, operations: string[], params: any[][], expected: any[]) => {
+      return `
+  ${userCode}
+  
+  import json
+  
+  ops = ${JSON.stringify(operations)}
+  params = ${JSON.stringify(params)}
+  expected = ${JSON.stringify(expected)}
+  
+  instance = None
+  actual_results = []
+  
+  try:
+    for i in range(len(ops)):
+      op = ops[i]
+      param = params[i]
+      if op == "${entryPoint}":
+        instance = ${entryPoint}(*param)
+        actual_results.append(None)
+      elif instance is not None:
+        method = getattr(instance, op)
+        result = method(*param)
+        actual_results.append(result)
+      else:
+        actual_results.append("Error: Class not initialized")
+  
+    # Simple direct comparison for class-based tests
+    passed = (actual_results == expected)
+    
+    print(json.dumps({
+      "input": { "operations": ops, "parameters": params },
+      "expected": expected,
+      "actual": actual_results,
+      "passed": passed
+    }))
+  except Exception as e:
+    print(json.dumps({
+        "input": { "operations": ops, "parameters": params },
+        "expected": expected,
+        "actual": "Execution Error: " + str(e),
+        "passed": False
+    }))
+  `.trim();
+    };
 
   const handleRunCode = async () => {
     setIsRunningCode(true);
@@ -481,22 +526,28 @@ print(json.dumps({
       return;
     }
 
+    const isClassBased = problem.entryPoint.charAt(0) === problem.entryPoint.charAt(0).toUpperCase();
+
     try {
       const results: TestResult[] = [];
       let allPassed = true;
 
       for (const tc of testCases) {
-        // Parse once
-        let inp: unknown, out: unknown;
-        try { inp = JSON.parse(tc.input); } catch { inp = tc.input; }
-        try { out = JSON.parse(tc.output); } catch { out = tc.output; }
-
-        // Optional comparison mode on each test case (string)
-        // Examples: "unordered_list", "set", "multiset", "float_tol:1e-6", "ordered"
-        const compareMode: string | undefined = (tc as any).compare;
-
-        const snippet = buildTestSnippet(code, problem.entryPoint, inp, out, compareMode);
-        const [capturedOutput, resultJson] = await runPythonCode(snippet);
+          let inp: any, out: any;
+          try { inp = JSON.parse(tc.input); } catch { inp = tc.input; }
+          try { out = JSON.parse(tc.output); } catch { out = tc.output; }
+  
+          let snippet;
+          if (isClassBased) {
+            // For class-based problems, inp is [operations, params] and out is [expected_results]
+            const [operations, params] = inp;
+            snippet = buildClassTestSnippet(code, problem.entryPoint, operations, params, out);
+          } else {
+            const compareMode: string | undefined = (tc as any).compare;
+            snippet = buildTestSnippet(code, problem.entryPoint, inp, out, compareMode);
+          }
+  
+          const [capturedOutput, resultJson] = await runPythonCode(snippet, isClassBased);
 
         if (resultJson) {
           const tr: TestResult = {

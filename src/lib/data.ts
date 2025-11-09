@@ -27,7 +27,7 @@ export type Category = z.infer<typeof CategorySchema>;
 export const categories: Category[] = [
   { slug: "warm-ups", title: "Warm-ups", description: "Basic loops, scans, and simple string/array tasks.", order: 0, levelMin: 1, levelMax: 2, topics: ["Arrays","Strings"] },
   { slug: "hashing", title: "Hashing & Counting", description: "Hash maps/sets, frequency tables, canonicalization.", order: 1, levelMin: 2, levelMax: 5, topics: ["Hash Map","Hash Set","Counting","Prefix Sum"] },
-  { slug: "stacks", title: "Stacks & Well-Formedness", description: "Stacks, bracket matching, stateful scans.", order: 2, levelMin: 2, levelMax: 3, topics: ["Stack","Strings"] },
+  { slug: "stacks", title: "Stacks & Well-Formedness", description: "Stacks, bracket matching, stateful scans.", order: 2, levelMin: 2, levelMax: 5, topics: ["Stack","Strings"] },
   { slug: "two-pointers", title: "Two-Pointers & Windows", description: "Pointers, windows, de-duplication.", order: 3, levelMin: 3, levelMax: 6, topics: ["Two Pointer","Sliding Window"] },
   { slug: "sets-ordering", title: "Sets & Ordering", description: "Ordering, merging, interval sweeps.", order: 4, levelMin: 4, levelMax: 5, topics: ["Sorting","Sweep","Set"] },
   { slug: "recursion-dp", title: "Recursion & Intro DP", description: "Recurrence intuition, memoization, simple DP.", order: 5, levelMin: 2, levelMax: 4, topics: ["Recursion","DP","Math"] },
@@ -485,6 +485,140 @@ An input string is valid if:
       { input: [']'], output: false }
     ],
   },
+
+  {
+    slug: 'simplify-path',
+    title: 'Simplify Path',
+    summary: 'Given a Unix-style absolute path, simplify it.',
+    difficulty: 4,
+    tags: ['Stack', 'String'],
+    categorySlug: 'stacks',
+    entryPoint: 'simplify_path',
+    body: `Given a string \`path\`, which is an absolute path (starting with a slash '/') to a file or directory in a Unix-style file system, convert it to the simplified canonical path.
+
+In a Unix-style file system:
+- A period \`.\` refers to the current directory.
+- A double period \`..\` refers to the directory up a level.
+- Any multiple consecutive slashes (i.e. \`//\`) are treated as a single slash \`/\`.
+
+The canonical path should have the following format:
+- The path starts with a single slash \`/\`.
+- Any two directories are separated by a single slash \`/\`.
+- The path does not end with a trailing \`/\`.
+- The path only contains the directory names on the path from the root directory to the target directory (i.e., no \`.\` or \`..\`).`,
+    templateCode:
+`class MinStack:
+    def __init__(self):
+        # Your code here
+        pass
+
+    def push(self, val: int) -> None:
+        # Your code here
+        pass
+
+    def pop(self) -> None:
+        # Your code here
+        pass
+
+    def top(self) -> int:
+        # Your code here
+        pass
+
+    def getMin(self) -> int:
+        # Your code here
+        pass
+`,
+    testCases: [
+        { input: ['/home/'], output: '/home' },
+        { input: ['/../'], output: '/' },
+        { input: ['/home//foo/'], output: '/home/foo' },
+        { input: ['/a/./b/../../c/'], output: '/c' },
+    ],
+  },
+
+  {
+    slug: 'min-stack',
+    title: 'Min Stack',
+    summary: 'Design a stack that supports retrieving the minimum element in O(1) time.',
+    difficulty: 4,
+    tags: ['Stack', 'Design'],
+    categorySlug: 'stacks',
+    entryPoint: 'MinStack', // This will be a class
+    body: `Design a stack that supports push, pop, top, and retrieving the minimum element in constant time.
+
+Implement the \`MinStack\` class:
+- \`MinStack()\` initializes the stack object.
+- \`push(val)\` pushes the element \`val\` onto the stack.
+- \`pop()\` removes the element on the top of the stack.
+- \`top()\` gets the top element of the stack.
+- \`getMin()\` retrieves the minimum element in the stack.
+
+You must implement a solution with O(1) time complexity for each function. This problem is tested differently; your class will be instantiated and its methods called sequentially. The test cases show the sequence of operations and expected outputs.`,
+    templateCode:
+`# This is a class-based problem.
+# The testing framework will instantiate your class and call its methods.
+class MinStack:
+    def __init__(self):
+        # Your code here
+        pass
+
+    def push(self, val: int) -> None:
+        # Your code here
+        pass
+
+    def pop(self) -> None:
+        # Your code here
+        pass
+
+    def top(self) -> int:
+        # Your code here
+        pass
+
+    def getMin(self) -> int:
+        # Your code here
+        pass
+`,
+    testCases: [
+        { input: [
+            ["MinStack", "push", "push", "push", "getMin", "pop", "top", "getMin"],
+            [[], [-2], [0], [-3], [], [], [], []]
+          ], 
+          output: [null, null, null, null, -3, null, 0, -2] },
+        { input: [
+            ["MinStack", "push", "push", "getMin", "top", "pop", "getMin"],
+            [[], [0], [-1], [], [], [], []]
+          ],
+          output: [null, null, null, -1, -1, null, 0]
+        }
+    ],
+  },
+  
+  {
+    slug: 'daily-temperatures',
+    title: 'Daily Temperatures',
+    summary: 'Find how many days you have to wait for a warmer temperature.',
+    difficulty: 5,
+    tags: ['Stack', 'Array', 'Monotonic Stack'],
+    categorySlug: 'stacks',
+    entryPoint: 'daily_temperatures',
+    body: `Given an array of integers \`temperatures\` representing the daily temperatures, return an array \`answer\` such that \`answer[i]\` is the number of days you have to wait after the \`i\`-th day to get a warmer temperature.
+
+If there is no future day for which this is possible, keep \`answer[i] == 0\` instead.
+
+This is a classic "monotonic stack" problem.`,
+    templateCode:
+`def daily_temperatures(temperatures):
+  # Your code here
+  pass
+`,
+    testCases: [
+        { input: [[73,74,75,71,69,72,76,73]], output: [1,1,4,2,1,1,0,0] },
+        { input: [[30,40,50,60]], output: [1,1,1,0] },
+        { input: [[30,60,90]], output: [1,1,0] },
+        { input: [[89,62,70,58,47,47,46,76,100,70]], output: [8,1,5,4,3,2,1,1,0,0] }
+    ],
+  },
+
 
   // ==========================================
   // PHASE 5: Recursion Basics
