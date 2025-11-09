@@ -152,8 +152,6 @@ export const articles: Article[] = [
   },
 ];
 
-// This is the data that will be seeded into Firestore.
-// This is the data that will be seeded into Firestore.
 export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; testCases: { input: any[]; output: any }[] })[] = [
   // ==========================================
   // PHASE 1: WARM-UP - Basic Arrays & Loops
@@ -1100,5 +1098,3 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
     ],
   },
 ];
-    
-    
