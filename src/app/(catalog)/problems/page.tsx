@@ -11,87 +11,122 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query } from 'firebase/firestore';
-import type { Problem } from '@/lib/data';
+import { useFirebase, useCollection, useMemoFirebase, useUser } from '@/firebase';
+import { collection, query, collectionGroup, where } from 'firebase/firestore';
+import type { Problem, Submission } from '@/lib/data';
+import { categories } from '@/lib/data';
 import { Skeleton } from '@/components/ui/skeleton';
-
-type Difficulty = 'All' | 'Easy' | 'Medium' | 'Hard';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 function ProblemListSkeleton() {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {Array.from({ length: 6 }).map((_, i) => (
-        <Skeleton key={i} className="h-[180px] w-full" />
+    <div className="space-y-8">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div key={i}>
+          <Skeleton className="h-8 w-1/3 mb-4" />
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, j) => (
+              <Skeleton key={j} className="h-[180px] w-full" />
+            ))}
+          </div>
+        </div>
       ))}
     </div>
   );
 }
 
-export default function ProblemsPage() {
-  const [q, setQ] = useState('');
-  const [difficulty, setDifficulty] = useState<Difficulty>('All');
-  const { firestore } = useFirebase();
+// Sort categories once by the 'order' property
+const sortedCategories = [...categories].sort((a, b) => a.order - b.order);
 
+export default function ProblemsPage() {
+  const { firestore, user } = useFirebase();
+
+  // Fetch all problems
   const problemsQuery = useMemoFirebase(
     () => (firestore ? query(collection(firestore, 'problems')) : null),
     [firestore]
   );
-  const { data: problems, isLoading } = useCollection<Problem>(problemsQuery);
+  const { data: problems, isLoading: isLoadingProblems } = useCollection<Problem>(problemsQuery);
 
-  const filtered = useMemo(() => {
-    if (!problems) return [];
-    return problems.filter((p) => {
-      const matchesQ = [p.title, p.summary, ...p.tags]
-        .join(' ')
-        .toLowerCase()
-        .includes(q.toLowerCase());
-      const matchesD = difficulty === 'All' || p.difficulty === difficulty;
-      return matchesQ && matchesD;
+  // Fetch user's submissions
+  const submissionsQuery = useMemoFirebase(
+    () =>
+      user && firestore
+        ? query(collectionGroup(firestore, 'submissions'), where('userId', '==', user.uid))
+        : null,
+    [user, firestore]
+  );
+  const { data: submissions, isLoading: isLoadingSubmissions } = useCollection<Submission>(submissionsQuery);
+
+  // Create a set of solved problem slugs for quick lookup
+  const solvedProblemSlugs = useMemo(() => {
+    if (!submissions) return new Set();
+    return new Set(submissions.filter(s => s.isCorrect).map(s => s.problemId));
+  }, [submissions]);
+
+  const categorizedProblems = useMemo(() => {
+    if (!problems) return {};
+    const problemGroups: { [key: string]: Problem[] } = {};
+    problems.forEach((problem) => {
+      const catSlug = problem.categorySlug;
+      if (!catSlug) return;
+      if (!problemGroups[catSlug]) {
+        problemGroups[catSlug] = [];
+      }
+      problemGroups[catSlug].push(problem);
     });
-  }, [q, difficulty, problems]);
+
+    for (const catSlug in problemGroups) {
+      problemGroups[catSlug].sort((a, b) => a.difficulty - b.difficulty);
+    }
+    return problemGroups;
+  }, [problems]);
+
+  const isLoading = isLoadingProblems || isLoadingSubmissions;
+
+  // Get a list of all category slugs to use as the default open accordions
+  const allCategorySlugs = useMemo(() => sortedCategories.map(c => c.slug), []);
 
   return (
     <Container className="py-10">
       <h1 className="text-3xl font-bold font-headline">Practice Problems</h1>
       <p className="mt-2 text-muted-foreground">
-        Apply your knowledge with a curated set of practice problems.
+        Apply your knowledge with a curated set of practice problems, grouped by topic.
       </p>
-      <div className="mt-6 flex flex-col items-start gap-3 sm:flex-row sm:items-center">
-        <Input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Search problems by title or tag..."
-          className="w-full sm:max-w-sm"
-        />
-        <Select
-          value={difficulty}
-          onValueChange={(value) => setDifficulty(value as Difficulty)}
-        >
-          <SelectTrigger className="w-full sm:w-[180px]">
-            <SelectValue placeholder="Difficulty" />
-          </SelectTrigger>
-          <SelectContent>
-            {(['All', 'Easy', 'Medium', 'Hard'] as Difficulty[]).map((d) => (
-              <SelectItem key={d} value={d}>
-                {d}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      
       <div className="mt-8">
         {isLoading ? (
           <ProblemListSkeleton />
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((p) => (
-              <ProblemCard key={p.slug} problem={p} />
-            ))}
-          </div>
+          <Accordion type="multiple" className="w-full space-y-6" defaultValue={allCategorySlugs}>
+            {sortedCategories.map((category) => {
+              const problemsInCategory = categorizedProblems[category.slug];
+              if (!problemsInCategory || problemsInCategory.length === 0) {
+                return null;
+              }
+
+              return (
+                <AccordionItem value={category.slug} key={category.slug} className="border-b-0">
+                  <AccordionTrigger className="text-xl font-semibold font-headline hover:no-underline rounded-md px-4 py-2 bg-secondary">
+                    {category.title}
+                  </AccordionTrigger>
+                  <AccordionContent className="pt-4">
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                      {problemsInCategory.map((p) => (
+                        <ProblemCard
+                          key={p.slug}
+                          problem={p}
+                          isSolved={solvedProblemSlugs.has(p.slug)}
+                        />
+                      ))}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              );
+            })}
+          </Accordion>
         )}
       </div>
     </Container>
   );
 }
-    
