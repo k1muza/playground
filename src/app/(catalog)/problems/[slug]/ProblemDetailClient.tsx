@@ -126,7 +126,7 @@ function TestCasesDisplay({ slug }: { slug: string }) {
         return (
           <div key={tc.id}>
             <p className="font-semibold">Example {i + 1}:</p>
-            <pre className="mt-2 p-3 bg-secondary rounded-md text-sm font-code">
+            <pre className="mt-2 p-3 bg-secondary rounded-md text-sm font-code whitespace-break-spaces">
               <strong>Input:</strong>{" "}
               {slug === "two-sum" && Array.isArray(parsedInput)
                 ? `nums = ${JSON.stringify((parsedInput as any[])[0])}, target = ${(parsedInput as any[])[1]}`
@@ -215,8 +215,8 @@ function AiSuggestion({
           {suggestion && (
             <div className="prose prose-sm dark:prose-invert max-w-none">
               <ReactMarkdown
-                 components={{
-                  code: ({node, ...props}) => <code className="font-code" {...props} />,
+                components={{
+                  code: ({ node, ...props }) => <code className="font-code" {...props} />,
                 }}
               >
                 {suggestion}
@@ -253,17 +253,17 @@ function CodeRunner({
 
   const { firestore, user } = useFirebase();
   const isLoading = isSubmitting || isRunningCode;
-  
+
   // Query for the user's most recent submission to this problem
   const latestSubmissionQuery = useMemoFirebase(
     () =>
       user && firestore
         ? query(
-            collection(firestore, "problems", slug, "submissions"),
-            where("userId", "==", user.uid),
-            orderBy("submittedAt", "desc"),
-            limit(1)
-          )
+          collection(firestore, "problems", slug, "submissions"),
+          where("userId", "==", user.uid),
+          orderBy("submittedAt", "desc"),
+          limit(1)
+        )
         : null,
     [firestore, user, slug]
   );
@@ -325,186 +325,252 @@ function CodeRunner({
     btoa(unescape(encodeURIComponent(JSON.stringify(obj))));
 
 
-    const runPythonCode = async (codeToRun: string, isClassBased = false): Promise<[string, any]> => {
-      const pyodide = pyodideRef.current;
-      if (!pyodide) return ["Pyodide is not loaded yet.", null];
-  
-      let capturedOutput = "";
-      let parsedLastJSON: any = null;
-  
-      const onBatch = (text: string) => {
-        capturedOutput += text + "\n";
-        if (isClassBased) return;
-        // Try parse last non-empty line as JSON
-        const trimmed = capturedOutput.trim().split("\n");
-        for (let i = trimmed.length - 1; i >= 0; i--) {
-          const line = trimmed[i].trim();
-          if (!line) continue;
-          try { parsedLastJSON = JSON.parse(line); break; } catch { /* ignore */ }
-        }
-      };
-  
-      pyodide.setStdout({ batched: onBatch });
-      pyodide.setStderr({ batched: (t: string) => { capturedOutput += t + "\n"; } });
-  
-      try {
-        await pyodide.loadPackagesFromImports(codeToRun);
-        await pyodide.runPythonAsync(codeToRun);
-      } catch (error) {
-        capturedOutput += (error as Error).message;
-      } finally {
-        pyodide.setStdout({});
-        pyodide.setStderr({});
+  const runPythonCode = async (codeToRun: string, isClassBased = false): Promise<[string, any]> => {
+    const pyodide = pyodideRef.current;
+    if (!pyodide) return ["Pyodide is not loaded yet.", null];
+
+    let capturedOutput = "";
+    let parsedLastJSON: any = null;
+
+    const onBatch = (text: string) => {
+      capturedOutput += text + "\n";
+      // Try parse last non-empty line as JSON (works for both modes)
+      const trimmed = capturedOutput.trim().split("\n");
+      for (let i = trimmed.length - 1; i >= 0; i--) {
+        const line = trimmed[i].trim();
+        if (!line) continue;
+        try { parsedLastJSON = JSON.parse(line); break; } catch { }
       }
-  
-      return [capturedOutput.trim(), parsedLastJSON];
     };
-  
-    // Build a Python snippet for function-based problems
-    const buildTestSnippet = (
-      userCode: string,
-      entryPoint: string,
-      inputJSON: unknown,
-      expectedJSON: unknown,
-      compareMode?: string
-    ) => {
-      const b64Input = base64Encode(inputJSON);
-      const b64Expected = base64Encode(expectedJSON);
-      // compareMode examples:
-      //   undefined or "ordered"
-      //   "unordered_list"
-      //   "set"
-      //   "multiset"
-      //   "float_tol:1e-6"
-      return `
-  ${userCode}
-  
-  import json, base64, math, collections
-  
-  def _b64_to_obj(b64s):
-      return json.loads(base64.b64decode(b64s).decode())
-  
-  def _call_solution(inp):
-      # array -> *args, object -> **kwargs, else -> single positional
-      if isinstance(inp, list):
-          return ${entryPoint}(*inp)
-      elif isinstance(inp, dict):
-          return ${entryPoint}(**inp)
-      else:
-          return ${entryPoint}(inp)
-  
-  def _norm_unordered_list(v):
-      if isinstance(v, list):
-          try:
-              return sorted(v)
-          except TypeError:
-              return sorted([json.dumps(x, sort_keys=True) for x in v])
-      return v
-  
-  def _as_set(v):
-      try:
-          return set(v)
-      except TypeError:
-          return set([json.dumps(x, sort_keys=True) for x in v])
-  
-  def _as_multiset(v):
-      try:
-          return collections.Counter(v)
-      except TypeError:
-          return collections.Counter([json.dumps(x, sort_keys=True) for x in v])
-  
-  def _floatclose(a, b, tol):
-      try:
-          return abs(float(a) - float(b)) <= tol
-      except Exception:
-          return False
-  
-  inp = _b64_to_obj("${b64Input}")
-  expected = _b64_to_obj("${b64Expected}")
-  actual = None
-  passed = False
-  err = None
-  
-  try:
-      actual = _call_solution(inp)
-      mode = ${JSON.stringify(compareMode || "ordered")}
-      if mode == "unordered_list":
-          passed = (_norm_unordered_list(actual) == _norm_unordered_list(expected))
-      elif mode == "set":
-          passed = (_as_set(actual) == _as_set(expected))
-      elif mode == "multiset":
-          passed = (_as_multiset(actual) == _as_multiset(expected))
-      elif isinstance(mode, str) and mode.startswith("float_tol:"):
-          try:
-              tol = float(mode.split(":")[1])
-          except Exception:
-              tol = 1e-6
-          passed = _floatclose(actual, expected, tol)
-      else:
-          # deterministic structural equality
-          try:
-              passed = (json.dumps(actual, sort_keys=True) == json.dumps(expected, sort_keys=True))
-          except TypeError:
-              # fallback for non-JSON-serializables
-              passed = (actual == expected)
-  except Exception as e:
-      err = str(e)
-  
-  print(json.dumps({
-      "input": inp,
-      "expected": expected,
-      "actual": actual if err is None else ("Execution Error: " + err),
-      "passed": False if err is not None else bool(passed)
-  }))
-  `.trim();
-    };
-  
-    // Build a Python snippet for class-based problems like MinStack
-    const buildClassTestSnippet = (userCode: string, entryPoint: string, operations: string[], params: any[][], expected: any[]) => {
-      return `
-  ${userCode}
-  
-  import json
-  
-  ops = ${JSON.stringify(operations)}
-  params = ${JSON.stringify(params)}
-  expected = ${JSON.stringify(expected)}
-  
-  instance = None
-  actual_results = []
-  
-  try:
-    for i in range(len(ops)):
-      op = ops[i]
-      param = params[i]
-      if op == "${entryPoint}":
-        instance = ${entryPoint}(*param)
-        actual_results.append(None)
-      elif instance is not None:
-        method = getattr(instance, op)
-        result = method(*param)
-        actual_results.append(result)
-      else:
-        actual_results.append("Error: Class not initialized")
-  
-    # Simple direct comparison for class-based tests
-    passed = (actual_results == expected)
-    
+
+    pyodide.setStdout({ batched: onBatch });
+    pyodide.setStderr({ batched: (t: string) => { capturedOutput += t + "\n"; } });
+
+    try {
+      await pyodide.loadPackagesFromImports(codeToRun);
+      await pyodide.runPythonAsync(codeToRun);
+    } catch (error: any) {
+      // Never allow an empty error string
+      const msg = error?.message || String(error) || "Unknown error";
+      capturedOutput += msg;
+    } finally {
+      pyodide.setStdout({});
+      pyodide.setStderr({});
+    }
+
+    return [capturedOutput.trim(), parsedLastJSON];
+  };
+
+
+  // Build a Python snippet for function-based problems
+  const buildTestSnippet = (
+    userCode: string,
+    entryPoint: string,
+    inputJSON: unknown,
+    expectedJSON: unknown,
+    compareMode?: string
+  ) => {
+    const b64Input = base64Encode(inputJSON);
+    const b64Expected = base64Encode(expectedJSON);
+
+    return `
+${userCode}
+
+import json, base64, math, collections
+
+def _b64_to_obj(b64s):
+    return json.loads(base64.b64decode(b64s).decode())
+
+def _call_solution(inp):
+    # array -> *args, object -> **kwargs, else -> single positional
+    if isinstance(inp, list):
+        return ${entryPoint}(*inp)
+    elif isinstance(inp, dict):
+        return ${entryPoint}(**inp)
+    else:
+        return ${entryPoint}(inp)
+
+def _norm_unordered_list(v):
+    if isinstance(v, list):
+        try:
+            return sorted(v)
+        except TypeError:
+            return sorted([json.dumps(x, sort_keys=True) for x in v])
+    return v
+
+def _as_set(v):
+    try:
+        return set(v)
+    except TypeError:
+        return set([json.dumps(x, sort_keys=True) for x in v])
+
+def _as_multiset(v):
+    try:
+        return collections.Counter(v)
+    except TypeError:
+        return collections.Counter([json.dumps(x, sort_keys=True) for x in v])
+
+def _floatclose(a, b, tol):
+    try:
+        return abs(float(a) - float(b)) <= tol
+    except Exception:
+        return False
+
+actual = None
+passed = False
+
+try:
+    inp = _b64_to_obj("${b64Input}")
+    expected = _b64_to_obj("${b64Expected}")
+    actual = _call_solution(inp)
+
+    mode = ${JSON.stringify(compareMode || "ordered")}
+    if mode == "unordered_list":
+        passed = (_norm_unordered_list(actual) == _norm_unordered_list(expected))
+    elif mode == "set":
+        passed = (_as_set(actual) == _as_set(expected))
+    elif mode == "multiset":
+        passed = (_as_multiset(actual) == _as_multiset(expected))
+    elif isinstance(mode, str) and mode.startswith("float_tol:"):
+        try:
+            tol = float(mode.split(":")[1])
+        except Exception:
+            tol = 1e-6
+        passed = _floatclose(actual, expected, tol)
+    else:
+        passed = (actual == expected)
+
     print(json.dumps({
-      "input": { "operations": ops, "parameters": params },
-      "expected": expected,
-      "actual": actual_results,
-      "passed": passed
+        "input": inp,
+        "expected": expected,
+        "actual": actual,
+        "passed": passed
     }))
-  except Exception as e:
+except Exception as e:
+    # Ensure a JSON line is always printed even if decode fails
+    try:
+        err = str(e) or repr(e)
+    except Exception:
+        err = "Unknown error"
+    print(json.dumps({
+        "input": "${b64Input}",
+        "expected": "${b64Expected}",
+        "actual": "Execution Error: " + err,
+        "passed": False
+    }))
+`.trim();
+  };
+
+
+  // Build a Python snippet for class-based problems like MinStack
+  const buildClassTestSnippet = (
+    userCode: string,
+    className: string,
+    operations: unknown[],
+    params: unknown[],
+    expectedResults: unknown[]
+  ) => {
+    const b64Ops = base64Encode(operations);
+    const b64Params = base64Encode(params);
+    const b64Expected = base64Encode(expectedResults);
+
+    return `
+${userCode}
+
+import json, base64
+
+def _b64_to_obj(b64s):
+    return json.loads(base64.b64decode(b64s).decode())
+
+def _json_default(o):
+    try:
+        return str(o)
+    except Exception:
+        return repr(o)
+
+try:
+    ops = _b64_to_obj("${b64Ops}")
+    params = _b64_to_obj("${b64Params}")
+    expected = _b64_to_obj("${b64Expected}")
+
+    results = []
+
+    # ---- Normalize to: ctor_args, op_names, op_args ----
+    ctor_args = []
+    op_names = []
+    op_args = []
+
+    if isinstance(ops, list) and ops:
+        # Case A: LeetCode style (first token is class name)
+        if isinstance(ops[0], str) and ops[0] == "${className}":
+            ctor_args = params[0] if isinstance(params, list) and len(params) > 0 else []
+            op_names = ops[1:]
+            op_args = params[1:] if isinstance(params, list) else []
+            # constructor yields null in expected:
+            results.append(None)
+
+        # Case B: names only (no constructor token)
+        elif all(isinstance(op, str) for op in ops):
+            # If params has one extra row, treat params[0] as constructor args
+            if isinstance(params, list) and len(params) == len(ops) + 1 and isinstance(params[0], list):
+                ctor_args = params[0]
+                op_args = params[1:]
+            else:
+                ctor_args = []
+                op_args = params if isinstance(params, list) else []
+            op_names = ops
+
+        # Case C: paired ops like ["push", [0]]
+        else:
+            if isinstance(params, list) and len(params) == len(ops) + 1 and isinstance(params[0], list):
+                ctor_args = params[0]
+            else:
+                ctor_args = []
+            for op in ops:
+                if isinstance(op, (list, tuple)) and len(op) >= 1:
+                    name = op[0]
+                    args = op[1] if len(op) > 1 else []
+                    op_names.append(name)
+                    op_args.append(args)
+                else:
+                    raise ValueError("Invalid operation format for class-based test")
+    else:
+        raise ValueError("Empty operations list")
+
+    # ---- Instantiate and execute ----
+    obj = ${className}(* (ctor_args or []))
+
+    # pad args so zip never drops an op (zip truncates!)
+    if len(op_args) < len(op_names):
+        op_args = list(op_args) + [[] for _ in range(len(op_names) - len(op_args))]
+
+    # STRICTLY iterate by index to avoid any zip truncation or off-by-one
+    for i in range(len(op_names)):
+        name = op_names[i]
+        args = op_args[i] if i < len(op_args) else []
+        results.append(getattr(obj, name)(* (args or [])))
+
+    passed = (results == expected)
+
     print(json.dumps({
         "input": { "operations": ops, "parameters": params },
         "expected": expected,
-        "actual": "Execution Error: " + str(e),
+        "actual": results,
+        "passed": passed
+    }, default=_json_default))
+except Exception as e:
+    try:
+        err = str(e) or repr(e)
+    except Exception:
+        err = "Unknown error"
+    print(json.dumps({
+        "input": { "operations": "${b64Ops}", "parameters": "${b64Params}" },
+        "expected": "${b64Expected}",
+        "actual": "Execution Error: " + err,
         "passed": False
-    }))
-  `.trim();
-    };
+    }, default=_json_default))
+`.trim();
+  };
 
   const handleRunCode = async () => {
     setIsRunningCode(true);
@@ -526,42 +592,50 @@ function CodeRunner({
       return;
     }
 
-    const isClassBased = problem.entryPoint.charAt(0) === problem.entryPoint.charAt(0).toUpperCase();
+    const isClassBased =
+      problem.entryPoint.charAt(0) === problem.entryPoint.charAt(0).toUpperCase();
 
     try {
       const results: TestResult[] = [];
       let allPassed = true;
 
       for (const tc of testCases) {
-          let inp: any, out: any;
-          try { inp = JSON.parse(tc.input); } catch { inp = tc.input; }
-          try { out = JSON.parse(tc.output); } catch { out = tc.output; }
-  
-          let snippet;
-          if (isClassBased) {
-            // For class-based problems, inp is [operations, params] and out is [expected_results]
-            const [operations, params] = inp;
-            snippet = buildClassTestSnippet(code, problem.entryPoint, operations, params, out);
-          } else {
-            const compareMode: string | undefined = (tc as any).compare;
-            snippet = buildTestSnippet(code, problem.entryPoint, inp, out, compareMode);
-          }
-  
-          const [capturedOutput, resultJson] = await runPythonCode(snippet, isClassBased);
+        // 1) Safely parse inputs/outputs (preserve strings if not JSON)
+        let inp: any, out: any;
+        try { inp = JSON.parse(tc.input); } catch { inp = tc.input; }
+        try { out = JSON.parse(tc.output); } catch { out = tc.output; }
 
-        if (resultJson) {
+        // 2) Build snippet
+        let snippet: string;
+        if (isClassBased) {
+          // For class-based problems, inp is [operations, params]
+          const [operations, params] = Array.isArray(inp) ? inp : [[], []];
+          snippet = buildClassTestSnippet(code, problem.entryPoint, operations, params, out);
+        } else {
+          const compareMode: string | undefined = (tc as any).compare;
+          snippet = buildTestSnippet(code, problem.entryPoint, inp, out, compareMode);
+        }
+
+        // 3) Run and parse result
+        const [capturedOutput, resultJson] = await runPythonCode(snippet, isClassBased);
+
+        // Decide if this is a structured result or a real runtime error
+        const isStructured = !!resultJson && typeof resultJson === "object" && "passed" in resultJson;
+
+        if (isStructured) {
           const tr: TestResult = {
             input: JSON.stringify(resultJson.input),
             expected: JSON.stringify(resultJson.expected),
             actual:
               typeof resultJson.actual === "string"
-                ? resultJson.actual
+                ? resultJson.actual // may be "Execution Error: ..." from Python except block
                 : JSON.stringify(resultJson.actual),
-            passed: !!resultJson.passed,
+            passed: Boolean(resultJson.passed),
           };
           results.push(tr);
-          if (!tr.passed) allPassed = false;
+          if (!tr.passed) allPassed = false; // regular FAIL, not an error
         } else {
+          // True execution/runtime error (no JSON to parse)
           allPassed = false;
           results.push({
             input: JSON.stringify(inp),
@@ -575,12 +649,8 @@ function CodeRunner({
       setTestResults(results);
 
       if (allPassed) {
-        // Check if there was already a correct submission
-        const alreadySolved = latestSubmissionData?.some(s => s.isCorrect) ?? false;
-        
-        if (!alreadySolved) {
-          setShowConfetti(true);
-        }
+        const alreadySolved = latestSubmissionData?.some((s) => s.isCorrect) ?? false;
+        if (!alreadySolved) setShowConfetti(true);
         setShowSuccessModal(true);
 
         if (user && firestore) {
@@ -599,6 +669,7 @@ function CodeRunner({
         }
       }
     } catch (error) {
+      // Only set console output for real handler-level errors
       setConsoleOutput((error as Error).message);
     } finally {
       setIsSubmitting(false);
@@ -606,7 +677,7 @@ function CodeRunner({
   };
 
   const onCodeChange = useCallback((value: string) => setCode(value), []);
-  
+
   const handleGoToNextProblem = () => {
     if (nextProblemSlug) {
       router.push(`/problems/${nextProblemSlug}`);
@@ -629,7 +700,7 @@ function CodeRunner({
       <div className="rounded-md border bg-background font-code text-sm overflow-hidden code-editor">
         <CodeMirror
           value={code}
-          height="320px"
+          minHeight="320px"
           extensions={cmExtensions}
           onChange={onCodeChange}
           theme={githubDark}
@@ -681,13 +752,13 @@ function CodeRunner({
           )}
         </Button>
         {nextProblemSlug && (
-           <Button asChild variant="outline" className="ml-auto">
-             <Link href={`/problems/${nextProblemSlug}`}>
-                Next Problem
-               <ArrowRight className="ml-2 h-4 w-4" />
-             </Link>
-           </Button>
-         )}
+          <Button asChild variant="outline" className="ml-auto">
+            <Link href={`/problems/${nextProblemSlug}`}>
+              Next Problem
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        )}
       </div>
 
       {(testResults.length > 0 || consoleOutput) && (
@@ -720,9 +791,15 @@ function CodeRunner({
                         {result.passed ? "Passed" : "Failed"}
                       </Badge>
                     </div>
-                    <p><strong>Input:</strong> {result.input}</p>
-                    <p><strong>Expected:</strong> {result.expected}</p>
-                    <p><strong>Actual:</strong> {result.actual}</p>
+                    <p className="whitespace-pre-wrap break-words">
+                      <strong>Input:</strong> {result.input}
+                    </p>
+                    <p className="whitespace-pre-wrap break-words">
+                      <strong>Expected:</strong> {result.expected}
+                    </p>
+                    <p className="whitespace-pre-wrap break-words">
+                      <strong>Actual:</strong> {result.actual}
+                    </p>
                   </div>
                 ))}
               </CardContent>
@@ -799,7 +876,7 @@ export default function ProblemDetailClient({ slug }: { slug: string }) {
 
   const { sortedProblems, nextProblemSlug } = useMemo(() => {
     if (!allProblems) return { sortedProblems: [], nextProblemSlug: null };
-    
+
     const problemGroups: { [key: string]: Problem[] } = {};
     allProblems.forEach((problem) => {
       const catSlug = problem.categorySlug;
@@ -813,7 +890,7 @@ export default function ProblemDetailClient({ slug }: { slug: string }) {
     for (const catSlug in problemGroups) {
       problemGroups[catSlug].sort((a, b) => a.difficulty - b.difficulty);
     }
-    
+
     const sortedProblems: Problem[] = [];
     sortedCategories.forEach(category => {
       if (problemGroups[category.slug]) {
@@ -827,7 +904,7 @@ export default function ProblemDetailClient({ slug }: { slug: string }) {
     return { sortedProblems, nextProblemSlug: nextProblem?.slug || null };
 
   }, [allProblems, slug]);
-  
+
   const loading = isProblemLoading || areTestCasesLoading || areProblemsLoading;
 
   if (loading) {
@@ -887,13 +964,13 @@ export default function ProblemDetailClient({ slug }: { slug: string }) {
               </Tooltip>
             </TooltipProvider>
           </div>
-          
+
           <hr className="my-6" />
 
           <ReactMarkdown
             className="prose dark:prose-invert max-w-none"
             components={{
-              code: ({node, ...props}) => <code className="font-code" {...props} />,
+              code: ({ node, ...props }) => <code className="font-code" {...props} />,
             }}
           >
             {p.body}
@@ -904,7 +981,7 @@ export default function ProblemDetailClient({ slug }: { slug: string }) {
       </div>
 
       <div className="h-full overflow-y-auto pl-4">
-        {testCases && <CodeRunner problem={p} testCases={testCases} slug={slug} nextProblemSlug={nextProblemSlug}/>}
+        {testCases && <CodeRunner problem={p} testCases={testCases} slug={slug} nextProblemSlug={nextProblemSlug} />}
       </div>
     </div>
   );

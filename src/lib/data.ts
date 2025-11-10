@@ -555,8 +555,8 @@ Implement the \`MinStack\` class:
 
 You must implement a solution with O(1) time complexity for each function. This problem is tested differently; your class will be instantiated and its methods called sequentially. The test cases show the sequence of operations and expected outputs.`,
     templateCode:
-`# This is a class-based problem.
-# The testing framework will instantiate your class and call its methods.
+`# The framework will instantiate your class 
+# and call its methods.
 class MinStack:
     def __init__(self):
         # Your code here
