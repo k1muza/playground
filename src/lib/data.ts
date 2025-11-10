@@ -806,6 +806,52 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
   // ==========================================
 
   {
+    slug: 'valid-palindrome',
+    title: 'Valid Palindrome',
+    summary: 'Check if a string is a palindrome, ignoring non-alphanumeric characters.',
+    difficulty: 3,
+    tags: ['String', 'Two Pointer'],
+    categorySlug: 'two-pointers',
+    entryPoint: 'is_valid_palindrome',
+    body:
+      'A phrase is a palindrome if, after converting all uppercase letters into lowercase letters and removing all non-alphanumeric characters, it reads the same forward and backward.\n\n' +
+      'Given a string `s`, return `True` if it is a palindrome, or `False` otherwise.',
+    templateCode:
+      `def is_valid_palindrome(s):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: ['A man, a plan, a canal: Panama'], output: true },
+      { input: ['race a car'], output: false },
+      { input: [' '], output: true },
+      { input: ['0P'], output: false },
+    ],
+  },
+
+  {
+    slug: 'minimum-size-subarray-sum',
+    title: 'Minimum Size Subarray Sum',
+    summary: 'Find the minimal length of a subarray whose sum is >= target.',
+    difficulty: 5,
+    tags: ['Array', 'Sliding Window', 'Two Pointer'],
+    categorySlug: 'two-pointers',
+    entryPoint: 'min_subarray_len',
+    body:
+      'Given an array of positive integers `nums` and a positive integer `target`, return the minimal length of a subarray whose sum is greater than or equal to `target`.\n\n' +
+      'If there is no such subarray, return 0 instead.',
+    templateCode:
+      `def min_subarray_len(target, nums):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [7, [2,3,1,2,4,3]], output: 2 },
+      { input: [4, [1,4,4]], output: 1 },
+      { input: [11, [1,1,1,1,1,1,1,1]], output: 0 },
+      { input: [15, [1,2,3,4,5]], output: 5 },
+    ],
+  },
+
+  {
     slug: 'container-with-most-water',
     title: 'Container With Most Water',
     summary: 'Find two lines that together with the x-axis form a container with maximum water.',
@@ -828,6 +874,28 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
       { input: [[1, 1]], output: 1 },
       { input: [[4, 3, 2, 1, 4]], output: 16 },
       { input: [[1, 2, 1]], output: 2 },
+    ],
+  },
+  
+  {
+    slug: '3sum',
+    title: '3Sum',
+    summary: 'Find all unique triplets in the array which give the sum of zero.',
+    difficulty: 6,
+    tags: ['Array', 'Two Pointer', 'Sorting'],
+    categorySlug: 'two-pointers',
+    entryPoint: 'three_sum',
+    body:
+      'Given an integer array `nums`, return all the triplets `[nums[i], nums[j], nums[k]]` such that `i != j`, `i != k`, and `j != k`, and `nums[i] + nums[j] + nums[k] == 0`.\n\n' +
+      'Notice that the solution set must not contain duplicate triplets.',
+    templateCode:
+      `def three_sum(nums):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[-1,0,1,2,-1,-4]], output: [[-1,-1,2],[-1,0,1]] },
+      { input: [[0,1,1]], output: [] },
+      { input: [[0,0,0]], output: [[0,0,0]] },
     ],
   },
 
