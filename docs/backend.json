@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "Course": {
@@ -264,6 +265,10 @@
         "isCorrect": {
           "type": "boolean",
           "description": "Indicates whether the solution is correct or not."
+        },
+        "aiSuggestion": {
+          "type": "string",
+          "description": "An AI-generated suggestion for improving the code."
         }
       },
       "required": [

@@ -76,6 +76,7 @@ export const SubmissionSchema = z.object({
   code: z.string(),
   submittedAt: z.string(),
   isCorrect: z.boolean(),
+  aiSuggestion: z.string().optional(),
 });
 
 export type Submission = z.infer<typeof SubmissionSchema>;
@@ -507,27 +508,9 @@ The canonical path should have the following format:
 - The path does not end with a trailing \`/\`.
 - The path only contains the directory names on the path from the root directory to the target directory (i.e., no \`.\` or \`..\`).`,
     templateCode:
-`class MinStack:
-    def __init__(self):
-        # Your code here
-        pass
-
-    def push(self, val: int) -> None:
-        # Your code here
-        pass
-
-    def pop(self) -> None:
-        # Your code here
-        pass
-
-    def top(self) -> int:
-        # Your code here
-        pass
-
-    def getMin(self) -> int:
-        # Your code here
-        pass
-`,
+      `def simplify_path(path):
+  # Your code here
+  pass`,
     testCases: [
         { input: ['/home/'], output: '/home' },
         { input: ['/../'], output: '/' },

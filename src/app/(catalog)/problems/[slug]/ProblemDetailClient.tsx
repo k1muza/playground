@@ -37,8 +37,8 @@ import CodeMirror from "@uiw/react-codemirror";
 import { python } from "@codemirror/lang-python";
 import { githubDark } from "@uiw/codemirror-theme-github";
 
-import { useFirebase, useDoc, useCollection, useMemoFirebase } from "@/firebase";
-import { collection, addDoc, doc, query, where, orderBy, limit } from "firebase/firestore";
+import { useFirebase, useDoc, useCollection, useMemoFirebase, updateDocumentNonBlocking } from "@/firebase";
+import { collection, addDoc, doc, query, where, orderBy, limit, updateDoc } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import Confetti from "react-confetti";
 import { suggestSolution } from "@/ai/flows/suggest-solution";
@@ -143,25 +143,31 @@ function TestCasesDisplay({ slug }: { slug: string }) {
 
 function AiSuggestion({
   problem,
-  userCode,
+  submission,
 }: {
   problem: Problem;
-  userCode: string;
+  submission: Submission;
 }) {
-  const [suggestion, setSuggestion] = useState('');
+  const [suggestion, setSuggestion] = useState(submission.aiSuggestion || '');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { firestore } = useFirebase();
 
   const handleGetSuggestion = async () => {
     setIsLoading(true);
     setError(null);
-    setSuggestion('');
     try {
       const result = await suggestSolution({
         problemBody: problem.body,
-        userCode: userCode,
+        userCode: submission.code,
       });
       setSuggestion(result.suggestion);
+
+      // Save suggestion to Firestore
+      if (firestore && submission.id) {
+        const submissionRef = doc(firestore, "problems", problem.slug, "submissions", submission.id);
+        updateDocumentNonBlocking(submissionRef, { aiSuggestion: result.suggestion });
+      }
     } catch (e) {
       console.error('AI suggestion failed:', e);
       setError(e instanceof Error ? e.message : 'An unknown error occurred.');
@@ -269,17 +275,17 @@ function CodeRunner({
   );
   const { data: latestSubmissionData, isLoading: isSubmissionLoading } = useCollection<Submission>(latestSubmissionQuery);
 
-  const hasSubmissions = useMemo(() => (latestSubmissionData?.length ?? 0) > 0, [latestSubmissionData]);
+  const latestSubmission = useMemo(() => (latestSubmissionData?.[0]), [latestSubmissionData]);
 
   useEffect(() => {
     if (!isSubmissionLoading) {
-      if (latestSubmissionData && latestSubmissionData.length > 0) {
-        setCode(latestSubmissionData[0].code);
+      if (latestSubmission) {
+        setCode(latestSubmission.code);
       } else {
         setCode(problem.templateCode);
       }
     }
-  }, [latestSubmissionData, isSubmissionLoading, problem.templateCode]);
+  }, [latestSubmission, isSubmissionLoading, problem.templateCode]);
 
   useEffect(() => {
     let cancelled = false;
@@ -818,8 +824,8 @@ except Exception as e:
         </Tabs>
       )}
 
-      {hasSubmissions && (
-        <AiSuggestion problem={problem} userCode={code} />
+      {latestSubmission && (
+        <AiSuggestion problem={problem} submission={latestSubmission} />
       )}
 
       <AlertDialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
