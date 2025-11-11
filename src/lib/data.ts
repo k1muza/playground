@@ -27,15 +27,17 @@ export type Category = z.infer<typeof CategorySchema>;
 export const categories: Category[] = [
   { slug: "warm-ups", title: "Warm-ups", description: "Basic loops, scans, and simple string/array tasks.", order: 0, levelMin: 1, levelMax: 2, topics: ["Arrays","Strings"] },
   { slug: "hashing", title: "Hashing & Counting", description: "Hash maps/sets, frequency tables, canonicalization.", order: 1, levelMin: 2, levelMax: 5, topics: ["Hash Map","Hash Set","Counting","Prefix Sum"] },
-  { slug: "stacks", title: "Stacks & Queues", description: "Stacks, bracket matching, stateful scans.", order: 2, levelMin: 2, levelMax: 5, topics: ["Stack","Strings"] },
+  { slug: "stacks", title: "Stacks & Queues", description: "Stacks, bracket matching, stateful scans.", order: 2, levelMin: 2, levelMax: 6, topics: ["Stack","Strings"] },
   { slug: "two-pointers", title: "Two-Pointers & Windows", description: "Pointers, windows, de-duplication.", order: 3, levelMin: 3, levelMax: 6, topics: ["Two Pointer","Sliding Window"] },
   { slug: "sets-ordering", title: "Sets & Ordering", description: "Ordering, merging, interval sweeps.", order: 4, levelMin: 4, levelMax: 5, topics: ["Sorting","Sweep","Set"] },
-  { slug: "recursion-dp", title: "Recursion & Backtracking", description: "Recurrence intuition, memoization, simple DP.", order: 5, levelMin: 2, levelMax: 4, topics: ["Recursion","DP","Math", "Backtracking"] },
-  { slug: "trees", title: "Trees (DFS/BFS)", description: "Traversal patterns and basic tree properties.", order: 6, levelMin: 2, levelMax: 4, topics: ["Tree","DFS","BFS"] },
-  { slug: "heaps", title: "Heaps & Priority Queues", description: "Selection, k-way merge, top-k.", order: 7, levelMin: 4, levelMax: 7, topics: ["Heap","Priority Queue"] },
-  { slug: "graphs", title: "Graphs & Topo Sort", description: "Cycle detection, topo order, reachability.", order: 8, levelMin: 5, levelMax: 7, topics: ["Graph","Topo Sort","DFS"] },
-  { slug: "grids-backtracking", title: "Grids & Backtracking", description: "Grid search, constraint propagation.", order: 9, levelMin: 5, levelMax: 7, topics: ["Grid","Backtracking","DFS"] },
-  { slug: "advanced-binary-search", title: "Advanced Binary Search", description: "Partitioning tricks on answers/arrays.", order: 10, levelMin: 8, levelMax: 9, topics: ["Binary Search"] },
+  { slug: "greedy-intervals", title: "Greedy & Intervals", description: "Greedy choices, interval management.", order: 5, levelMin: 4, levelMax: 6, topics: ["Greedy","Intervals","Sorting"] },
+  { slug: "recursion-dp", title: "Recursion & Backtracking", description: "Recurrence intuition, memoization, simple DP.", order: 6, levelMin: 2, levelMax: 8, topics: ["Recursion","DP","Math", "Backtracking"] },
+  { slug: "trees", title: "Trees (DFS/BFS)", description: "Traversal patterns and basic tree properties.", order: 7, levelMin: 2, levelMax: 6, topics: ["Tree","DFS","BFS"] },
+  { slug: "heaps", title: "Heaps & Priority Queues", description: "Selection, k-way merge, top-k.", order: 8, levelMin: 4, levelMax: 7, topics: ["Heap","Priority Queue"] },
+  { slug: "graphs", title: "Graphs & Topo Sort", description: "Cycle detection, topo order, reachability.", order: 9, levelMin: 5, levelMax: 7, topics: ["Graph","Topo Sort","DFS"] },
+  { slug: "grids-backtracking", title: "Grids & Backtracking", description: "Grid search, constraint propagation.", order: 10, levelMin: 5, levelMax: 8, topics: ["Grid","Backtracking","DFS"] },
+  { slug: "math-bit-tricks", title: "Math & Bit Tricks", description: "Number theory, bitwise operations.", order: 11, levelMin: 4, levelMax: 7, topics: ["Math","Bit Manipulation"] },
+  { slug: "advanced-binary-search", title: "Advanced Binary Search", description: "Partitioning tricks on answers/arrays.", order: 12, levelMin: 5, levelMax: 9, topics: ["Binary Search"] },
 ];
 
 // Represents the data stored in the main `problems/{slug}` document.
@@ -914,7 +916,7 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
     summary: 'Return the k most frequent elements in the array.',
     difficulty: 5,
     tags: ['Hash Map', 'Counting', 'Heap'],
-    categorySlug: 'hashing',
+    categorySlug: 'heaps',
     entryPoint: 'top_k_frequent',
     body:
       'Given an integer array `nums` and an integer `k`, return the `k` most frequent elements.\n\n' +
@@ -1028,7 +1030,7 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
     categorySlug: 'two-pointers',
     entryPoint: 'three_sum',
     body:
-      'Given an integer array `nums`, return all the triplets `[nums[i], nums[j], nums[k]]` such that `i != j`, `i != k`, and `j != k`, and `nums[i] + nums[j] + nums[k] == 0`.\n\n' +
+      'Given an integer array `nums`, return all the triplets `[nums[i], nums[j], nums[k]]` such that `i != j`, `i != k`, and `nums[i] + nums[j] + nums[k] == 0`.\n\n' +
       'Notice that the solution set must not contain duplicate triplets.',
     templateCode:
       `def three_sum(nums):
@@ -1877,6 +1879,144 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
       { input: ['', ''], output: true },
     ],
   },
+    // ==========================================
+  // New problems for Greedy & Intervals
+  // ==========================================
+  {
+    slug: 'non-overlapping-intervals',
+    title: 'Non-overlapping Intervals',
+    summary: 'Find the minimum number of intervals to remove to make the rest non-overlapping.',
+    difficulty: 4,
+    tags: ['Greedy', 'Intervals', 'Sorting'],
+    categorySlug: 'greedy-intervals',
+    entryPoint: 'erase_overlap_intervals',
+    body: 'Given an array of intervals `intervals` where `intervals[i] = [starti, endi]`, return the minimum number of intervals you need to remove to make the rest of the intervals non-overlapping.\n\nA classic greedy approach is to sort the intervals by their end times.',
+    templateCode:
+`def erase_overlap_intervals(intervals):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[[1,2],[2,3],[3,4],[1,3]]], output: 1 },
+      { input: [[[1,2],[1,2],[1,2]]], output: 2 },
+      { input: [[[1,2],[2,3]]], output: 0 }
+    ]
+  },
+  {
+    slug: 'jump-game',
+    title: 'Jump Game',
+    summary: 'Determine if you can reach the last index of the array.',
+    difficulty: 5,
+    tags: ['Greedy', 'Array'],
+    categorySlug: 'greedy-intervals',
+    entryPoint: 'can_jump',
+    body: 'You are given an integer array `nums`. You are initially positioned at the array\'s first index, and each element in the array represents your maximum jump length at that position.\n\nReturn `true` if you can reach the last index, or `false` otherwise.\n\nThis can be solved with a greedy approach by keeping track of the maximum reach possible.',
+    templateCode:
+`def can_jump(nums):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[2,3,1,1,4]], output: true },
+      { input: [[3,2,1,0,4]], output: false },
+      { input: [[0]], output: true },
+      { input: [[2,0,0]], output: true }
+    ]
+  },
+  {
+    slug: 'meeting-rooms-ii',
+    title: 'Meeting Rooms II',
+    summary: 'Find the minimum number of conference rooms required.',
+    difficulty: 6,
+    tags: ['Greedy', 'Intervals', 'Heap', 'Sorting'],
+    categorySlug: 'greedy-intervals',
+    entryPoint: 'min_meeting_rooms',
+    body: 'Given an array of meeting time intervals `intervals` where `intervals[i] = [starti, endi]`, return the minimum number of conference rooms required.\n\nThis can be solved by sorting start and end times, or by using a min-heap to track meeting end times.',
+    templateCode:
+`def min_meeting_rooms(intervals):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[[0,30],[5,10],[15,20]]], output: 2 },
+      { input: [[[7,10],[2,4]]], output: 1 },
+      { input: [[[1,5],[8,9],[8,9]]], output: 2 }
+    ]
+  },
+  // ==========================================
+  // New problems for Math & Bit Tricks
+  // ==========================================
+  {
+    slug: 'reverse-bits',
+    title: 'Reverse Bits',
+    summary: 'Reverse the bits of a given 32-bit unsigned integer.',
+    difficulty: 4,
+    tags: ['Bit Manipulation'],
+    categorySlug: 'math-bit-tricks',
+    entryPoint: 'reverse_bits',
+    body: 'Reverse the bits of a given 32-bit unsigned integer.',
+    templateCode:
+`def reverse_bits(n):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [43261596], output: 964176192 }, // 00000010100101000001111010011100 -> 00111001011110000010100101000000
+      { input: [2147483648], output: 1 }, // 100...0 -> 0...01
+      { input: [1], output: 2147483648 }
+    ]
+  },
+  {
+    slug: 'single-number',
+    title: 'Single Number',
+    summary: 'Find the single element that appears only once in an array where every other element appears twice.',
+    difficulty: 4,
+    tags: ['Bit Manipulation', 'XOR'],
+    categorySlug: 'math-bit-tricks',
+    entryPoint: 'single_number',
+    body: 'Given a non-empty array of integers `nums`, every element appears twice except for one. Find that single one.\n\nYou must implement a solution with a linear runtime complexity and use only constant extra space. The XOR operator is your friend here!',
+    templateCode:
+`def single_number(nums):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[2,2,1]], output: 1 },
+      { input: [[4,1,2,1,2]], output: 4 },
+      { input: [[1]], output: 1 }
+    ]
+  },
+  {
+    slug: 'hamming-weight',
+    title: 'Number of 1 Bits',
+    summary: 'Return the number of set bits (1s) in an integer.',
+    difficulty: 4,
+    tags: ['Bit Manipulation'],
+    categorySlug: 'math-bit-tricks',
+    entryPoint: 'hamming_weight',
+    body: 'Write a function that takes an unsigned integer and returns the number of \'1\' bits it has (also known as the Hamming weight).\n\nFor example, the input `11` (binary `1011`) has 3 set bits.',
+    templateCode:
+`def hamming_weight(n):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [11], output: 3 },
+      { input: [128], output: 1 },
+      { input: [2147483645], output: 30 }
+    ]
+  },
+  {
+    slug: 'missing-number',
+    title: 'Missing Number',
+    summary: 'Find the missing number in an array containing n distinct numbers in the range [0, n].',
+    difficulty: 4,
+    tags: ['Bit Manipulation', 'Math', 'XOR'],
+    categorySlug: 'math-bit-tricks',
+    entryPoint: 'missing_number',
+    body: 'Given an array `nums` containing `n` distinct numbers in the range `[0, n]`, return the only number in the range that is missing from the array.\n\nThis can be solved using Gauss\'s summation formula or with XOR.',
+    templateCode:
+`def missing_number(nums):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[3,0,1]], output: 2 },
+      { input: [[0,1]], output: 2 },
+      { input: [[9,6,4,2,3,5,7,0,1]], output: 8 }
+    ]
+  },
 ];
-
-    
