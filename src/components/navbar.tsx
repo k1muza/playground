@@ -14,7 +14,7 @@ const links = [
   { href: '/', label: 'Home', icon: Home },
   { href: '/courses', label: 'Courses', icon: Book },
   { href: '/problems', label: 'Problems', icon: Code },
-  { href: '/articles', label: 'Articles', icon: FileText },
+  { href: '/lessons', label: 'Lessons', icon: FileText },
   { href: '/search', label: 'Search', icon: Search },
   { href: '/admin/add-problem', label: 'Admin', icon: Shield },
 ];

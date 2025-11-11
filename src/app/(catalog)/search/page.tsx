@@ -4,8 +4,8 @@ import { useMemo, useState } from 'react';
 import Container from '@/components/container';
 import CourseCard from '@/components/course-card';
 import ProblemCard from '@/components/problem-card';
-import ArticleCard from '@/components/article-card';
-import { courses, articles } from '@/lib/data';
+import LessonCard from '@/components/lesson-card';
+import { courses, lessons } from '@/lib/data';
 import { Input } from '@/components/ui/input';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query } from 'firebase/firestore';
@@ -23,7 +23,7 @@ export default function SearchPage() {
 
   const results = useMemo(() => {
     if (!q) {
-      return { courses: [], problems: [], articles: [] };
+      return { courses: [], problems: [], lessons: [] };
     }
     const term = q.toLowerCase();
     return {
@@ -33,7 +33,7 @@ export default function SearchPage() {
       problems: (problems || []).filter((p) =>
         (p.title + p.summary + p.tags.join(' ')).toLowerCase().includes(term)
       ),
-      articles: articles.filter((a) =>
+      lessons: lessons.filter((a) =>
         (a.title + a.excerpt + a.tags.join(' ')).toLowerCase().includes(term)
       ),
     };
@@ -42,7 +42,7 @@ export default function SearchPage() {
   const hasResults =
     results.courses.length > 0 ||
     results.problems.length > 0 ||
-    results.articles.length > 0;
+    results.lessons.length > 0;
 
   return (
     <Container className="py-10">
@@ -50,7 +50,7 @@ export default function SearchPage() {
       <Input
         value={q}
         onChange={(e) => setQ(e.target.value)}
-        placeholder="Search courses, problems, articles..."
+        placeholder="Search courses, problems, lessons..."
         className="mt-4 w-full max-w-xl"
         autoFocus
       />
@@ -62,7 +62,7 @@ export default function SearchPage() {
         </div>
       )}
 
-      {(results.courses.length > 0 || results.problems.length > 0 || results.articles.length > 0) && (
+      {(results.courses.length > 0 || results.problems.length > 0 || results.lessons.length > 0) && (
         <div className="mt-10 grid gap-12 lg:grid-cols-3 lg:gap-8">
           {results.courses.length > 0 && (
             <section>
@@ -86,12 +86,12 @@ export default function SearchPage() {
             </section>
           )}
 
-          {results.articles.length > 0 && (
+          {results.lessons.length > 0 && (
             <section>
-              <h2 className="text-xl font-semibold mb-4 font-headline">Articles</h2>
+              <h2 className="text-xl font-semibold mb-4 font-headline">Lessons</h2>
               <div className="space-y-4">
-                {results.articles.map((a) => (
-                  <ArticleCard key={a.slug} article={a} />
+                {results.lessons.map((a) => (
+                  <LessonCard key={a.slug} lesson={a} />
                 ))}
               </div>
             </section>
@@ -101,5 +101,3 @@ export default function SearchPage() {
     </Container>
   );
 }
-
-    

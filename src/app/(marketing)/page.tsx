@@ -2,9 +2,9 @@
 import Hero from '@/components/hero';
 import Container from '@/components/container';
 import CourseCard from '@/components/course-card';
-import ArticleCard from '@/components/article-card';
+import LessonCard from '@/components/lesson-card';
 import ProblemCard from '@/components/problem-card';
-import { courses, articles } from '@/lib/data';
+import { courses, lessons } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
@@ -63,16 +63,16 @@ export default function Page() {
 
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-semibold font-headline">Latest Articles</h2>
+            <h2 className="text-2xl font-semibold font-headline">Latest Lessons</h2>
             <Button variant="link" asChild>
-              <Link href="/articles">
+              <Link href="/lessons">
                 View All <ArrowRight className="ml-1 h-4 w-4" />
               </Link>
             </Button>
           </div>
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {articles.map((a) => (
-              <ArticleCard key={a.slug} article={a} />
+            {lessons.map((a) => (
+              <LessonCard key={a.slug} lesson={a} />
             ))}
           </div>
         </section>
@@ -80,5 +80,3 @@ export default function Page() {
     </>
   );
 }
-
-    

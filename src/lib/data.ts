@@ -1,4 +1,3 @@
-
 import { z } from 'zod';
 
 export type Course = {
@@ -84,7 +83,7 @@ export const SubmissionSchema = z.object({
 export type Submission = z.infer<typeof SubmissionSchema>;
 
 
-export type Article = {
+export type Lesson = {
   slug: string;
   title: string;
   excerpt: string;
@@ -138,7 +137,7 @@ export const courses: Course[] = [
   },
 ];
 
-export const articles: Article[] = [
+export const lessons: Lesson[] = [
   {
     slug: 'space-time-complexity',
     title: 'A Practical Guide to Space & Time Complexity',
@@ -1135,32 +1134,6 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
       { input: [[5,5,5,5]], output: 1 },
       { input: [[1,2,3]], output: 3 },
     ]
-  },
-  
-  {
-    slug: 'longest-unique-substring',
-    title: 'Longest Substring Without Repeating Characters',
-    summary: 'Find the length of the longest substring with no repeating characters.',
-    difficulty: 4,
-    tags: ['String', 'Sliding Window', 'Set'],
-    categorySlug: 'two-pointers',
-    entryPoint: 'longest_unique_substring',
-    body:
-      'Given a string `s`, find the length of the longest substring without repeating characters.\n\n' +
-      'For example, in "abcabcbb", the answer is "abc" with length 3. In "pwwkew", the answer is "wke" with length 3.\n\n' +
-      'Use a sliding window with a `set` to keep track of characters currently in the window.',
-    templateCode:
-      `def longest_unique_substring(s):
-  # Your code here
-  pass`,
-    testCases: [
-      { input: ['abcabcbb'], output: 3 },
-      { input: ['bbbbb'], output: 1 },
-      { input: ['pwwkew'], output: 3 },
-      { input: [''], output: 0 },
-      { input: ['au'], output: 2 },
-      { input: ['dvdf'], output: 3 },
-    ],
   },
   
   {
