@@ -83,7 +83,7 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-sm">
       <div className="container mx-auto flex h-16 items-center justify-between gap-6">
-        <Link href="/" className="flex items-center gap-2.5 font-bold text-lg flex-shrink-0">
+        <Link href="/" className="flex items-center gap-2.5 font-bold text-lg">
           <Feather className="h-7 w-7 text-primary" />
           <span className="font-headline">LearnVerse</span>
         </Link>
@@ -103,7 +103,7 @@ export default function Navbar() {
             </Link>
           ))}
         </nav>
-        <div className="flex-1 flex justify-end">
+        <div className="flex">
             <OverallProgress />
         </div>
       </div>

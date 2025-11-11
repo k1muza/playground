@@ -71,7 +71,7 @@ export default function ProblemsPage() {
         progress[catSlug] = { completed: 0, total: 0 };
       }
       problemGroups[catSlug].push(problem);
-      
+
       const difficultyWeight = problem.difficulty || 1;
       progress[catSlug].total += difficultyWeight;
       if (solvedProblemSlugs.has(problem.slug)) {
@@ -97,7 +97,7 @@ export default function ProblemsPage() {
       <p className="mt-2 text-muted-foreground">
         Apply your knowledge with a curated set of practice problems, grouped by topic.
       </p>
-      
+
       <div className="mt-8">
         {isLoading ? (
           <ProblemListSkeleton />
@@ -118,11 +118,11 @@ export default function ProblemsPage() {
                 <AccordionItem value={category.slug} key={category.slug} className="border-b-0">
                   <AccordionTrigger className="text-xl font-semibold font-headline hover:no-underline rounded-md px-4 py-3 bg-secondary">
                     <div className='w-full'>
-                      <div className="flex justify-between items-center w-full mb-2">
+                      <h2 className="text-left w-full mb-2">
                         <span>{category.title}</span>
-                        <span className="text-sm font-normal text-muted-foreground">{completionPercentage}%</span>
-                      </div>
-                      <Progress value={completionPercentage} className="h-2" />
+                        <span>{" "}</span>
+                        <span className="font-normal text-muted-foreground">({completionPercentage}%)</span>
+                      </h2>
                     </div>
                   </AccordionTrigger>
                   <AccordionContent className="pt-4">
