@@ -161,6 +161,31 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
   // ==========================================
   
   {
+    slug: 'has-any-common',
+    title: 'Has Any Common Element',
+    summary: 'Return whether two lists share any common elements.',
+    difficulty: 1,
+    tags: ['Set', 'Loop'],
+    categorySlug: 'hashing',
+    entryPoint: 'has_any_common',
+    body:
+      'Write a function, `has_any_common`, that takes in two lists, `a` and `b`, as arguments. ' +
+      'The function should return `True` if the lists share at least one common element, and `False` otherwise.\n\n' +
+      'For an efficient solution, convert one of the lists to a set for O(1) lookups.',
+    templateCode:
+      `def has_any_common(a, b):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[1, 2, 3], [4, 5, 6]], output: false },
+      { input: [[1, 2, 3], [3, 4, 5]], output: true },
+      { input: [['a', 'b'], ['c', 'd', 'b']], output: true },
+      { input: [[], [1, 2]], output: false },
+      { input: [[1, 2], []], output: false }
+    ],
+  },
+  
+  {
     slug: 'max-value',
     title: 'Max Value',
     summary: 'Return the largest number in the list.',
@@ -258,6 +283,31 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
       { input: [[1, 2, 3], [4, 5, 6]], output: [] },
       { input: [['a', 'b', 'c'], ['b', 'x']], output: ['b'] },
       { input: [[], [1, 2, 3]], output: [] }
+    ],
+  },
+  
+  {
+    slug: 'dedupe-preserve-order',
+    title: 'Deduplicate & Preserve Order',
+    summary: 'Remove duplicates from a list while keeping the original order.',
+    difficulty: 2,
+    tags: ['Set', 'Array'],
+    categorySlug: 'hashing',
+    entryPoint: 'dedupe_preserve_order',
+    body:
+      'Write a function `dedupe_preserve_order` that takes a list of items and returns a new list with duplicates removed. ' +
+      'The order of the first appearance of each element should be preserved.\n\n' +
+      'For example, `[1, 5, 2, 1, 9, 2]` should return `[1, 5, 2, 9]`. Use a `set` to keep track of seen elements for an efficient O(n) solution.',
+    templateCode:
+      `def dedupe_preserve_order(items):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[1, 5, 2, 1, 9, 2]], output: [1, 5, 2, 9] },
+      { input: [['a', 'b', 'a', 'c', 'b']], output: ['a', 'b', 'c'] },
+      { input: [[1, 2, 3]], output: [1, 2, 3] },
+      { input: [[4, 4, 4, 4]], output: [4] },
+      { input: [[]], output: [] },
     ],
   },
 
@@ -366,6 +416,31 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
       { input: ['hello'], output: 'ehllo' },
     ]
   },
+  
+  {
+    slug: 'set-diff-indices',
+    title: 'Set Difference Indices',
+    summary: 'Return indices of items in list `a` that are not in list `b`.',
+    difficulty: 3,
+    tags: ['Set', 'Array'],
+    categorySlug: 'hashing',
+    entryPoint: 'set_diff_indices',
+    body:
+      'Write a function, `set_diff_indices`, that takes two lists, `a` and `b`. ' +
+      'It should return a new list containing the **indices** of elements from list `a` that are **not** present in list `b`.\n\n' +
+      'Use a `set` for list `b` to achieve an efficient O(1) average time complexity for membership checking.',
+    templateCode:
+      `def set_diff_indices(a, b):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[1, 2, 3, 4], [3, 4, 5, 6]], output: [0, 1] },
+      { input: [['x', 'y', 'z'], ['a', 'b', 'c']], output: [0, 1, 2] },
+      { input: [[10, 20, 30], [10, 20, 30]], output: [] },
+      { input: [[10, 10, 20], [20]], output: [0, 1] },
+      { input: [[], [1, 2]], output: [] },
+    ],
+  },
 
   {
     slug: 'ransom-note',
@@ -415,7 +490,33 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
       { input: ['badc', 'baba'], output: false }
     ],
   },
-
+  
+  {
+    slug: 'two-sum-exists',
+    title: 'Two Sum Exists',
+    summary: 'Return a boolean indicating if two numbers sum to a target.',
+    difficulty: 4,
+    tags: ['Set', 'Array'],
+    categorySlug: 'hashing',
+    entryPoint: 'two_sum_exists',
+    body:
+      'Write a function, `two_sum_exists`, that takes a list of numbers `nums` and a `target`. ' +
+      'The function should return `True` if there exist two numbers in the list that sum up to the `target`, and `False` otherwise.\n\n' +
+      'Use a `set` to solve this in O(n) time by checking for the existence of `target - num` as you iterate through the list.',
+    templateCode:
+      `def two_sum_exists(nums, target):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[2, 7, 11, 15], 9], output: true },
+      { input: [[3, 2, 4], 6], output: true },
+      { input: [[3, 3], 6], output: true },
+      { input: [[1, 5, 9], 15], output: false },
+      { input: [[-1, 5, -2, 8], 6], output: true },
+      { input: [[10], 20], output: false },
+    ],
+  },
+  
   // ==========================================
   // PHASE 3: Strings & Basic Algorithms
   // ==========================================
@@ -1020,6 +1121,56 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
       { input: [[1,2,3]], output: 3 },
     ]
   },
+  
+  {
+    slug: 'longest-unique-substring',
+    title: 'Longest Substring Without Repeating Characters',
+    summary: 'Find the length of the longest substring with no repeating characters.',
+    difficulty: 4,
+    tags: ['String', 'Sliding Window', 'Set'],
+    categorySlug: 'two-pointers',
+    entryPoint: 'longest_unique_substring',
+    body:
+      'Given a string `s`, find the length of the longest substring without repeating characters.\n\n' +
+      'For example, in "abcabcbb", the answer is "abc" with length 3. In "pwwkew", the answer is "wke" with length 3.\n\n' +
+      'Use a sliding window with a `set` to keep track of characters currently in the window.',
+    templateCode:
+      `def longest_unique_substring(s):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: ['abcabcbb'], output: 3 },
+      { input: ['bbbbb'], output: 1 },
+      { input: ['pwwkew'], output: 3 },
+      { input: [''], output: 0 },
+      { input: ['au'], output: 2 },
+      { input: ['dvdf'], output: 3 },
+    ],
+  },
+  
+  {
+    slug: 'near-duplicate-within-k',
+    title: 'Contains Duplicate II',
+    summary: 'Check for duplicate numbers within a certain distance `k`.',
+    difficulty: 4,
+    tags: ['Set', 'Array', 'Sliding Window'],
+    categorySlug: 'two-pointers',
+    entryPoint: 'contains_nearby_duplicate',
+    body:
+      'Given an integer array `nums` and an integer `k`, return `true` if there are two distinct indices `i` and `j` in the array such that `nums[i] == nums[j]` and `abs(i - j) <= k`.\n\n' +
+      'This problem can be solved with a sliding window approach, but instead of a window of a fixed size, you use a `set` representing a window of elements.',
+    templateCode:
+      `def contains_nearby_duplicate(nums, k):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[1, 2, 3, 1], 3], output: true },
+      { input: [[1, 0, 1, 1], 1], output: true },
+      { input: [[1, 2, 3, 1, 2, 3], 2], output: false },
+      { input: [[99, 99], 2], output: true },
+      { input: [[1], 1], output: false },
+    ],
+  },
 
   {
     slug: '3sum',
@@ -1286,6 +1437,30 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
       { input: [[2, 3, 6, 7], 7], output: [[2, 2, 3], [7]], compare: "multiset"},
       { input: [[2, 3, 5], 8], output: [[2, 2, 2, 2], [2, 3, 3], [3, 5]], compare: "multiset"},
       { input: [[2], 1], output: [], compare: "multiset"},
+    ],
+  },
+  
+  {
+    slug: 'word-break',
+    title: 'Word Break',
+    summary: 'Can a string be segmented into a space-separated sequence of dictionary words?',
+    difficulty: 6,
+    tags: ['Dynamic Programming', 'Set', 'Recursion'],
+    categorySlug: 'recursion-dp',
+    entryPoint: 'word_break',
+    body:
+      'Given a string `s` and a dictionary of strings `wordDict` (provided as a list), return `true` if `s` can be segmented into a space-separated sequence of one or more dictionary words. The same dictionary word may be reused multiple times.\n\n' +
+      'For efficient lookups, you should convert `wordDict` into a `set`.',
+    templateCode:
+      `def word_break(s, wordDict):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: ['leetcode', ['leet', 'code']], output: true },
+      { input: ['applepenapple', ['apple', 'pen']], output: true },
+      { input: ['catsandog', ['cats', 'dog', 'sand', 'and', 'cat']], output: false },
+      { input: ['a', ['b']], output: false },
+      { input: ['aaaaaaa', ['aaaa', 'aaa']], output: true },
     ],
   },
 
