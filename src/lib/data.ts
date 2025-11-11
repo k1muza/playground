@@ -343,6 +343,27 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
       { input: ['', ''], output: true }
     ],
   },
+  
+  {
+    slug: 'anagram-signature',
+    title: 'Anagram Signature',
+    summary: 'Return a "signature" for a word, like its sorted form or character counts.',
+    difficulty: 3,
+    tags: ['String', 'Sorting', 'Counting'],
+    categorySlug: 'hashing',
+    entryPoint: 'anagram_signature',
+    body: 'Write a function that takes a word and returns its "anagram signature". This can be either the string with its characters sorted, or a tuple representing the counts of each letter from a-z. The sorted string is simpler to implement.\n\nFor example, `signature("eat")` could be `"aet"`. This is a key building block for grouping anagrams.',
+    templateCode: `def anagram_signature(word):
+  # Return the "signature" of the word.
+  # For example, sorting the characters: 'eat' -> 'aet'
+  pass`,
+    testCases: [
+      { input: ['eat'], output: 'aet' },
+      { input: ['tea'], output: 'aet' },
+      { input: ['zyxw'], output: 'wxyz' },
+      { input: ['hello'], output: 'ehllo' },
+    ]
+  },
 
   {
     slug: 'ransom-note',
@@ -849,6 +870,25 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
       { input: [[9, 8, 7, 7, 8, 9, 9], 1], output: [9] },
     ],
   },
+  
+  {
+    slug: 'product-of-array-except-self',
+    title: 'Product of Array Except Self',
+    summary: 'Return an array where answer[i] is the product of all elements of nums except nums[i].',
+    difficulty: 5,
+    tags: ['Array', 'Prefix Sum'],
+    categorySlug: 'hashing',
+    entryPoint: 'product_except_self',
+    body: 'Given an integer array `nums`, return an array `answer` such that `answer[i]` is equal to the product of all the elements of `nums` except `nums[i]`.\n\nYou must write an algorithm that runs in O(n) time and without using the division operation.',
+    templateCode: `def product_except_self(nums):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[1,2,3,4]], output: [24,12,8,6] },
+      { input: [[-1,1,0,-3,3]], output: [0,0,9,0,0] },
+      { input: [[1, -1]], output: [-1, 1] },
+    ]
+  },
 
   // ==========================================
   // PHASE 7: Arrays & Two Pointer
@@ -878,6 +918,46 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
   },
   
   {
+    slug: 'squares-of-a-sorted-array',
+    title: 'Squares of a Sorted Array',
+    summary: 'Given a sorted array, return an array of the squares of each number, also in sorted order.',
+    difficulty: 3,
+    tags: ['Array', 'Two Pointer', 'Sorting'],
+    categorySlug: 'two-pointers',
+    entryPoint: 'sorted_squares',
+    body: 'Given an integer array `nums` sorted in non-decreasing order, return an array of the squares of each number sorted in non-decreasing order.\n\nCan you solve it in O(n) time using a two-pointer approach?',
+    templateCode: `def sorted_squares(nums):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[-4,-1,0,3,10]], output: [0,1,9,16,100] },
+      { input: [[-7,-3,2,3,11]], output: [4,9,9,49,121] },
+      { input: [[0,0,1,2]], output: [0,0,1,4] },
+    ]
+  },
+
+  {
+    slug: 'remove-duplicates-sorted-array',
+    title: 'Remove Duplicates from Sorted Array',
+    summary: 'Remove the duplicates from a sorted array in-place and return the new length.',
+    difficulty: 3,
+    tags: ['Array', 'Two Pointer'],
+    categorySlug: 'two-pointers',
+    entryPoint: 'remove_duplicates',
+    body: 'Given a sorted integer array `nums`, remove the duplicates in-place such that each unique element appears only once. The relative order of the elements should be kept the same.\n\nReturn `k`, the number of unique elements in `nums`. The first `k` elements of `nums` should hold the final result.',
+    templateCode: `def remove_duplicates(nums):
+  # Modify the array in-place and return the new length.
+  # The judge will check the first k elements of your array.
+  pass`,
+    testCases: [
+      { input: [[1,1,2]], output: 2 }, // nums becomes [1,2,_]
+      { input: [[0,0,1,1,1,2,2,3,3,4]], output: 5 }, // nums becomes [0,1,2,3,4,_,_,_,_,_]
+      { input: [[5,5,5,5]], output: 1 },
+      { input: [[1,2,3]], output: 3 },
+    ]
+  },
+
+  {
     slug: '3sum',
     title: '3Sum',
     summary: 'Find all unique triplets in the array which give the sum of zero.',
@@ -897,6 +977,25 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
       { input: [[0,1,1]], output: [] },
       { input: [[0,0,0]], output: [[0,0,0]] },
     ],
+  },
+  
+  {
+    slug: 'max-average-subarray',
+    title: 'Maximum Average Subarray I',
+    summary: 'Find the contiguous subarray of given length k that has the maximum average value.',
+    difficulty: 4,
+    tags: ['Array', 'Sliding Window'],
+    categorySlug: 'two-pointers',
+    entryPoint: 'find_max_average',
+    body: 'You are given an integer array `nums` consisting of `n` elements, and an integer `k`.\n\nFind a contiguous subarray whose length is equal to `k` that has the maximum average value and return this value.',
+    templateCode: `def find_max_average(nums, k):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[1,12,-5,-6,50,3], 4], output: 12.75 },
+      { input: [[5], 1], output: 5.0 },
+      { input: [[0,1,1,3,3], 4], output: 2.0 },
+    ]
   },
 
   {
