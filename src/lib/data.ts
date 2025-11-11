@@ -27,10 +27,10 @@ export type Category = z.infer<typeof CategorySchema>;
 export const categories: Category[] = [
   { slug: "warm-ups", title: "Warm-ups", description: "Basic loops, scans, and simple string/array tasks.", order: 0, levelMin: 1, levelMax: 2, topics: ["Arrays","Strings"] },
   { slug: "hashing", title: "Hashing & Counting", description: "Hash maps/sets, frequency tables, canonicalization.", order: 1, levelMin: 2, levelMax: 5, topics: ["Hash Map","Hash Set","Counting","Prefix Sum"] },
-  { slug: "stacks", title: "Stacks & Well-Formedness", description: "Stacks, bracket matching, stateful scans.", order: 2, levelMin: 2, levelMax: 5, topics: ["Stack","Strings"] },
+  { slug: "stacks", title: "Stacks & Queues", description: "Stacks, bracket matching, stateful scans.", order: 2, levelMin: 2, levelMax: 5, topics: ["Stack","Strings"] },
   { slug: "two-pointers", title: "Two-Pointers & Windows", description: "Pointers, windows, de-duplication.", order: 3, levelMin: 3, levelMax: 6, topics: ["Two Pointer","Sliding Window"] },
   { slug: "sets-ordering", title: "Sets & Ordering", description: "Ordering, merging, interval sweeps.", order: 4, levelMin: 4, levelMax: 5, topics: ["Sorting","Sweep","Set"] },
-  { slug: "recursion-dp", title: "Recursion & Intro DP", description: "Recurrence intuition, memoization, simple DP.", order: 5, levelMin: 2, levelMax: 4, topics: ["Recursion","DP","Math"] },
+  { slug: "recursion-dp", title: "Recursion & Backtracking", description: "Recurrence intuition, memoization, simple DP.", order: 5, levelMin: 2, levelMax: 4, topics: ["Recursion","DP","Math", "Backtracking"] },
   { slug: "trees", title: "Trees (DFS/BFS)", description: "Traversal patterns and basic tree properties.", order: 6, levelMin: 2, levelMax: 4, topics: ["Tree","DFS","BFS"] },
   { slug: "heaps", title: "Heaps & Priority Queues", description: "Selection, k-way merge, top-k.", order: 7, levelMin: 4, levelMax: 7, topics: ["Heap","Priority Queue"] },
   { slug: "graphs", title: "Graphs & Topo Sort", description: "Cycle detection, topo order, reachability.", order: 8, levelMin: 5, levelMax: 7, topics: ["Graph","Topo Sort","DFS"] },
@@ -153,7 +153,7 @@ export const articles: Article[] = [
   },
 ];
 
-export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; testCases: { input: any[]; output: any }[] })[] = [
+export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; testCases: { input: any[]; output: any, compare?: string }[] })[] = [
   // ==========================================
   // PHASE 1: WARM-UP - Basic Arrays & Loops
   // ==========================================
@@ -282,11 +282,11 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
   # Your code here
   pass`,
     testCases: [
-      { input: [[2, 7, 11, 15], 9], output: [0, 1] },
-      { input: [[3, 2, 4], 6], output: [1, 2] },
-      { input: [[3, 3], 6], output: [0, 1] },
-      { input: [[-1, -2, -3, -4, -5], -8], output: [2, 4] },
-      { input: [[0, 4, 3, 0], 0], output: [0, 3] }
+      { input: [[2, 7, 11, 15], 9], output: [0, 1], compare: "unordered_list" },
+      { input: [[3, 2, 4], 6], output: [1, 2], compare: "unordered_list" },
+      { input: [[3, 3], 6], output: [0, 1], compare: "unordered_list" },
+      { input: [[-1, -2, -3, -4, -5], -8], output: [2, 4], compare: "unordered_list" },
+      { input: [[0, 4, 3, 0], 0], output: [0, 3], compare: "unordered_list" }
     ],
   },
 
@@ -837,19 +837,23 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
     testCases: [
       {
         input: [['eat', 'tea', 'tan', 'ate', 'nat', 'bat']],
-        output: [['ate', 'eat', 'tea'], ['bat'], ['nat', 'tan']]
+        output: [['ate', 'eat', 'tea'], ['bat'], ['nat', 'tan']],
+        compare: 'multiset'
       },
       {
         input: [['']],
-        output: [['']]
+        output: [['']],
+        compare: 'multiset'
       },
       {
         input: [['a']],
-        output: [['a']]
+        output: [['a']],
+        compare: 'multiset'
       },
       {
         input: [['ab', 'ba', 'abc', 'bca', 'cab', 'zzz']],
-        output: [['ab', 'ba'], ['abc', 'bca', 'cab'], ['zzz']]
+        output: [['ab', 'ba'], ['abc', 'bca', 'cab'], ['zzz']],
+        compare: 'multiset'
       },
     ],
   },
@@ -921,11 +925,11 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
   # return List[int] sorted by (-freq, value) as specified
   pass`,
     testCases: [
-      { input: [[1, 1, 1, 2, 2, 3], 2], output: [1, 2] },
-      { input: [[1], 1], output: [1] },
-      { input: [[4, 4, 1, 1, 2, 2], 2], output: [1, 2] },
-      { input: [[5, 3, 5, 2, 2, 2, 3], 2], output: [2, 3] },
-      { input: [[9, 8, 7, 7, 8, 9, 9], 1], output: [9] },
+      { input: [[1, 1, 1, 2, 2, 3], 2], output: [1, 2], compare: 'unordered_list' },
+      { input: [[1], 1], output: [1], compare: 'unordered_list' },
+      { input: [[4, 4, 1, 1, 2, 2], 2], output: [1, 2], compare: 'unordered_list' },
+      { input: [[5, 3, 5, 2, 2, 2, 3], 2], output: [2, 3], compare: 'unordered_list' },
+      { input: [[9, 8, 7, 7, 8, 9, 9], 1], output: [9], compare: 'unordered_list' },
     ],
   },
   
@@ -1031,9 +1035,9 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
   # Your code here
   pass`,
     testCases: [
-      { input: [[-1,0,1,2,-1,-4]], output: [[-1,-1,2],[-1,0,1]] },
-      { input: [[0,1,1]], output: [] },
-      { input: [[0,0,0]], output: [[0,0,0]] },
+      { input: [[-1,0,1,2,-1,-4]], output: [[-1,-1,2],[-1,0,1]], compare: 'multiset' },
+      { input: [[0,1,1]], output: [], compare: 'multiset' },
+      { input: [[0,0,0]], output: [[0,0,0]], compare: 'multiset' },
     ],
   },
   
@@ -1201,7 +1205,91 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
   },
 
   // ==========================================
-  // PHASE 8: Trees Introduction
+  // PHASE 8: Recursion & Backtracking
+  // ==========================================
+  
+  {
+    slug: 'powerset',
+    title: 'Powerset',
+    summary: 'Return all possible subsets (the power set) of an array of unique elements.',
+    difficulty: 3,
+    tags: ['Recursion', 'Backtracking', 'Array'],
+    categorySlug: 'recursion-dp',
+    entryPoint: 'subsets',
+    body: 'Given an integer array `nums` of **unique** elements, return all possible subsets (the power set).\n\nThe solution set must not contain duplicate subsets. Return the solution in any order.',
+    templateCode:
+      `def subsets(nums):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[1, 2, 3]], output: [[], [1], [2], [1, 2], [3], [1, 3], [2, 3], [1, 2, 3]], compare: "multiset"},
+      { input: [[0]], output: [[], [0]], compare: "multiset"},
+      { input: [[]], output: [[]], compare: "multiset"},
+    ],
+  },
+
+  {
+    slug: 'permutations-ii',
+    title: 'Permutations II',
+    summary: 'Return all unique permutations of an array that may contain duplicates.',
+    difficulty: 5,
+    tags: ['Recursion', 'Backtracking', 'Array'],
+    categorySlug: 'recursion-dp',
+    entryPoint: 'permute_unique',
+    body: 'Given a collection of numbers, `nums`, that might contain duplicates, return all possible unique permutations in any order.',
+    templateCode:
+      `def permute_unique(nums):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[1, 1, 2]], output: [[1, 1, 2], [1, 2, 1], [2, 1, 1]], compare: "multiset"},
+      { input: [[1, 2, 3]], output: [[1, 2, 3], [1, 3, 2], [2, 1, 3], [2, 3, 1], [3, 1, 2], [3, 2, 1]], compare: "multiset"},
+    ],
+  },
+
+  {
+    slug: 'letter-combinations-phone-number',
+    title: 'Letter Combinations of a Phone Number',
+    summary: 'Given a string of digits, return all possible letter combinations it could represent.',
+    difficulty: 5,
+    tags: ['Recursion', 'Backtracking', 'String'],
+    categorySlug: 'recursion-dp',
+    entryPoint: 'letter_combinations',
+    body: 'Given a string containing digits from `2-9` inclusive, return all possible letter combinations that the number could represent. Return the answer in any order.\n\nA mapping of digits to letters (just like on the telephone buttons) is given below. Note that 1 does not map to any letters.\n`2:abc`, `3:def`, `4:ghi`, `5:jkl`, `6:mno`, `7:pqrs`, `8:tuv`, `9:wxyz`',
+    templateCode:
+      `def letter_combinations(digits):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: ['23'], output: ["ad", "ae", "af", "bd", "be", "bf", "cd", "ce", "cf"], compare: "multiset"},
+      { input: [''], output: [], compare: "multiset"},
+      { input: ['2'], output: ["a", "b", "c"], compare: "multiset"},
+    ],
+  },
+
+  {
+    slug: 'combination-sum',
+    title: 'Combination Sum',
+    summary: 'Find all unique combinations of candidates that sum to a target.',
+    difficulty: 6,
+    tags: ['Recursion', 'Backtracking', 'Array'],
+    categorySlug: 'recursion-dp',
+    entryPoint: 'combination_sum',
+    body: 'Given an array of **distinct** integer `candidates` and a `target` integer, return a list of all **unique combinations** of `candidates` where the chosen numbers sum to `target`. You may return the combinations in any order.\n\nThe same number may be chosen from `candidates` an unlimited number of times. Two combinations are unique if the frequency of at least one of the chosen numbers is different.',
+    templateCode:
+      `def combination_sum(candidates, target):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[2, 3, 6, 7], 7], output: [[2, 2, 3], [7]], compare: "multiset"},
+      { input: [[2, 3, 5], 8], output: [[2, 2, 2, 2], [2, 3, 3], [3, 5]], compare: "multiset"},
+      { input: [[2], 1], output: [], compare: "multiset"},
+    ],
+  },
+
+
+  // ==========================================
+  // PHASE 9: Trees Introduction
   // ==========================================
 
   {
@@ -1276,7 +1364,7 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
   },
 
   // ==========================================
-  // PHASE 9: Advanced Medium/Hard
+  // PHASE 10: Advanced Medium/Hard
   // ==========================================
 
   {
@@ -1422,7 +1510,7 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
   },
 
   // ==========================================
-  // PHASE 10: Hard Problems
+  // PHASE 11: Hard Problems
   // ==========================================
 
   {
