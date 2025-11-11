@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { clsx } from 'clsx';
 import { useMemo } from 'react';
 import { Book, Code, FileText, Home, Search, Feather, Shield } from 'lucide-react';
-import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
+import { useFirebase, useCollection, useMemoFirebase, useUser } from '@/firebase';
 import type { Problem, Submission } from '@/lib/data';
 import { collection, query, collectionGroup, where } from 'firebase/firestore';
 import { Progress } from '@/components/ui/progress';
@@ -16,7 +16,7 @@ const links = [
   { href: '/problems', label: 'Problems', icon: Code },
   { href: '/lessons', label: 'Lessons', icon: FileText },
   { href: '/search', label: 'Search', icon: Search },
-  { href: '/admin/add-problem', label: 'Admin', icon: Shield },
+  { href: '/admin', label: 'Admin', icon: Shield },
 ];
 
 function OverallProgress() {

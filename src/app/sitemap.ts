@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next';
-import { courses, lessons } from '@/lib/data';
+import { courses } from '@/lib/data';
 import { initializeFirebase } from '@/firebase';
 import { getDocs, collection } from 'firebase/firestore';
 
@@ -20,9 +20,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: new Date(),
     priority: 0.6,
   }));
-
-  const lessonUrls = lessons.map((a) => ({
-    url: `${BASE_URL}/lessons/${a.slug}`,
+  
+  const lessonDocs = await getDocs(collection(firestore, 'lessons'));
+  const lessonUrls = lessonDocs.docs.map((doc) => ({
+    url: `${BASE_URL}/lessons/${doc.id}`,
     lastModified: new Date(),
     priority: 0.7,
   }));

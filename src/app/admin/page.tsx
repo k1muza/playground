@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ProblemSchema, TestCaseSchema, type Problem, type TestCase } from '@/lib/data';
+import { ProblemSchema, TestCaseSchema, LessonSchema, type Problem, type TestCase, type Lesson } from '@/lib/data';
 import Container from '@/components/container';
 import { useFirebase } from '@/firebase';
 import { doc, setDoc, writeBatch } from 'firebase/firestore';
@@ -33,18 +33,32 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { PlusCircle, Trash2, Database } from 'lucide-react';
 import { seedProblems } from '@/actions/seed-problems';
+import { seedLessons } from '@/actions/seed-lessons';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-// Form schema combines problem data and an array of test cases
-const FormSchema = ProblemSchema.omit({
+
+// Form schema for Problems
+const ProblemFormSchema = ProblemSchema.omit({
   tags: true,
 }).extend({
   tags: z.string().min(1, 'At least one tag is required.'),
   testCases: z.array(TestCaseSchema).min(1, 'At least one test case is required.'),
 });
 
-type FormValues = z.infer<typeof FormSchema>;
+type ProblemFormValues = z.infer<typeof ProblemFormSchema>;
 
-function Seeder() {
+
+// Form schema for Lessons
+const LessonFormSchema = LessonSchema.omit({
+  tags: true,
+}).extend({
+  tags: z.string().min(1, 'At least one tag is required.'),
+});
+
+type LessonFormValues = z.infer<typeof LessonFormSchema>;
+
+
+function ProblemSeeder() {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
 
@@ -86,18 +100,63 @@ function Seeder() {
   );
 }
 
-export default function AddProblemPage() {
+function LessonSeeder() {
+  const [isPending, startTransition] = useTransition();
+  const { toast } = useToast();
+
+  const handleSeed = () => {
+    startTransition(async () => {
+      try {
+        const result = await seedLessons();
+        if (result.success) {
+          toast({
+            title: 'Success!',
+            description: result.message,
+          });
+        } else {
+          throw new Error(result.message);
+        }
+      } catch (error) {
+        toast({
+          variant: 'destructive',
+          title: 'Seeding Failed',
+          description: error instanceof Error ? error.message : 'An unknown error occurred.',
+        });
+      }
+    });
+  };
+
+  return (
+    <div className="mb-6 flex items-center justify-between rounded-lg border p-4">
+      <div>
+        <h2 className="font-semibold">Seed Lessons</h2>
+        <p className="text-sm text-muted-foreground">
+          Populate the Firestore `lessons` collection with the default set of lessons.
+        </p>
+      </div>
+      <Button onClick={handleSeed} disabled={isPending} variant="outline">
+        <Database className="mr-2 h-4 w-4" />
+        {isPending ? 'Seeding...' : 'Seed Lessons'}
+      </Button>
+    </div>
+  );
+}
+
+
+function AddProblemForm() {
   const { firestore } = useFirebase();
   const { toast } = useToast();
   const router = useRouter();
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(FormSchema),
+  const form = useForm<ProblemFormValues>({
+    resolver: zodResolver(ProblemFormSchema),
     defaultValues: {
       slug: '',
       title: '',
       summary: '',
-      difficulty: 'Easy',
+      difficulty: 1,
+      categorySlug: 'warm-ups',
+      entryPoint: 'solution',
       tags: '',
       body: '',
       templateCode: 'def solution():\n  pass',
@@ -110,7 +169,7 @@ export default function AddProblemPage() {
     name: 'testCases',
   });
 
-  const onSubmit = async (data: FormValues) => {
+  const onSubmit = async (data: ProblemFormValues) => {
     if (!firestore) {
       toast({
         variant: 'destructive',
@@ -127,19 +186,14 @@ export default function AddProblemPage() {
         tags: data.tags.split(',').map((tag) => tag.trim()),
       };
 
-      // We still validate against the Zod schema to be safe.
       ProblemSchema.parse(problemData);
 
       const batch = writeBatch(firestore);
-
-      // 1. Set the main problem document
       const problemRef = doc(firestore, 'problems', problemData.slug);
       batch.set(problemRef, problemData);
 
-      // 2. Set the test case documents in the subcollection
-      const testCasesRef = doc(firestore, 'problems', problemData.slug);
-      testCases.forEach((tc) => {
-        const testCaseRef = doc(testCasesRef, 'testCases', crypto.randomUUID());
+      testCases.forEach((tc, index) => {
+        const testCaseRef = doc(firestore, 'problems', problemData.slug, 'testCases', `${problemData.slug}-tc-${index}`);
         batch.set(testCaseRef, tc);
       });
       
@@ -168,9 +222,8 @@ export default function AddProblemPage() {
   };
 
   return (
-    <Container className="py-10">
-      <h1 className="text-3xl font-bold font-headline mb-6">Admin</h1>
-      <Seeder />
+    <>
+      <ProblemSeeder />
       <h2 className="text-2xl font-bold font-headline mb-4">Add New Problem</h2>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -179,7 +232,7 @@ export default function AddProblemPage() {
               <CardTitle>Problem Details</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <FormField
+               <FormField
                 control={form.control}
                 name="title"
                 render={({ field }) => (
@@ -240,19 +293,10 @@ export default function AddProblemPage() {
                   name="difficulty"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Difficulty</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a difficulty" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Easy">Easy</SelectItem>
-                          <SelectItem value="Medium">Medium</SelectItem>
-                          <SelectItem value="Hard">Hard</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <FormLabel>Difficulty (1-10)</FormLabel>
+                       <FormControl>
+                        <Input type="number" min="1" max="10" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10))}/>
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -369,8 +413,179 @@ export default function AddProblemPage() {
           </Button>
         </form>
       </Form>
-    </Container>
+    </>
+  )
+}
+
+function AddLessonForm() {
+  const { firestore } = useFirebase();
+  const { toast } = useToast();
+  const router = useRouter();
+
+  const form = useForm<LessonFormValues>({
+    resolver: zodResolver(LessonFormSchema),
+    defaultValues: {
+      slug: '',
+      title: '',
+      excerpt: '',
+      tags: '',
+      body: '',
+    },
+  });
+
+  const onSubmit = async (data: LessonFormValues) => {
+    if (!firestore) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Firestore is not available. Cannot save lesson.',
+      });
+      return;
+    }
+
+    try {
+      const lessonData = {
+        ...data,
+        tags: data.tags.split(',').map((tag) => tag.trim()),
+      };
+
+      LessonSchema.parse(lessonData);
+
+      const lessonRef = doc(firestore, 'lessons', lessonData.slug);
+      await setDoc(lessonRef, lessonData);
+
+      toast({
+        title: 'Success!',
+        description: `Lesson "${lessonData.title}" has been saved.`,
+      });
+
+      router.push(`/lessons/${lessonData.slug}`);
+    } catch (error) {
+      console.error('Error saving lesson:', error);
+      let description = 'An unexpected error occurred.';
+      if (error instanceof z.ZodError) {
+        description = 'Data validation failed. Check the console for details.';
+      } else if (error instanceof Error) {
+        description = error.message;
+      }
+      toast({
+        variant: 'destructive',
+        title: 'Failed to Save Lesson',
+        description,
+      });
+    }
+  };
+
+  return (
+    <>
+      <LessonSeeder />
+      <h2 className="text-2xl font-bold font-headline mb-4">Add New Lesson</h2>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Lesson Details</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Title</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., Introduction to Big-O" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="slug"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Slug</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., intro-to-big-o" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      URL-friendly identifier for the lesson.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="excerpt"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Excerpt</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="A brief one-sentence summary of the lesson." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="tags"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tags</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., Big-O, Analysis, Fundamentals" {...field} />
+                    </FormControl>
+                     <FormDescription>
+                        Comma-separated list of tags.
+                      </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+               <FormField
+                control={form.control}
+                name="body"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Lesson Body</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="The full lesson content in Markdown." rows={12} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          </Card>
+          <Button type="submit" disabled={form.formState.isSubmitting}>
+            {form.formState.isSubmitting ? 'Saving...' : 'Save Lesson'}
+          </Button>
+        </form>
+      </Form>
+    </>
   );
 }
 
-    
+
+export default function AdminPage() {
+  return (
+    <Container className="py-10">
+      <h1 className="text-3xl font-bold font-headline mb-6">Admin Dashboard</h1>
+      <Tabs defaultValue="problems">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="problems">Problems</TabsTrigger>
+          <TabsTrigger value="lessons">Lessons</TabsTrigger>
+        </TabsList>
+        <TabsContent value="problems" className="mt-6">
+          <AddProblemForm />
+        </TabsContent>
+        <TabsContent value="lessons" className="mt-6">
+          <AddLessonForm />
+        </TabsContent>
+      </Tabs>
+    </Container>
+  );
+}

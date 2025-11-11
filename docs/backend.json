@@ -56,28 +56,36 @@
       "type": "object",
       "description": "Represents a lesson within a course.",
       "properties": {
-        "id": {
+        "slug": {
           "type": "string",
-          "description": "Unique identifier for the lesson."
-        },
-        "courseId": {
-          "type": "string",
-          "description": "Reference to Course. (Relationship: Course 1:N Lesson)"
+          "description": "URL-friendly slug for the lesson, used as document ID."
         },
         "title": {
           "type": "string",
           "description": "Title of the lesson."
         },
-        "content": {
+        "excerpt": {
+          "type": "string",
+          "description": "A short summary of the lesson."
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Tags for categorizing the lesson."
+        },
+        "body": {
           "type": "string",
           "description": "Content of the lesson (e.g., Markdown or HTML)."
         }
       },
       "required": [
-        "id",
-        "courseId",
+        "slug",
         "title",
-        "content"
+        "excerpt",
+        "tags",
+        "body"
       ]
     },
     "Problem": {
@@ -332,7 +340,7 @@
         }
       },
       {
-        "path": "lessons/{lessonId}",
+        "path": "lessons/{lessonSlug}",
         "definition": {
           "entityName": "Lesson",
           "schema": {
@@ -341,8 +349,8 @@
           "description": "Stores lesson information.",
           "params": [
             {
-              "name": "lessonId",
-              "description": "Unique identifier for the lesson."
+              "name": "lessonSlug",
+              "description": "URL-friendly slug for the lesson, used as document ID."
             }
           ]
         }
@@ -468,7 +476,7 @@
         }
       }
     ],
-    "reasoning": "The Firestore structure is designed to reflect the relationships between courses, lessons, problems, articles, tags, and user submissions. For problems, the document ID is the URL slug for direct and efficient lookups. Test cases and submissions are stored in subcollections under each problem for scalability and to keep the main problem document lean. This structure supports secure list operations (QAPs) by ensuring all documents in the `problems/{problemSlug}/submissions` collection share the same security context. Denormalization is used for submissions, which include the `userId` and `problemId` to allow for efficient cross-problem queries (e.g., 'show me all problems a user has solved') using collection group queries on the `submissions` collection."
+    "reasoning": "The Firestore structure is designed to reflect the relationships between courses, lessons, problems, articles, tags, and user submissions. For problems and lessons, the document ID is the URL slug for direct and efficient lookups. Test cases and submissions are stored in subcollections under each problem for scalability and to keep the main problem document lean. This structure supports secure list operations (QAPs) by ensuring all documents in the `problems/{problemSlug}/submissions` collection share the same security context. Denormalization is used for submissions, which include the `userId` and `problemId` to allow for efficient cross-problem queries (e.g., 'show me all problems a user has solved') using collection group queries on the `submissions` collection."
   }
 }
     

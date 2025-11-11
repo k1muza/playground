@@ -1,10 +1,14 @@
-export type Lesson = {
-  slug: string;
-  title: string;
-  excerpt: string;
-  tags: string[];
-  body: string;
-};
+import { z } from 'zod';
+
+export const LessonSchema = z.object({
+  slug: z.string().min(1, 'Slug is required.'),
+  title: z.string().min(1, 'Title is required.'),
+  excerpt: z.string().min(1, 'Excerpt is required.'),
+  tags: z.array(z.string()).min(1, 'At least one tag is required.'),
+  body: z.string().min(1, 'Body is required.'),
+});
+
+export type Lesson = z.infer<typeof LessonSchema>;
 
 export const lessons: Lesson[] = [
   {

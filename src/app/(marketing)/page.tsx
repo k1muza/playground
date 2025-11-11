@@ -4,22 +4,30 @@ import Container from '@/components/container';
 import CourseCard from '@/components/course-card';
 import LessonCard from '@/components/lesson-card';
 import ProblemCard from '@/components/problem-card';
-import { courses, lessons } from '@/lib/data';
+import { courses } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, limit } from 'firebase/firestore';
-import type { Problem } from '@/lib/data';
+import type { Problem, Lesson } from '@/lib/data';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Page() {
   const { firestore } = useFirebase();
+
   const problemsQuery = useMemoFirebase(
     () => (firestore ? query(collection(firestore, 'problems'), limit(3)) : null),
     [firestore]
   );
-  const { data: problems, isLoading } = useCollection<Problem>(problemsQuery);
+  const { data: problems, isLoading: isLoadingProblems } = useCollection<Problem>(problemsQuery);
+  
+  const lessonsQuery = useMemoFirebase(
+    () => (firestore ? query(collection(firestore, 'lessons'), limit(3)) : null),
+    [firestore]
+  );
+  const { data: lessons, isLoading: isLoadingLessons } = useCollection<Lesson>(lessonsQuery);
+
 
   return (
     <>
@@ -51,7 +59,7 @@ export default function Page() {
             </Button>
           </div>
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {isLoading ? (
+            {isLoadingProblems ? (
               Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-[180px] w-full" />)
             ) : (
               problems?.map((p) => (
@@ -71,9 +79,13 @@ export default function Page() {
             </Button>
           </div>
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {lessons.map((a) => (
-              <LessonCard key={a.slug} lesson={a} />
-            ))}
+            {isLoadingLessons ? (
+               Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-[190px] w-full" />)
+            ) : (
+              lessons?.map((l) => (
+                <LessonCard key={l.slug} lesson={l} />
+              ))
+            )}
           </div>
         </section>
       </Container>
