@@ -2,11 +2,11 @@ import Container from '@/components/container';
 import Sidebar from '@/components/sidebar';
 import { courses } from '@/lib/data';
 import { notFound } from 'next/navigation';
-import { mdToHtml } from '@/lib/utils';
 import { generateCourseToc } from '@/ai/flows/generate-course-toc';
 import TopicBadge from '@/components/topic-badge';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Lightbulb } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 
 async function AiCourseToc({ courseContent }: { courseContent: string }) {
   try {
@@ -69,7 +69,14 @@ export default async function CourseDetail({
             {course.lessons.map((l, index) => (
               <section id={l.id} key={l.id} className="scroll-mt-24">
                 {index > 0 && <hr className="my-12"/>}
-                <div dangerouslySetInnerHTML={{ __html: mdToHtml(l.content) }} />
+                <ReactMarkdown
+                  className="prose dark:prose-invert max-w-none"
+                  components={{
+                    code: ({ node, ...props }) => <code className="font-code" {...props} />,
+                  }}
+                >
+                  {l.content}
+                </ReactMarkdown>
               </section>
             ))}
           </article>

@@ -1,8 +1,8 @@
 import Container from '@/components/container';
 import { lessons } from '@/lib/data';
 import { notFound } from 'next/navigation';
-import { mdToHtml } from '@/lib/utils';
 import TopicBadge from '@/components/topic-badge';
+import ReactMarkdown from 'react-markdown';
 
 export async function generateStaticParams() {
   return lessons.map((a) => ({
@@ -24,10 +24,16 @@ export default function LessonDetail({ params }: { params: { slug: string } }) {
         </div>
         <h1 className="text-4xl font-bold font-headline">{a.title}</h1>
         <p className="text-lg text-muted-foreground mt-2">{a.excerpt}</p>
-        <div
-          className="mt-8"
-          dangerouslySetInnerHTML={{ __html: mdToHtml(a.body) }}
-        />
+        <div className="mt-8">
+          <ReactMarkdown
+            className="prose dark:prose-invert max-w-none"
+            components={{
+              code: ({ node, ...props }) => <code className="font-code" {...props} />,
+            }}
+          >
+            {a.body}
+          </ReactMarkdown>
+        </div>
       </article>
     </Container>
   );
