@@ -558,6 +558,35 @@ An input string is valid if:
   },
 
   {
+    slug: 'next-greater-element-i',
+    title: 'Next Greater Element I',
+    summary: 'Find the next greater element for each element of a first array in a second array.',
+    difficulty: 4,
+    tags: ['Stack', 'Array', 'Monotonic Stack', 'Hash Map'],
+    categorySlug: 'stacks',
+    entryPoint: 'next_greater_element',
+    body: `You are given two distinct 0-indexed integer arrays \`nums1\` and \`nums2\`, where \`nums1\` is a subset of \`nums2\`.
+
+For each \`0 <= i < nums1.length\`, find the index \`j\` such that \`nums1[i] == nums2[j]\` and determine the **next greater element** of \`nums2[j]\` in \`nums2\`. If there is no next greater element, the answer for this query is \`-1\`.
+
+Return an array \`ans\` of length \`nums1.length\` such that \`ans[i]\` is the next greater element as described above.
+
+This can be solved efficiently by first computing the next greater element for all numbers in \`nums2\` using a monotonic stack.`,
+    templateCode:
+`import collections
+
+def next_greater_element(nums1, nums2):
+  # Your code here
+  pass
+`,
+    testCases: [
+        { input: [[4,1,2], [1,3,4,2]], output: [-1,3,-1] },
+        { input: [[2,4], [1,2,3,4]], output: [3,-1] },
+        { input: [[1,3,5,2,4], [6,5,4,3,2,1,7]], output: [7,7,7,7,7] },
+    ],
+  },
+
+  {
     slug: 'simplify-path',
     title: 'Simplify Path',
     summary: 'Given a Unix-style absolute path, simplify it.',
@@ -669,6 +698,35 @@ This is a classic "monotonic stack" problem.`,
         { input: [[30,40,50,60]], output: [1,1,1,0] },
         { input: [[30,60,90]], output: [1,1,0] },
         { input: [[89,62,70,58,47,47,46,76,100,70]], output: [8,1,5,4,3,2,1,1,0,0] }
+    ],
+  },
+
+  {
+    slug: 'sliding-window-maximum',
+    title: 'Sliding Window Maximum',
+    summary: 'Find the maximum value in each sliding window of size k.',
+    difficulty: 6,
+    tags: ['Array', 'Sliding Window', 'Deque', 'Monotonic Queue'],
+    categorySlug: 'stacks',
+    entryPoint: 'max_sliding_window',
+    body: `You are given an array of integers \`nums\`, there is a sliding window of size \`k\` which is moving from the very left of the array to the very right. You can only see the \`k\` numbers in the window. Each time the sliding window moves right by one position.
+
+Return the max sliding window.
+
+This problem can be solved efficiently using a **deque (double-ended queue)** to maintain a "monotonic queue" of indices.`,
+    templateCode:
+`import collections
+
+def max_sliding_window(nums, k):
+  # Your code here
+  pass
+`,
+    testCases: [
+        { input: [[1,3,-1,-3,5,3,6,7], 3], output: [3,3,5,5,6,7] },
+        { input: [[1], 1], output: [1] },
+        { input: [[1,-1], 1], output: [1,-1] },
+        { input: [[9,11], 2], output: [11] },
+        { input: [[4,-2], 2], output: [4] }
     ],
   },
 
@@ -825,7 +883,7 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
     slug: 'subarray-sum-equals-k',
     title: 'Subarray Sum Equals K',
     summary: 'Count the number of subarrays whose sum equals k.',
-    difficulty: 5,
+    difficulty: 4,
     tags: ['Hash Map', 'Prefix Sum', 'Array'],
     categorySlug: 'hashing',
     entryPoint: 'subarray_sum',
