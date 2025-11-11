@@ -1705,32 +1705,6 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
       { input: [[['1','1','0','0','0'],['1','1','0','0','0'],['0','0','1','0','0'],['0','0','0','1','1']]], output: 3 },
     ]
   },
-
-  {
-    slug: 'longest-substring-without-repeating',
-    title: 'Longest Substring Without Repeating Characters',
-    summary: 'Find the length of the longest substring without repeating characters.',
-    difficulty: 5,
-    tags: ['String', 'Sliding Window', 'Hash Set'],
-    categorySlug: 'hashing',
-    entryPoint: 'length_of_longest_substring',
-    body:
-      'Given a string `s`, find the length of the longest substring without repeating characters.\n\n' +
-      'Use a sliding window approach with a hash set.',
-    templateCode:
-      `def length_of_longest_substring(s):
-  # s: str
-  # return int
-  pass`,
-    testCases: [
-      { input: ['abcabcbb'], output: 3 },  // "abc"
-      { input: ['bbbbb'], output: 1 },     // "b"
-      { input: ['pwwkew'], output: 3 },    // "wke"
-      { input: [''], output: 0 },
-      { input: ['dvdf'], output: 3 },      // "vdf"
-      { input: ['abcdefg'], output: 7 },
-    ],
-  },
   
   {
     slug: 'shortest-path-binary-matrix',
