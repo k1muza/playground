@@ -441,6 +441,26 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
       { input: [[], [1, 2]], output: [] },
     ],
   },
+  
+  {
+    slug: 'relative-sort-array',
+    title: 'Relative Sort Array',
+    summary: 'Sort an array based on the order of another array.',
+    difficulty: 3,
+    tags: ['Sorting', 'Hash Map', 'Counting'],
+    categorySlug: 'sets-ordering',
+    entryPoint: 'relative_sort_array',
+    body: 'Given two arrays, `arr1` and `arr2`, `arr2` contains distinct elements, and all of its elements are also in `arr1`.\n\nSort the elements of `arr1` such that the relative ordering of items in `arr1` is the same as in `arr2`. Elements that do not appear in `arr2` should be placed at the end of `arr1` in **ascending** order.',
+    templateCode:
+`def relative_sort_array(arr1, arr2):
+  # Your code here
+  pass
+`,
+    testCases: [
+      { input: [[2,3,1,3,2,4,6,7,9,2,19], [2,1,4,3,9,6]], output: [2,2,2,1,4,3,3,9,6,7,19] },
+      { input: [[28,6,22,8,44,17], [22,28,8,6]], output: [22,28,8,6,17,44] }
+    ]
+  },
 
   {
     slug: 'ransom-note',
@@ -960,6 +980,26 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
       },
     ],
   },
+  
+  {
+    slug: 'sort-by-frequency-then-value',
+    title: 'Sort by Frequency then Value',
+    summary: 'Sort an array descending by frequency, with ties broken by ascending value.',
+    difficulty: 4,
+    tags: ['Sorting', 'Hash Map', 'Counting'],
+    categorySlug: 'hashing',
+    entryPoint: 'sort_by_frequency',
+    body: 'Given an array of integers `nums`, sort the array in decreasing order based on the frequency of the values.\n\nIf multiple values have the same frequency, sort them in increasing order.\n\nFor example, `[2,3,1,3,2,2]` should be `[2,2,2,3,3,1]`.',
+    templateCode:
+`def sort_by_frequency(nums):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[1,1,2,2,2,3]], output: [2,2,2,1,1,3] },
+      { input: [[2,3,1,3,2]], output: [2,2,3,3,1] },
+      { input: [[-1,1,-6,4,5,-6,1,4,1]], output: [1,1,1,-6,-6,4,4,5] }
+    ]
+  },
 
   {
     slug: 'longest-consecutive-sequence',
@@ -1008,31 +1048,6 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
       { input: [[-1, -1, 1], 0], output: 1 },
       { input: [[0, 0, 0], 0], output: 6 },
       { input: [[3, 4, 7, 2, -3, 1, 4, 2], 7], output: 4 },
-    ],
-  },
-
-  {
-    slug: 'top-k-frequent-elements',
-    title: 'Top K Frequent Elements',
-    summary: 'Return the k most frequent elements in the array.',
-    difficulty: 5,
-    tags: ['Hash Map', 'Counting', 'Heap'],
-    categorySlug: 'heaps',
-    entryPoint: 'top_k_frequent',
-    body:
-      'Given an integer array `nums` and an integer `k`, return the `k` most frequent elements.\n\n' +
-      '**Determinism for tests**: Sort the result by decreasing frequency; break ties by ascending element value.',
-    templateCode:
-      `def top_k_frequent(nums, k):
-  # nums: List[int], k: int
-  # return List[int] sorted by (-freq, value) as specified
-  pass`,
-    testCases: [
-      { input: [[1, 1, 1, 2, 2, 3], 2], output: [1, 2], compare: 'unordered_list' },
-      { input: [[1], 1], output: [1], compare: 'unordered_list' },
-      { input: [[4, 4, 1, 1, 2, 2], 2], output: [1, 2], compare: 'unordered_list' },
-      { input: [[5, 3, 5, 2, 2, 2, 3], 2], output: [2, 3], compare: 'unordered_list' },
-      { input: [[9, 8, 7, 7, 8, 9, 9], 1], output: [9], compare: 'unordered_list' },
     ],
   },
   
@@ -1864,6 +1879,45 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
   },
   
   {
+    slug: 'kth-largest-element-in-an-array',
+    title: 'Kth Largest Element in an Array',
+    summary: 'Find the kth largest element in an unsorted array.',
+    difficulty: 5,
+    tags: ['Sorting', 'Heap', 'Quickselect'],
+    categorySlug: 'heaps',
+    entryPoint: 'find_kth_largest',
+    body: 'Given an integer array `nums` and an integer `k`, return the `k`th largest element in the array.\n\nNote that it is the `k`th largest element in the sorted order, not the `k`th distinct element.\n\nCan you solve it without sorting the whole array?',
+    templateCode:
+`def find_kth_largest(nums, k):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[3,2,1,5,6,4], 2], output: 5 },
+      { input: [[3,2,3,1,2,4,5,5,6], 4], output: 4 }
+    ]
+  },
+  
+  {
+    slug: 'verifying-an-alien-dictionary',
+    title: 'Verifying an Alien Dictionary',
+    summary: 'Check if a list of words is sorted according to a custom alphabet.',
+    difficulty: 5,
+    tags: ['Sorting', 'Hash Map', 'String'],
+    categorySlug: 'sets-ordering',
+    entryPoint: 'is_alien_sorted',
+    body: 'In an alien language, surprisingly, they also use English lowercase letters, but possibly in a different `order`. The `order` of the alphabet is some permutation of lowercase letters.\n\nGiven a sequence of `words` written in the alien language, and the `order` of the alphabet, return `true` if and only if the given `words` are sorted lexicographically in this alien language.',
+    templateCode:
+`def is_alien_sorted(words, order):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [["hello","leetcode"], "hlabcdefgijkmnopqrstuvwxyz"], output: true },
+      { input: [["word","world","row"], "worldabcefghijkmnpqstuvxyz"], output: false },
+      { input: [["apple","app"], "abcdefghijklmnopqrstuvwxyz"], output: false }
+    ]
+  },
+  
+  {
     slug: 'search-in-rotated-sorted-array',
     title: 'Search in Rotated Sorted Array',
     summary: 'Search for a target in a sorted array that has been rotated.',
@@ -2115,6 +2169,26 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
       { input: [[[1,5],[8,9],[8,9]]], output: 2 }
     ]
   },
+  
+  {
+    slug: 'queue-reconstruction-by-height',
+    title: 'Queue Reconstruction by Height',
+    summary: 'Reconstruct a queue based on people\'s heights and number of people in front.',
+    difficulty: 6,
+    tags: ['Greedy', 'Sorting', 'Array'],
+    categorySlug: 'greedy-intervals',
+    entryPoint: 'reconstruct_queue',
+    body: 'You are given an array of people, where `people[i] = [hi, ki]` represents the `i`th person has a height of `hi` and `ki` people in front of them who have a height greater than or equal to `hi`.\n\nReconstruct and return the queue.\n\nThis problem can be solved with a clever greedy approach: sort the people and then insert them into the result array at specific positions.',
+    templateCode:
+`def reconstruct_queue(people):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[[7,0],[4,4],[7,1],[5,0],[6,1],[5,2]]], output: [[5,0],[7,0],[5,2],[6,1],[4,4],[7,1]] },
+      { input: [[[6,0],[5,0],[4,0],[3,0],[2,0],[1,0]]], output: [[1,0],[2,0],[3,0],[4,0],[5,0],[6,0]] }
+    ]
+  },
+  
   // ==========================================
   // New problems for Math & Bit Tricks
   // ==========================================
@@ -2192,6 +2266,26 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
       { input: [[3,0,1]], output: 2 },
       { input: [[0,1]], output: 2 },
       { input: [[9,6,4,2,3,5,7,0,1]], output: 8 }
+    ]
+  },
+  {
+    slug: 'course-schedule-ii',
+    title: 'Course Schedule II',
+    summary: 'Return a valid course order given prerequisites, or an empty list if impossible.',
+    difficulty: 6,
+    tags: ['Graph', 'DFS', 'Topological Sort', 'BFS'],
+    categorySlug: 'graphs',
+    entryPoint: 'find_order',
+    body: 'This is a follow-up to Course Schedule. This time, you need to return the ordering of courses you should take to finish all courses. If there are multiple valid orderings, return any of them. If it is impossible to finish all courses (i.e., there is a cycle), return an empty list.\n\nThis can be solved using either Kahn\'s algorithm (BFS with in-degrees) or a DFS-based topological sort.',
+    templateCode:
+`def find_order(numCourses, prerequisites):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [2, [[1,0]]], output: [0,1], compare: "multiset" },
+      { input: [4, [[1,0],[2,0],[3,1],[3,2]]], output: [0,1,2,3], compare: "multiset" },
+      { input: [1, []], output: [0], compare: "multiset" },
+      { input: [2, [[0,1],[1,0]]], output: [], compare: "multiset" }
     ]
   },
 ];
