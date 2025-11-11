@@ -1,22 +1,15 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import Container from '@/components/container';
 import ProblemCard from '@/components/problem-card';
-import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { useFirebase, useCollection, useMemoFirebase, useUser } from '@/firebase';
 import { collection, query, collectionGroup, where } from 'firebase/firestore';
 import type { Problem, Submission } from '@/lib/data';
 import { categories } from '@/lib/data';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Progress } from '@/components/ui/progress';
 
 function ProblemListSkeleton() {
   return (
@@ -64,23 +57,34 @@ export default function ProblemsPage() {
     return new Set(submissions.filter(s => s.isCorrect).map(s => s.problemId));
   }, [submissions]);
 
-  const categorizedProblems = useMemo(() => {
-    if (!problems) return {};
+  const { categorizedProblems, progressByCategory } = useMemo(() => {
+    if (!problems) return { categorizedProblems: {}, progressByCategory: {} };
+
     const problemGroups: { [key: string]: Problem[] } = {};
+    const progress: { [key: string]: { completed: number, total: number } } = {};
+
     problems.forEach((problem) => {
       const catSlug = problem.categorySlug;
       if (!catSlug) return;
       if (!problemGroups[catSlug]) {
         problemGroups[catSlug] = [];
+        progress[catSlug] = { completed: 0, total: 0 };
       }
       problemGroups[catSlug].push(problem);
+      
+      const difficultyWeight = problem.difficulty || 1;
+      progress[catSlug].total += difficultyWeight;
+      if (solvedProblemSlugs.has(problem.slug)) {
+        progress[catSlug].completed += difficultyWeight;
+      }
     });
 
     for (const catSlug in problemGroups) {
       problemGroups[catSlug].sort((a, b) => a.difficulty - b.difficulty);
     }
-    return problemGroups;
-  }, [problems]);
+    return { categorizedProblems: problemGroups, progressByCategory: progress };
+  }, [problems, solvedProblemSlugs]);
+
 
   const isLoading = isLoadingProblems || isLoadingSubmissions;
 
@@ -105,10 +109,21 @@ export default function ProblemsPage() {
                 return null;
               }
 
+              const categoryProgress = progressByCategory[category.slug];
+              const completionPercentage = categoryProgress.total > 0
+                ? Math.round((categoryProgress.completed / categoryProgress.total) * 100)
+                : 0;
+
               return (
                 <AccordionItem value={category.slug} key={category.slug} className="border-b-0">
-                  <AccordionTrigger className="text-xl font-semibold font-headline hover:no-underline rounded-md px-4 py-2 bg-secondary">
-                    {category.title}
+                  <AccordionTrigger className="text-xl font-semibold font-headline hover:no-underline rounded-md px-4 py-3 bg-secondary">
+                    <div className='w-full'>
+                      <div className="flex justify-between items-center w-full mb-2">
+                        <span>{category.title}</span>
+                        <span className="text-sm font-normal text-muted-foreground">{completionPercentage}%</span>
+                      </div>
+                      <Progress value={completionPercentage} className="h-2" />
+                    </div>
                   </AccordionTrigger>
                   <AccordionContent className="pt-4">
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
