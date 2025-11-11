@@ -912,7 +912,7 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
     slug: 'top-k-frequent-elements',
     title: 'Top K Frequent Elements',
     summary: 'Return the k most frequent elements in the array.',
-    difficulty: 4,
+    difficulty: 5,
     tags: ['Hash Map', 'Counting', 'Heap'],
     categorySlug: 'hashing',
     entryPoint: 'top_k_frequent',
@@ -1035,9 +1035,9 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
   # Your code here
   pass`,
     testCases: [
-      { input: [[-1,0,1,2,-1,-4]], output: [[-1,-1,2],[-1,0,1]], compare: 'multiset' },
-      { input: [[0,1,1]], output: [], compare: 'multiset' },
-      { input: [[0,0,0]], output: [[0,0,0]], compare: 'multiset' },
+      { input: [[-1,0,1,2,-1,-4]], output: [[-1,-1,2],[-1,0,1]], compare: "multiset" },
+      { input: [[0,1,1]], output: [], compare: "multiset" },
+      { input: [[0,0,0]], output: [[0,0,0]], compare: "multiset" },
     ],
   },
   
@@ -1362,6 +1362,85 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
       { input: [{ val: 1, left: null, right: null }, null], output: false },
     ],
   },
+  
+  {
+    slug: 'binary-tree-level-order-traversal',
+    title: 'Binary Tree Level Order Traversal',
+    summary: 'Traverse the tree level by level.',
+    difficulty: 4,
+    tags: ['Tree', 'BFS', 'Queue'],
+    categorySlug: 'trees',
+    entryPoint: 'level_order',
+    body: 'Given the root of a binary tree, return the level order traversal of its nodes\' values. (i.e., from left to right, level by level).',
+    templateCode: `def level_order(root):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [{val: 3, left: {val: 9}, right: {val: 20, left: {val: 15}, right: {val: 7}}}], output: [[3], [9, 20], [15, 7]] },
+      { input: [{val: 1}], output: [[1]] },
+      { input: [null], output: [] }
+    ]
+  },
+
+  {
+    slug: 'path-sum',
+    title: 'Path Sum',
+    summary: 'Check if there is a root-to-leaf path with a given sum.',
+    difficulty: 4,
+    tags: ['Tree', 'DFS', 'Recursion'],
+    categorySlug: 'trees',
+    entryPoint: 'has_path_sum',
+    body: 'Given the root of a binary tree and an integer `targetSum`, return `True` if the tree has a root-to-leaf path such that adding up all the values along the path equals `targetSum`. A leaf is a node with no children.',
+    templateCode: `def has_path_sum(root, targetSum):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [{val: 5, left: {val: 4, left: {val: 11, left: {val: 7}, right: {val: 2}}}, right: {val: 8, left: {val: 13}, right: {val: 4, right: {val: 1}}}}, 22], output: true },
+      { input: [{val: 1, left: {val: 2}, right: {val: 3}}, 5], output: false },
+      { input: [null, 0], output: false }
+    ]
+  },
+
+  {
+    slug: 'lowest-common-ancestor-bst',
+    title: 'Lowest Common Ancestor of a BST',
+    summary: 'Find the lowest common ancestor of two given nodes in a Binary Search Tree.',
+    difficulty: 5,
+    tags: ['Tree', 'BST', 'Recursion'],
+    categorySlug: 'trees',
+    entryPoint: 'lowest_common_ancestor_bst',
+    body: 'Given a binary search tree (BST), find the lowest common ancestor (LCA) node of two given nodes in the BST. The LCA is defined between two nodes `p` and `q` as the lowest node in T that has both `p` and `q` as descendants.\n\n*This problem is different from the standard LCA problem as it requires you to pass the node objects themselves for `p` and `q`.* The test runner will handle constructing the tree and finding the node references to pass to your function.',
+    templateCode: `def lowest_common_ancestor_bst(root, p, q):
+  # This is a simplified version for Python. 
+  # In a real scenario, you'd likely work with node objects.
+  # For this problem, assume p and q are just integer values.
+  # Your code should return the value of the LCA node.
+  pass`,
+    testCases: [
+      { input: [{val: 6, left: {val: 2, left: {val: 0}, right: {val: 4, left: {val: 3}, right: {val: 5}}}, right: {val: 8, left: {val: 7}, right: {val: 9}}}, 2, 8], output: 6 },
+      { input: [{val: 6, left: {val: 2, left: {val: 0}, right: {val: 4, left: {val: 3}, right: {val: 5}}}, right: {val: 8, left: {val: 7}, right: {val: 9}}}, 2, 4], output: 2 },
+      { input: [{val: 2, left: {val: 1}}, 2, 1], output: 2 }
+    ]
+  },
+
+  {
+    slug: 'diameter-of-binary-tree',
+    title: 'Diameter of Binary Tree',
+    summary: 'Find the length of the longest path between any two nodes in a tree.',
+    difficulty: 6,
+    tags: ['Tree', 'DFS', 'Recursion'],
+    categorySlug: 'trees',
+    entryPoint: 'diameter_of_binary_tree',
+    body: 'Given the root of a binary tree, return the length of the diameter of the tree. The diameter is the length of the longest path between any two nodes in a tree. This path may or may not pass through the root.\n\nThe length of a path between two nodes is represented by the number of edges between them.',
+    templateCode: `def diameter_of_binary_tree(root):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [{val: 1, left: {val: 2, left: {val: 4}, right: {val: 5}}, right: {val: 3}}], output: 3 },
+      { input: [{val: 1, left: {val: 2}}], output: 1 },
+      { input: [null], output: 0 }
+    ]
+  },
 
   // ==========================================
   // PHASE 10: Advanced Medium/Hard
@@ -1512,6 +1591,43 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
   // ==========================================
   // PHASE 11: Hard Problems
   // ==========================================
+
+  {
+    slug: 'k-closest-points',
+    title: 'K Closest Points to Origin',
+    summary: 'Find the K closest points to the origin (0, 0).',
+    difficulty: 4,
+    tags: ['Heap', 'Sorting', 'Priority Queue'],
+    categorySlug: 'heaps',
+    entryPoint: 'k_closest',
+    body: 'Given an array of `points` where `points[i] = [xi, yi]` represents a point on the X-Y plane and an integer `k`, return the `k` closest points to the origin `(0, 0)`.\n\nThe distance between two points on the X-Y plane is the Euclidean distance (i.e., `sqrt(x1 - x2)^2 + (y1 - y2)^2`).\n\nYou may return the answer in any order. The answer is guaranteed to be unique (except for the order that it is in).',
+    templateCode: `def k_closest(points, k):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[[1,3],[-2,2]], 1], output: [[-2,2]], compare: 'multiset' },
+      { input: [[[3,3],[5,-1],[-2,4]], 2], output: [[3,3],[-2,4]], compare: 'multiset' }
+    ]
+  },
+  
+  {
+    slug: 'search-in-rotated-sorted-array',
+    title: 'Search in Rotated Sorted Array',
+    summary: 'Search for a target in a sorted array that has been rotated.',
+    difficulty: 5,
+    tags: ['Array', 'Binary Search'],
+    categorySlug: 'advanced-binary-search',
+    entryPoint: 'search',
+    body: 'There is an integer array `nums` sorted in ascending order (with distinct values).\n\nPrior to being passed to your function, `nums` is possibly rotated at an unknown pivot index `k` (`1 <= k < nums.length`). For example, `[0,1,2,4,5,6,7]` might be rotated at pivot index 3 and become `[4,5,6,7,0,1,2]`.\n\nGiven the array `nums` after the possible rotation and an integer `target`, return the index of `target` if it is in `nums`, or -1 if it is not in `nums`.\n\nYou must write an algorithm with `O(log n)` runtime complexity.',
+    templateCode: `def search(nums, target):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[4,5,6,7,0,1,2], 0], output: 4 },
+      { input: [[4,5,6,7,0,1,2], 3], output: -1 },
+      { input: [[1], 0], output: -1 }
+    ]
+  },
 
   {
     slug: 'trapping-rain-water',
