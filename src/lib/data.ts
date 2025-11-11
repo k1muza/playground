@@ -1495,6 +1495,24 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
       }
     ],
   },
+  
+  {
+    slug: 'number-of-islands',
+    title: 'Number of Islands',
+    summary: 'Count the number of islands in a 2D grid.',
+    difficulty: 5,
+    tags: ['Grid', 'DFS', 'BFS'],
+    categorySlug: 'grids-backtracking',
+    entryPoint: 'num_islands',
+    body: 'Given an `m x n` 2D binary grid `grid` which represents a map of `\'1\'`s (land) and `\'0\'`s (water), return the number of islands.\n\nAn island is surrounded by water and is formed by connecting adjacent lands horizontally or vertically. You may assume all four edges of the grid are all surrounded by water.',
+    templateCode: `def num_islands(grid):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[['1','1','1','1','0'],['1','1','0','1','0'],['1','1','0','0','0'],['0','0','0','0','0']]], output: 1 },
+      { input: [[['1','1','0','0','0'],['1','1','0','0','0'],['0','0','1','0','0'],['0','0','0','1','1']]], output: 3 },
+    ]
+  },
 
   {
     slug: 'longest-substring-without-repeating',
@@ -1520,6 +1538,25 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
       { input: ['dvdf'], output: 3 },      // "vdf"
       { input: ['abcdefg'], output: 7 },
     ],
+  },
+  
+  {
+    slug: 'shortest-path-binary-matrix',
+    title: 'Shortest Path in Binary Matrix',
+    summary: 'Find the shortest clear path from top-left to bottom-right in a grid.',
+    difficulty: 6,
+    tags: ['Grid', 'BFS', 'Graph'],
+    categorySlug: 'graphs',
+    entryPoint: 'shortest_path_binary_matrix',
+    body: 'Given an `n x n` binary matrix `grid`, return the length of the shortest **clear path** in the matrix. If there is no clear path, return -1.\n\nA clear path in a binary matrix is a path from the **top-left** cell (i.e., `(0, 0)`) to the **bottom-right** cell (i.e., `(n - 1, n - 1)`) such that:\n- All the visited cells of the path are `0`.\n- All the adjacent cells of the path are **8-directionally** connected (i.e., they are different and share an edge or a corner).',
+    templateCode: `def shortest_path_binary_matrix(grid):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[ [0,1],[1,0] ]], output: 2 },
+      { input: [[ [0,0,0],[1,1,0],[1,1,0] ]], output: 4 },
+      { input: [[ [1,0,0],[1,1,0],[1,1,0] ]], output: -1 },
+    ]
   },
 
   {
@@ -1548,6 +1585,45 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
       { input: [4, [[1, 0], [2, 0], [3, 1], [3, 2]]], output: true },
       { input: [1, []], output: true },
     ],
+  },
+  
+  {
+    slug: 'climbing-stairs',
+    title: 'Climbing Stairs',
+    summary: 'Find the number of distinct ways to climb to the top of a staircase.',
+    difficulty: 5,
+    tags: ['Dynamic Programming', 'Recursion'],
+    categorySlug: 'recursion-dp',
+    entryPoint: 'climb_stairs',
+    body: 'You are climbing a staircase. It takes `n` steps to reach the top.\n\nEach time you can either climb 1 or 2 steps. In how many distinct ways can you climb to the top?\n\nThis is a classic introductory dynamic programming problem.',
+    templateCode: `def climb_stairs(n):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [2], output: 2 },
+      { input: [3], output: 3 },
+      { input: [5], output: 8 },
+      { input: [45], output: 1836311903 }
+    ]
+  },
+  
+  {
+    slug: 'coin-change',
+    title: 'Coin Change',
+    summary: 'Find the minimum number of coins to make a given amount.',
+    difficulty: 6,
+    tags: ['Dynamic Programming', 'Array'],
+    categorySlug: 'recursion-dp',
+    entryPoint: 'coin_change',
+    body: 'You are given an integer array `coins` representing coins of different denominations and an integer `amount` representing a total amount of money.\n\nReturn the fewest number of coins that you need to make up that amount. If that amount of money cannot be made up by any combination of the coins, return -1.\n\nYou may assume that you have an infinite number of each kind of coin.',
+    templateCode: `def coin_change(coins, amount):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[1,2,5], 11], output: 3 }, // 5 + 5 + 1
+      { input: [[2], 3], output: -1 },
+      { input: [[1], 0], output: 0 }
+    ]
   },
 
   {
@@ -1626,6 +1702,44 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
       { input: [[4,5,6,7,0,1,2], 0], output: 4 },
       { input: [[4,5,6,7,0,1,2], 3], output: -1 },
       { input: [[1], 0], output: -1 }
+    ]
+  },
+  
+  {
+    slug: 'word-ladder',
+    title: 'Word Ladder',
+    summary: 'Find the shortest transformation sequence from one word to another.',
+    difficulty: 7,
+    tags: ['Graph', 'BFS'],
+    categorySlug: 'graphs',
+    entryPoint: 'ladder_length',
+    body: 'Given two words, `beginWord` and `endWord`, and a dictionary `wordList`, return the length of the shortest transformation sequence from `beginWord` to `endWord`.\n\n- A transformation sequence is a sequence of words `beginWord -> s1 -> s2 -> ... -> sk` such that:\n- Every adjacent pair of words differs by a single letter.\n- Every `si` for `1 <= i <= k` is in `wordList`.\n- `sk == endWord`.\nIf no such sequence exists, return 0.',
+    templateCode: `def ladder_length(beginWord, endWord, wordList):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: ["hit", "cog", ["hot","dot","dog","lot","log","cog"]], output: 5 },
+      { input: ["hit", "cog", ["hot","dot","dog","lot","log"]], output: 0 },
+      { input: ["a", "c", ["a","b","c"]], output: 2 }
+    ]
+  },
+  
+  {
+    slug: 'longest-increasing-subsequence',
+    title: 'Longest Increasing Subsequence',
+    summary: 'Find the length of the longest strictly increasing subsequence.',
+    difficulty: 7,
+    tags: ['Dynamic Programming', 'Binary Search'],
+    categorySlug: 'recursion-dp',
+    entryPoint: 'length_of_lis',
+    body: 'Given an integer array `nums`, return the length of the longest strictly increasing subsequence.\n\nA subsequence is a sequence that can be derived from an array by deleting some or no elements without changing the order of the remaining elements.\n\nWhile a standard O(n^2) DP solution exists, can you find the more optimal O(n log n) solution using patience sorting or binary search?',
+    templateCode: `def length_of_lis(nums):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[10,9,2,5,3,7,101,18]], output: 4 }, // [2,3,7,101]
+      { input: [[0,1,0,3,2,3]], output: 4 }, // [0,1,2,3]
+      { input: [[7,7,7,7,7,7,7]], output: 1 }
     ]
   },
 
@@ -1764,3 +1878,5 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
     ],
   },
 ];
+
+    
