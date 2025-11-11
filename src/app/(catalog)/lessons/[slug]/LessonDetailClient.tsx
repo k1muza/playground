@@ -2,13 +2,13 @@
 'use client';
 
 import Container from '@/components/container';
-import { notFound } from 'next/navigation';
 import TopicBadge from '@/components/topic-badge';
 import ReactMarkdown from 'react-markdown';
 import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import type { Lesson } from '@/lib/lessons';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent } from '@/components/ui/card';
 
 function LessonDetailSkeleton() {
   return (
@@ -38,7 +38,20 @@ export default function LessonDetailClient({ slug }: { slug: string }) {
   }
 
   if (!lesson) {
-    return notFound();
+    // Client components can't throw a 404 this way.
+    // Instead, we render a "not found" message.
+    return (
+      <Container className="py-16">
+        <Card>
+          <CardContent className="p-8">
+            <h1 className="text-2xl font-bold mb-2">Lesson not found</h1>
+            <p className="text-muted-foreground">
+              We couldn’t find a lesson with the slug “{slug}”. It might have been moved or deleted.
+            </p>
+          </CardContent>
+        </Card>
+      </Container>
+    );
   }
 
   return (
