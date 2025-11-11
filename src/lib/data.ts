@@ -344,6 +344,55 @@ export const problemsForSeeding: (Omit<Problem, 'tags'> & { tags: string[]; test
     ],
   },
 
+  {
+    slug: 'ransom-note',
+    title: 'Ransom Note',
+    summary: 'Determine if a ransom note can be constructed from a magazine.',
+    difficulty: 3,
+    tags: ['String', 'Hash Map', 'Counting'],
+    categorySlug: 'hashing',
+    entryPoint: 'can_construct',
+    body:
+      'Given two strings, `ransomNote` and `magazine`, return `True` if `ransomNote` can be constructed from the characters in `magazine`, and `False` otherwise.\n\n' +
+      'Each character in `magazine` can only be used once in `ransomNote`.',
+    templateCode:
+      `def can_construct(ransomNote, magazine):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: ['a', 'b'], output: false },
+      { input: ['aa', 'ab'], output: false },
+      { input: ['aa', 'aab'], output: true },
+      { input: ['aab', 'baa'], output: true },
+      { input: ['hello', 'lol he'], output: true }
+    ],
+  },
+
+  {
+    slug: 'isomorphic-strings',
+    title: 'Isomorphic Strings',
+    summary: 'Check if there is a one-to-one character mapping between two strings.',
+    difficulty: 4,
+    tags: ['String', 'Hash Map'],
+    categorySlug: 'hashing',
+    entryPoint: 'is_isomorphic',
+    body:
+      'Given two strings `s` and `t`, determine if they are isomorphic.\n\n' +
+      'Two strings `s` and `t` are isomorphic if the characters in `s` can be replaced to get `t`.\n\n' +
+      'All occurrences of a character must be replaced with another character while preserving the order of characters. No two characters may map to the same character, but a character may map to itself.',
+    templateCode:
+      `def is_isomorphic(s, t):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: ['egg', 'add'], output: true },
+      { input: ['foo', 'bar'], output: false },
+      { input: ['paper', 'title'], output: true },
+      { input: ['ab', 'ca'], output: true },
+      { input: ['badc', 'baba'], output: false }
+    ],
+  },
+
   // ==========================================
   // PHASE 3: Strings & Basic Algorithms
   // ==========================================
@@ -827,27 +876,26 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
       { input: ['0P'], output: false },
     ],
   },
-
+  
   {
-    slug: 'minimum-size-subarray-sum',
-    title: 'Minimum Size Subarray Sum',
-    summary: 'Find the minimal length of a subarray whose sum is >= target.',
-    difficulty: 5,
-    tags: ['Array', 'Sliding Window', 'Two Pointer'],
+    slug: '3sum',
+    title: '3Sum',
+    summary: 'Find all unique triplets in the array which give the sum of zero.',
+    difficulty: 6,
+    tags: ['Array', 'Two Pointer', 'Sorting'],
     categorySlug: 'two-pointers',
-    entryPoint: 'min_subarray_len',
+    entryPoint: 'three_sum',
     body:
-      'Given an array of positive integers `nums` and a positive integer `target`, return the minimal length of a subarray whose sum is greater than or equal to `target`.\n\n' +
-      'If there is no such subarray, return 0 instead.',
+      'Given an integer array `nums`, return all the triplets `[nums[i], nums[j], nums[k]]` such that `i != j`, `i != k`, and `j != k`, and `nums[i] + nums[j] + nums[k] == 0`.\n\n' +
+      'Notice that the solution set must not contain duplicate triplets.',
     templateCode:
-      `def min_subarray_len(target, nums):
+      `def three_sum(nums):
   # Your code here
   pass`,
     testCases: [
-      { input: [7, [2,3,1,2,4,3]], output: 2 },
-      { input: [4, [1,4,4]], output: 1 },
-      { input: [11, [1,1,1,1,1,1,1,1]], output: 0 },
-      { input: [15, [1,2,3,4,5]], output: 5 },
+      { input: [[-1,0,1,2,-1,-4]], output: [[-1,-1,2],[-1,0,1]] },
+      { input: [[0,1,1]], output: [] },
+      { input: [[0,0,0]], output: [[0,0,0]] },
     ],
   },
 
@@ -876,28 +924,100 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
       { input: [[1, 2, 1]], output: 2 },
     ],
   },
-  
+
   {
-    slug: '3sum',
-    title: '3Sum',
-    summary: 'Find all unique triplets in the array which give the sum of zero.',
-    difficulty: 6,
-    tags: ['Array', 'Two Pointer', 'Sorting'],
+    slug: 'longest-repeating-character-replacement',
+    title: 'Longest Repeating Character Replacement',
+    summary: 'Find the longest substring containing the same letter after at most k replacements.',
+    difficulty: 5,
+    tags: ['String', 'Sliding Window', 'Hash Map'],
     categorySlug: 'two-pointers',
-    entryPoint: 'three_sum',
+    entryPoint: 'character_replacement',
     body:
-      'Given an integer array `nums`, return all the triplets `[nums[i], nums[j], nums[k]]` such that `i != j`, `i != k`, and `j != k`, and `nums[i] + nums[j] + nums[k] == 0`.\n\n' +
-      'Notice that the solution set must not contain duplicate triplets.',
+      'You are given a string `s` and an integer `k`. You can choose any character of the string and change it to any other uppercase English character. You can perform this operation at most `k` times.\n\n' +
+      'Return the length of the longest substring containing the same letter you can get after performing the above operations.',
     templateCode:
-      `def three_sum(nums):
+      `def character_replacement(s, k):
   # Your code here
   pass`,
     testCases: [
-      { input: [[-1,0,1,2,-1,-4]], output: [[-1,-1,2],[-1,0,1]] },
-      { input: [[0,1,1]], output: [] },
-      { input: [[0,0,0]], output: [[0,0,0]] },
+      { input: ['ABAB', 2], output: 4 },
+      { input: ['AABABBA', 1], output: 4 },
+      { input: ['ABCDE', 1], output: 2 },
+      { input: ['AAAA', 2], output: 4 },
     ],
   },
+
+  {
+    slug: 'minimum-size-subarray-sum',
+    title: 'Minimum Size Subarray Sum',
+    summary: 'Find the minimal length of a subarray whose sum is >= target.',
+    difficulty: 5,
+    tags: ['Array', 'Sliding Window', 'Two Pointer'],
+    categorySlug: 'two-pointers',
+    entryPoint: 'min_subarray_len',
+    body:
+      'Given an array of positive integers `nums` and a positive integer `target`, return the minimal length of a subarray whose sum is greater than or equal to `target`.\n\n' +
+      'If there is no such subarray, return 0 instead.',
+    templateCode:
+      `def min_subarray_len(target, nums):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [7, [2,3,1,2,4,3]], output: 2 },
+      { input: [4, [1,4,4]], output: 1 },
+      { input: [11, [1,1,1,1,1,1,1,1]], output: 0 },
+      { input: [15, [1,2,3,4,5]], output: 5 },
+    ],
+  },
+  
+  {
+    slug: 'longest-substring-k-distinct',
+    title: 'Longest Substring with At Most K Distinct Characters',
+    summary: 'Find the length of the longest substring with at most k distinct characters.',
+    difficulty: 5,
+    tags: ['String', 'Sliding Window', 'Hash Map'],
+    categorySlug: 'two-pointers',
+    entryPoint: 'length_of_longest_substring_k_distinct',
+    body:
+      'Given a string `s` and an integer `k`, return the length of the longest substring of `s` that contains at most `k` distinct characters.',
+    templateCode:
+      `def length_of_longest_substring_k_distinct(s, k):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: ['eceba', 2], output: 3 },
+      { input: ['aa', 1], output: 2 },
+      { input: ['abaccc', 2], output: 4 },
+      { input: ['a', 0], output: 0 },
+    ],
+  },
+  
+  {
+    slug: 'minimum-window-substring',
+    title: 'Minimum Window Substring',
+    summary: 'Find the smallest substring that contains all characters of another string.',
+    difficulty: 6,
+    tags: ['String', 'Sliding Window', 'Hash Map'],
+    categorySlug: 'two-pointers',
+    entryPoint: 'min_window',
+    body:
+      'Given two strings `s` and `t`, return the minimum window in `s` which will contain all the characters in `t`.\n\n' +
+      'If there is no such window in `s` that covers all characters in `t`, return the empty string `""`.\n\n' +
+      'Note that the order of characters in `t` does not matter. The characters in `t` can appear in any order within the window.',
+    templateCode:
+      `def min_window(s, t):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: ['ADOBECODEBANC', 'ABC'], output: 'BANC' },
+      { input: ['a', 'a'], output: 'a' },
+      { input: ['a', 'aa'], output: '' },
+      { input: ['ab', 'a'], output: 'a' },
+      { input: ['cabwefgewcwaefgcf', 'cae'], output: 'cwae' },
+    ],
+  },
+
 
   {
     slug: 'merge-intervals',
