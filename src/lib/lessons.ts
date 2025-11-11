@@ -160,6 +160,199 @@ The peek, isEmpty, and size operations are also constant time. This efficiency m
 A stack is fundamentally about controlled access to data. By restricting operations to the top element only, stacks provide a simple but powerful way to manage data in situations where LIFO ordering matters. Understanding stacks helps you recognize patterns in everyday computing, from how your programs execute to how your browser remembers where you've been. The simplicity of the stack's interface—push, pop, and peek—belies its versatility in solving complex problems throughout computer science.
     `,
   },
-];
+  {
+    slug: 'understanding-hashmaps',
+    title: 'Understanding HashMaps: The Power of Key-Value Storage',
+    excerpt: 'A HashMap is a data structure that stores data as key-value pairs, providing incredibly fast lookups.',
+    tags: ['Hash Map', 'Data Structures', 'Key-Value', 'Fundamentals'],
+    body: `
+# Understanding HashMaps: The Power of Key-Value Storage
 
+## What is a HashMap?
+
+Imagine you're organizing a library, but instead of arranging books by where they fit on the shelf, you create a magical catalog system. In this system, you can simply say the book's title, and the catalog instantly tells you exactly which shelf and position holds that book. You don't need to search through every shelf or remember any particular order. The title itself becomes a direct pathway to finding the book.
+
+This is essentially what a HashMap does in computer science. A HashMap, also called a hash table or dictionary in some programming languages, is a data structure that stores data as key-value pairs. You provide a key, which is like the book title in our example, and the HashMap gives you back the associated value, which is like the book's location. The remarkable thing about HashMaps is their speed. Unlike searching through a list where you might need to check every item, a HashMap can find your data almost instantly, regardless of how much information it contains.
+
+## How HashMaps Actually Work
+
+The secret behind a HashMap's speed lies in something called a hash function. Think of a hash function as a sophisticated formula that converts your key into a number. This number then determines where in memory the HashMap will store your value. It's like having a formula that converts a book title into a shelf number, so you always know exactly where to look.
+
+Let me walk you through what happens when you store something in a HashMap. Suppose you want to store the fact that John's phone number is 555-0123. You call the HashMap's put operation with the key "John" and the value "555-0123". The HashMap takes the key "John" and runs it through its hash function, which might produce a number like 42. The HashMap then stores "555-0123" in position 42 of its internal array. Later, when you want to retrieve John's number, you provide the key "John" again. The HashMap runs "John" through the same hash function, gets 42, looks in position 42, and immediately finds the phone number. No searching required.
+
+## The Challenge of Collisions
+
+You might wonder what happens if two different keys produce the same hash value. This situation is called a collision, and it's one of the fundamental challenges in implementing HashMaps. Imagine two different book titles that, according to your formula, should go on the same shelf. You can't put both books in exactly the same spot, so you need a strategy for handling this conflict.
+
+There are several approaches to handling collisions, but let's focus on the most common one called chaining. With chaining, each position in the HashMap's internal array doesn't just hold a single value. Instead, it holds a small list of all the key-value pairs that hashed to that position. So if both "John" and "Jane" hash to position 42, position 42 would contain a short list with both entries. When you look up "John", the HashMap goes to position 42 and then checks through that small list to find the exact entry for "John". This is still much faster than searching through all the data in the HashMap.
+
+Another approach is called open addressing. When a collision occurs, instead of creating a list at that position, the HashMap looks for the next available empty position and stores the value there. This is like saying, "Well, shelf 42 is full, so let's put it on shelf 43 instead." The HashMap remembers this adjustment so it can find the value later.
+
+## Real-World Applications
+
+HashMaps are everywhere in modern programming because they solve such a common problem: quickly looking up information based on some identifier. When you log into a website, the server might use a HashMap to quickly find your user information based on your username. The username is the key, and your account details are the value.
+
+Databases use hash tables internally to speed up queries. When you search for a record by its ID, the database can use hashing to jump directly to that record instead of scanning through potentially millions of entries. This is why database lookups by primary key are so fast.
+
+Web browsers use HashMaps to implement caches. When you visit a website, the browser might store the website's resources in a HashMap with the URL as the key. The next time you visit that page, the browser can instantly check if it already has those resources cached by looking them up in the HashMap.
+
+Compilers and interpreters use HashMaps to implement symbol tables. When you declare a variable in your code, the compiler stores that variable's information in a HashMap, using the variable name as the key. This allows the compiler to quickly look up information about any variable whenever it encounters that name in the code.
+
+## A Python Implementation
+
+Let me show you how you might implement a simple HashMap in Python. This implementation will help you understand what's happening under the hood, even though in practice you'd usually use Python's built-in dictionary, which is itself a sophisticated HashMap implementation.
+
+\`\`\`python
+class HashMap:
+    def __init__(self, initial_capacity=16):
+        # Start with an array of a certain size
+        # Each position will hold a list to handle collisions (chaining)
+        self.capacity = initial_capacity
+        self.size = 0
+        # Create an array of empty lists
+        self.buckets = [[] for _ in range(self.capacity)]
     
+    def _hash(self, key):
+        # Convert the key to a number using Python's built-in hash function
+        # Then use modulo to ensure it fits within our array size
+        # This is our hash function that determines where to store the value
+        return hash(key) % self.capacity
+    
+    def put(self, key, value):
+        # Store or update a key-value pair
+        # First, figure out which bucket (position) this key belongs in
+        bucket_index = self._hash(key)
+        bucket = self.buckets[bucket_index]
+        
+        # Check if this key already exists in the bucket
+        # If so, update its value instead of adding a duplicate
+        for i, (existing_key, existing_value) in enumerate(bucket):
+            if existing_key == key:
+                bucket[i] = (key, value)  # Update existing entry
+                return
+        
+        # Key doesn't exist yet, so add it as a new entry
+        bucket.append((key, value))
+        self.size += 1
+        
+        # If the HashMap is getting too full, we should resize it
+        # We'll keep this simple for now and just note where it would happen
+        load_factor = self.size / self.capacity
+        if load_factor > 0.7:
+            self._resize()
+    
+    def get(self, key):
+        # Retrieve the value associated with a key
+        # Calculate which bucket to look in
+        bucket_index = self._hash(key)
+        bucket = self.buckets[bucket_index]
+        
+        # Search through the bucket for our key
+        for stored_key, stored_value in bucket:
+            if stored_key == key:
+                return stored_value
+        
+        # Key not found
+        raise KeyError(f"Key '{key}' not found in HashMap")
+    
+    def remove(self, key):
+        # Remove a key-value pair
+        bucket_index = self._hash(key)
+        bucket = self.buckets[bucket_index]
+        
+        # Find and remove the key from the bucket
+        for i, (stored_key, stored_value) in enumerate(bucket):
+            if stored_key == key:
+                del bucket[i]
+                self.size -= 1
+                return stored_value
+        
+        raise KeyError(f"Key '{key}' not found in HashMap")
+    
+    def contains(self, key):
+        # Check if a key exists without retrieving its value
+        try:
+            self.get(key)
+            return True
+        except KeyError:
+            return False
+    
+    def _resize(self):
+        # When the HashMap gets too full, double its size
+        # This keeps operations fast by reducing collisions
+        old_buckets = self.buckets
+        self.capacity *= 2
+        self.buckets = [[] for _ in range(self.capacity)]
+        self.size = 0
+        
+        # Re-insert all existing entries with the new capacity
+        # This is necessary because the hash function depends on capacity
+        for bucket in old_buckets:
+            for key, value in bucket:
+                self.put(key, value)
+\`\`\`
+
+Let's see this HashMap in action with a practical example:
+
+\`\`\`python
+# Create a phone book using our HashMap
+phone_book = HashMap()
+
+# Add some contacts
+phone_book.put("Alice", "555-0100")
+phone_book.put("Bob", "555-0101")
+phone_book.put("Charlie", "555-0102")
+phone_book.put("Diana", "555-0103")
+
+# Look up a phone number - this happens almost instantly
+print(phone_book.get("Bob"))  # Output: "555-0101"
+
+# Update an existing entry
+phone_book.put("Bob", "555-9999")
+print(phone_book.get("Bob"))  # Output: "555-9999"
+
+# Check if a contact exists
+print(phone_book.contains("Alice"))   # Output: True
+print(phone_book.contains("Edward"))  # Output: False
+
+# Remove a contact
+phone_book.remove("Charlie")
+# Now trying to get Charlie would raise a KeyError
+\`\`\`
+
+## Understanding Load Factor and Performance
+
+One crucial concept for HashMaps is the load factor, which is the ratio of stored items to the total capacity. If you have a HashMap with space for 100 items and you've stored 70 items, your load factor is 0.7 or 70%. The load factor directly impacts performance because it affects how many collisions occur.
+
+When a HashMap has a low load factor, collisions are rare. Most keys hash to their own unique position, and lookups are extremely fast. As the load factor increases, collisions become more common. More items end up sharing the same bucket, which means those buckets contain longer lists that need to be searched through. This is why HashMap implementations typically resize themselves when the load factor exceeds a certain threshold, usually around 0.7 or 0.75.
+
+Resizing involves creating a larger internal array and rehashing all existing entries into the new array. This operation takes time proportional to the number of items in the HashMap, but it happens infrequently enough that it doesn't significantly impact the overall performance. It's like reorganizing your entire library to add more shelves, which takes effort, but then makes finding books faster for a long time afterward.
+
+## Time Complexity in Practice
+
+The beauty of a well-implemented HashMap is its average-case time complexity. For the three main operations—inserting a value, retrieving a value, and deleting a value—a HashMap achieves O(1) average time complexity. This means these operations take roughly the same amount of time whether your HashMap contains ten items or ten million items. This constant-time performance is what makes HashMaps so valuable.
+
+However, it's important to understand that this is average-case performance. In the worst case, if you're extremely unlucky and every single key hashes to the same bucket, all operations would degrade to O(n) time, where n is the number of items. This would turn your HashMap into essentially a single linked list. Good hash functions and proper load factor management make this worst case extremely unlikely in practice, but it's theoretically possible.
+
+## Choosing Good Keys
+
+Not everything makes a good key for a HashMap. Good keys need to be immutable, meaning they can't change after they're created. This is crucial because if a key could change, its hash value might change too. Imagine storing something with key "John" at position 42, but then the key somehow changes to "Joan". The hash of "Joan" might be 58, but your value is still at position 42. You'd never be able to find it again.
+
+This is why languages like Python allow strings, numbers, and tuples to be dictionary keys, but not lists. Strings and numbers can't be modified after creation, but lists can have items added or removed, making them unsuitable as keys. Good keys should also distribute evenly across the hash space to minimize collisions. If your hash function produces the same value for many different keys, you'll get lots of collisions and poor performance.
+
+## HashMaps vs Other Data Structures
+
+Understanding when to use a HashMap versus other data structures is an important skill. If you need to store data and look it up by some identifier, a HashMap is usually the best choice. It gives you constant-time lookups, which is hard to beat. However, HashMaps have no inherent order. If you iterate through a HashMap's entries, they won't come out in any particular sequence.
+
+If you need to maintain items in sorted order, a balanced tree structure like a Red-Black tree might be more appropriate. These give you O(log n) lookups, which is slower than a HashMap's O(1), but they keep items sorted. If you need to frequently access items by their position, like "give me the 100th item", a simple array or list would be better. Arrays give you O(1) access by index, which is faster than a HashMap would be for that use case.
+
+Stacks and queues, which we discussed earlier, are specialized for specific access patterns. You'd use a stack when you need LIFO behavior, not when you need to look things up by a key. Each data structure has its strengths, and choosing the right one depends on what operations you need to perform most frequently.
+
+## Key Takeaways
+
+HashMaps represent a brilliant trade-off in computer science. By using a hash function to convert keys into array indices, they achieve nearly instant lookups at the cost of some memory overhead and the need to handle collisions. The concept of trading memory for speed is common in computing, and HashMaps exemplify this trade-off beautifully.
+
+When you understand HashMaps, you understand one of the most widely-used data structures in modern programming. From databases to compilers to web servers, HashMaps power the fast lookups that make modern software responsive. The next time you search for something by username, look up a word in a dictionary app, or access any kind of data by an identifier, there's likely a HashMap working behind the scenes, quietly delivering instant results from potentially vast amounts of data.
+`,
+  },
+];
