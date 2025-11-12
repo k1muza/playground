@@ -43,9 +43,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Confetti from "react-confetti";
 import { suggestSolution } from "@/ai/flows/suggest-solution";
 
+import { ListNode, arrayToList, listToArray } from "@/lib/list-node";
+
 declare global {
   interface Window {
     loadPyodide: () => Promise<PyodideInterface>;
+    ListNode: any;
+    arrayToList: any;
+    listToArray: any;
   }
 }
 
@@ -294,6 +299,12 @@ function CodeRunner({
       try {
         const pyodide = await window.loadPyodide();
         if (cancelled) return;
+        
+        // Add helpers to Pyodide global scope
+        pyodide.globals.set("ListNode", ListNode);
+        pyodide.globals.set("arrayToList", arrayToList);
+        pyodide.globals.set("listToArray", listToArray);
+
         pyodideRef.current = pyodide;
         setIsPyodideLoading(false);
       } catch (error) {
@@ -367,6 +378,81 @@ function CodeRunner({
     return [capturedOutput.trim(), parsedLastJSON];
   };
 
+  // Build a Python snippet for linked list problems
+  const buildLinkedListTestSnippet = (
+    userCode: string,
+    entryPoint: string,
+    inputJSON: unknown,
+    expectedJSON: unknown,
+    compareMode?: string
+  ) => {
+    const b64Input = base64Encode(inputJSON);
+    const b64Expected = base64Encode(expectedJSON);
+  
+    // Check if the solution is a function or an in-place modification
+    const returnsValue = problem.slug !== 'reorder-list';
+  
+    const callLogic = returnsValue
+      ? `actual_node = _call_solution(inp)`
+      : `_call_solution(inp)\n    actual_node = inp_list`; // For in-place modifications
+  
+    return `
+${userCode}
+  
+import json, base64
+
+# Helpers are pre-loaded in Pyodide scope
+# from list_node import ListNode, arrayToList, listToArray
+
+def _b64_to_obj(b64s):
+    return json.loads(base64.b64decode(b64s).decode())
+  
+def _call_solution(inp):
+    # array -> *args, object -> **kwargs, else -> single positional
+    if isinstance(inp, list):
+        # Convert first argument to a linked list
+        inp[0] = arrayToList(inp[0])
+        return ${entryPoint}(*inp)
+    elif isinstance(inp, dict):
+        return ${entryPoint}(**inp)
+    else:
+        return ${entryPoint}(inp)
+
+actual_node = None
+passed = False
+  
+try:
+    inp_raw = _b64_to_obj("${b64Input}")
+    inp = _b64_to_obj("${b64Input}") # Make a copy to preserve original
+    expected_list = _b64_to_obj("${b64Expected}")
+
+    inp_list = arrayToList(inp[0] if isinstance(inp, list) else inp)
+    
+    ${callLogic}
+
+    actual_list = listToArray(actual_node)
+    
+    passed = (actual_list == expected_list)
+
+    print(json.dumps({
+        "input": inp_raw,
+        "expected": expected_list,
+        "actual": actual_list,
+        "passed": passed
+    }))
+except Exception as e:
+    try:
+        err = str(e) or repr(e)
+    except Exception:
+        err = "Unknown error"
+    print(json.dumps({
+        "input": "${b64Input}",
+        "expected": "${b64Expected}",
+        "actual": "Execution Error: " + err,
+        "passed": False
+    }))
+`.trim();
+  };
 
   // Build a Python snippet for function-based problems
   const buildTestSnippet = (
@@ -601,6 +687,8 @@ except Exception as e:
     const isClassBased =
       problem.entryPoint.charAt(0) === problem.entryPoint.charAt(0).toUpperCase();
 
+    const isLinkedListProblem = problem.problemType === 'linked-list';
+
     try {
       const results: TestResult[] = [];
       let allPassed = true;
@@ -613,7 +701,10 @@ except Exception as e:
 
         // 2) Build snippet
         let snippet: string;
-        if (isClassBased) {
+        if (isLinkedListProblem) {
+          const compareMode: string | undefined = (tc as any).compare;
+          snippet = buildLinkedListTestSnippet(code, problem.entryPoint, inp, out, compareMode);
+        } else if (isClassBased) {
           // For class-based problems, inp is [operations, params]
           const [operations, params] = Array.isArray(inp) ? inp : [[], []];
           snippet = buildClassTestSnippet(code, problem.entryPoint, operations, params, out);

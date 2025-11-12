@@ -19,15 +19,16 @@ export const categories: Category[] = [
   { slug: "hashing", title: "Hashing & Counting", description: "Hash maps/sets, frequency tables, canonicalization.", order: 1, levelMin: 2, levelMax: 5, topics: ["Hash Map","Hash Set","Counting","Prefix Sum"] },
   { slug: "stacks", title: "Stacks & Queues", description: "Stacks, bracket matching, stateful scans.", order: 2, levelMin: 2, levelMax: 6, topics: ["Stack","Strings"] },
   { slug: "two-pointers", title: "Two-Pointers & Windows", description: "Pointers, windows, de-duplication.", order: 3, levelMin: 3, levelMax: 6, topics: ["Two Pointer","Sliding Window"] },
-  { slug: "sets-ordering", title: "Sets & Ordering", description: "Ordering, merging, interval sweeps.", order: 4, levelMin: 4, levelMax: 5, topics: ["Sorting","Sweep","Set"] },
-  { slug: "greedy-intervals", title: "Greedy & Intervals", description: "Greedy choices, interval management.", order: 5, levelMin: 4, levelMax: 6, topics: ["Greedy","Intervals","Sorting"] },
-  { slug: "recursion-dp", title: "Recursion & Backtracking", description: "Recurrence intuition, memoization, simple DP.", order: 6, levelMin: 2, levelMax: 8, topics: ["Recursion","DP","Math", "Backtracking"] },
-  { slug: "trees", title: "Trees (DFS/BFS)", description: "Traversal patterns and basic tree properties.", order: 7, levelMin: 2, levelMax: 6, topics: ["Tree","DFS","BFS"] },
-  { slug: "heaps", title: "Heaps & Priority Queues", description: "Selection, k-way merge, top-k.", order: 8, levelMin: 4, levelMax: 7, topics: ["Heap","Priority Queue"] },
-  { slug: "graphs", title: "Graphs & Topo Sort", description: "Cycle detection, topo order, reachability.", order: 9, levelMin: 5, levelMax: 7, topics: ["Graph","Topo Sort","DFS"] },
-  { slug: "grids-backtracking", title: "Grids & Backtracking", description: "Grid search, constraint propagation.", order: 10, levelMin: 5, levelMax: 8, topics: ["Grid","Backtracking","DFS"] },
-  { slug: "math-bit-tricks", title: "Math & Bit Tricks", description: "Number theory, bitwise operations.", order: 11, levelMin: 4, levelMax: 7, topics: ["Math","Bit Manipulation"] },
-  { slug: "advanced-binary-search", title: "Advanced Binary Search", description: "Partitioning tricks on answers/arrays.", order: 12, levelMin: 5, levelMax: 9, topics: ["Binary Search"] },
+  { slug: "linked-lists", title: "Linked Lists", description: "Fast/slow pointers, list reversal, cycle detection.", order: 4, levelMin: 1, levelMax: 5, topics: ["Linked List", "Two Pointer"]},
+  { slug: "sets-ordering", title: "Sets & Ordering", description: "Ordering, merging, interval sweeps.", order: 5, levelMin: 4, levelMax: 5, topics: ["Sorting","Sweep","Set"] },
+  { slug: "greedy-intervals", title: "Greedy & Intervals", description: "Greedy choices, interval management.", order: 6, levelMin: 4, levelMax: 6, topics: ["Greedy","Intervals","Sorting"] },
+  { slug: "recursion-dp", title: "Recursion & Backtracking", description: "Recurrence intuition, memoization, simple DP.", order: 7, levelMin: 2, levelMax: 8, topics: ["Recursion","DP","Math", "Backtracking"] },
+  { slug: "trees", title: "Trees (DFS/BFS)", description: "Traversal patterns and basic tree properties.", order: 8, levelMin: 2, levelMax: 6, topics: ["Tree","DFS","BFS"] },
+  { slug: "heaps", title: "Heaps & Priority Queues", description: "Selection, k-way merge, top-k.", order: 9, levelMin: 4, levelMax: 7, topics: ["Heap","Priority Queue"] },
+  { slug: "graphs", title: "Graphs & Topo Sort", description: "Cycle detection, topo order, reachability.", order: 10, levelMin: 5, levelMax: 7, topics: ["Graph","Topo Sort","DFS"] },
+  { slug: "grids-backtracking", title: "Grids & Backtracking", description: "Grid search, constraint propagation.", order: 11, levelMin: 5, levelMax: 8, topics: ["Grid","Backtracking","DFS"] },
+  { slug: "math-bit-tricks", title: "Math & Bit Tricks", description: "Number theory, bitwise operations.", order: 12, levelMin: 4, levelMax: 7, topics: ["Math","Bit Manipulation"] },
+  { slug: "advanced-binary-search", title: "Advanced Binary Search", description: "Partitioning tricks on answers/arrays.", order: 13, levelMin: 5, levelMax: 9, topics: ["Binary Search"] },
 ];
 
 // Represents the data stored in the main `problems/{slug}` document.
@@ -46,6 +47,8 @@ export const ProblemSchema = z.object({
   tags: z.array(z.string()).min(1, 'At least one tag is required.'),
   body: z.string().min(1, 'Problem body is required.'),
   templateCode: z.string().min(1, 'Template code is required.'),
+  // New property to indicate problem type
+  problemType: z.enum(['default', 'linked-list']).default('default'),
 });
 
 export type Problem = z.infer<typeof ProblemSchema>;
@@ -989,25 +992,25 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
   },
   
   {
-    slug: 'longest-substring-without-repeating',
-    title: 'Longest Substring Without Repeating Characters',
-    summary: 'Find the length of the longest substring without repeating characters.',
-    difficulty: 4,
-    tags: ['String', 'Sliding Window', 'Hash Set'],
+    slug: 'longest-substring-k-distinct',
+    title: 'Longest Substring with At Most K Distinct Characters',
+    summary: 'Find the length of the longest substring with at most k distinct characters.',
+    difficulty: 5,
+    tags: ['String', 'Sliding Window', 'Hash Map'],
     categorySlug: 'two-pointers',
-    entryPoint: 'length_of_longest_substring',
-    body: 'Given a string `s`, find the length of the longest substring without repeating characters.\n\nThis is a classic sliding window problem where the window is defined by a set of unique characters.',
+    entryPoint: 'length_of_longest_substring_k_distinct',
+    body:
+      'Given a string `s` and an integer `k`, return the length of the longest substring of `s` that contains at most `k` distinct characters.',
     templateCode:
-`def length_of_longest_substring(s):
+      `def length_of_longest_substring_k_distinct(s, k):
   # Your code here
   pass`,
     testCases: [
-      { input: ['abcabcbb'], output: 3 },
-      { input: ['bbbbb'], output: 1 },
-      { input: ['pwwkew'], output: 3 },
-      { input: [''], output: 0 },
-      { input: ['dvdf'], output: 3 }
-    ]
+      { input: ['eceba', 2], output: 3 },
+      { input: ['aa', 1], output: 2 },
+      { input: ['abaccc', 2], output: 4 },
+      { input: ['a', 0], output: 0 },
+    ],
   },
 
   // ==========================================
@@ -1169,7 +1172,7 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
   },
 
   {
-    slug: 'longest-repeating-character-replacement',
+    slug: 'character-replacement',
     title: 'Longest Repeating Character Replacement',
     summary: 'Find the longest substring containing the same letter after at most k replacements.',
     difficulty: 5,
@@ -1211,28 +1214,6 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
       { input: [4, [1,4,4]], output: 1 },
       { input: [11, [1,1,1,1,1,1,1,1]], output: 0 },
       { input: [15, [1,2,3,4,5]], output: 5 },
-    ],
-  },
-  
-  {
-    slug: 'longest-substring-k-distinct',
-    title: 'Longest Substring with At Most K Distinct Characters',
-    summary: 'Find the length of the longest substring with at most k distinct characters.',
-    difficulty: 5,
-    tags: ['String', 'Sliding Window', 'Hash Map'],
-    categorySlug: 'two-pointers',
-    entryPoint: 'length_of_longest_substring_k_distinct',
-    body:
-      'Given a string `s` and an integer `k`, return the length of the longest substring of `s` that contains at most `k` distinct characters.',
-    templateCode:
-      `def length_of_longest_substring_k_distinct(s, k):
-  # Your code here
-  pass`,
-    testCases: [
-      { input: ['eceba', 2], output: 3 },
-      { input: ['aa', 1], output: 2 },
-      { input: ['abaccc', 2], output: 4 },
-      { input: ['a', 0], output: 0 },
     ],
   },
   
@@ -1291,7 +1272,7 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
   // ==========================================
   
   {
-    slug: 'powerset',
+    slug: 'subsets',
     title: 'Powerset',
     summary: 'Return all possible subsets (the power set) of an array of unique elements.',
     difficulty: 3,
@@ -1311,7 +1292,7 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
   },
 
   {
-    slug: 'permutations-ii',
+    slug: 'permute-unique',
     title: 'Permutations II',
     summary: 'Return all unique permutations of an array that may contain duplicates.',
     difficulty: 5,
@@ -1330,7 +1311,7 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
   },
 
   {
-    slug: 'letter-combinations-phone-number',
+    slug: 'letter-combinations',
     title: 'Letter Combinations of a Phone Number',
     summary: 'Given a string of digits, return all possible letter combinations it could represent.',
     difficulty: 5,
@@ -1470,19 +1451,19 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
   },
   
   {
-    slug: 'binary-tree-level-order-traversal',
-    title: 'Binary Tree Level Order Traversal',
-    summary: 'Traverse the tree level by level.',
+    slug: 'level-order-zigzag',
+    title: 'Binary Tree Zigzag Level Order Traversal',
+    summary: 'Traverse a binary tree in a zigzag level order (left-to-right, then right-to-left, etc.).',
     difficulty: 4,
     tags: ['Tree', 'BFS', 'Queue'],
     categorySlug: 'trees',
-    entryPoint: 'level_order',
-    body: 'Given the root of a binary tree, return the level order traversal of its nodes\' values. (i.e., from left to right, level by level).',
-    templateCode: `def level_order(root):
+    entryPoint: 'level_order_zigzag',
+    body: 'Given the root of a binary tree, return the zigzag level order traversal of its nodes\' values. (i.e., from left to right, then right to left for the next level and alternate between).',
+    templateCode: `def level_order_zigzag(root):
   # Your code here
   pass`,
     testCases: [
-      { input: [{val: 3, left: {val: 9}, right: {val: 20, left: {val: 15}, right: {val: 7}}}], output: [[3], [9, 20], [15, 7]] },
+      { input: [{val: 3, left: {val: 9}, right: {val: 20, left: {val: 15}, right: {val: 7}}}], output: [[3], [20, 9], [15, 7]] },
       { input: [{val: 1}], output: [[1]] },
       { input: [null], output: [] }
     ]
@@ -1603,7 +1584,7 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
   },
   
   {
-    slug: 'number-of-islands',
+    slug: 'islands-count',
     title: 'Number of Islands',
     summary: 'Count the number of islands in a 2D grid.',
     difficulty: 5,
@@ -1621,7 +1602,7 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
   },
   
   {
-    slug: 'shortest-path-binary-matrix',
+    slug: 'shortest-path-unweighted-grid',
     title: 'Shortest Path in Binary Matrix',
     summary: 'Find the shortest clear path from top-left to bottom-right in a grid.',
     difficulty: 6,
@@ -2059,7 +2040,7 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
   },
   
   {
-    slug: 'queue-reconstruction-by-height',
+    slug: 'reconstruct-queue-by-height',
     title: 'Queue Reconstruction by Height',
     summary: 'Reconstruct a queue based on people\'s heights and number of people in front.',
     difficulty: 6,
@@ -2175,5 +2156,195 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
       { input: [1, []], output: [0], compare: "multiset" },
       { input: [2, [[0,1],[1,0]]], output: [], compare: "multiset" }
     ]
+  },
+  {
+    slug: 'middle-of-linked-list',
+    title: 'Middle of the Linked List',
+    summary: 'Return the middle node (second middle on even length).',
+    difficulty: 1,
+    tags: ['Linked List', 'Two Pointer'],
+    categorySlug: 'linked-lists',
+    entryPoint: 'middleNode',
+    problemType: 'linked-list',
+    body: 'Given the `head` of a singly linked list, return the middle node of the linked list.\n\nIf there are two middle nodes, return the second middle node. This is the classic "fast and slow pointer" problem.',
+    templateCode: `from typing import Optional
+
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+        
+def middleNode(head: Optional[ListNode]) -> Optional[ListNode]:
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[1, 2, 3, 4, 5]], output: [3, 4, 5] },
+      { input: [[1, 2, 3, 4, 5, 6]], output: [4, 5, 6] },
+      { input: [[1]], output: [1] },
+    ],
+  },
+  {
+    slug: 'kth-from-end',
+    title: 'Kth Node From End',
+    summary: 'Return the k-th node from the end.',
+    difficulty: 2,
+    tags: ['Linked List', 'Two Pointer'],
+    categorySlug: 'linked-lists',
+    entryPoint: 'kthFromEnd',
+    problemType: 'linked-list',
+    body: 'Given the `head` of a linked list and an integer `k`, return the `k`-th node from the end of the list.\n\nUse a lead-lag window of size `k` with two pointers to solve this in a single pass.',
+    templateCode: `from typing import Optional
+
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+
+def kthFromEnd(head: Optional[ListNode], k: int) -> Optional[ListNode]:
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[1, 2, 3, 4, 5], 2], output: [4, 5] },
+      { input: [[1], 1], output: [1] },
+      { input: [[1, 2], 1], output: [2] },
+    ],
+  },
+  {
+    slug: 'delete-kth-from-end',
+    title: 'Delete Kth Node From End',
+    summary: 'Remove the k-th node from the end of the list.',
+    difficulty: 2,
+    tags: ['Linked List', 'Two Pointer'],
+    categorySlug: 'linked-lists',
+    entryPoint: 'removeNthFromEnd',
+    problemType: 'linked-list',
+    body: 'Given the `head` of a linked list, remove the `n`-th node from the end of the list and return its head.\n\nThis can be solved in one pass using two pointers. Pay attention to edge cases like removing the head of the list.',
+    templateCode: `from typing import Optional
+
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+
+def removeNthFromEnd(head: Optional[ListNode], n: int) -> Optional[ListNode]:
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[1, 2, 3, 4, 5], 2], output: [1, 2, 3, 5] },
+      { input: [[1], 1], output: [] },
+      { input: [[1, 2], 1], output: [1] },
+    ],
+  },
+  {
+    slug: 'has-cycle',
+    title: 'Linked List Cycle',
+    summary: 'Detect if a linked list has a cycle.',
+    difficulty: 3,
+    tags: ['Linked List', 'Two Pointer', 'Cycle Detection'],
+    categorySlug: 'linked-lists',
+    entryPoint: 'hasCycle',
+    problemType: 'linked-list', // Special handling for list w/ cycle
+    body: 'Given `head`, the head of a linked list, determine if the linked list has a cycle in it.\n\nThere is a cycle in a linked list if there is some node in the list that can be reached again by continuously following the `next` pointer. Return `true` if there is a cycle, `false` otherwise.',
+    templateCode: `from typing import Optional
+
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+
+def hasCycle(head: Optional[ListNode]) -> bool:
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[3, 2, 0, -4], 1], output: true }, // pos=1
+      { input: [[1, 2], 0], output: true },       // pos=0
+      { input: [[1], -1], output: false },      // pos=-1 (no cycle)
+    ],
+  },
+  {
+    slug: 'is-palindrome-linked-list',
+    title: 'Palindrome Linked List',
+    summary: 'Check if a linked list is a palindrome.',
+    difficulty: 4,
+    tags: ['Linked List', 'Two Pointer', 'Reversal'],
+    categorySlug: 'linked-lists',
+    entryPoint: 'isPalindrome',
+    problemType: 'linked-list',
+    body: 'Given the head of a singly linked list, return `true` if it is a palindrome.\n\nAn efficient O(1) space solution involves finding the middle of the list, reversing the second half, comparing the two halves, and then (optionally) restoring the list.',
+    templateCode: `from typing import Optional
+
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+
+def isPalindrome(head: Optional[ListNode]) -> bool:
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[1, 2, 2, 1]], output: true },
+      { input: [[1, 2]], output: false },
+      { input: [[1, 2, 3, 2, 1]], output: true },
+    ],
+  },
+  {
+    slug: 'reorder-list',
+    title: 'Reorder List',
+    summary: 'Reorder list to L0→Ln→L1→Ln-1...',
+    difficulty: 5,
+    tags: ['Linked List', 'Two Pointer', 'Reversal'],
+    categorySlug: 'linked-lists',
+    entryPoint: 'reorderList',
+    problemType: 'linked-list',
+    body: 'You are given the head of a singly linked list. The list can be represented as: L0 → L1 → … → Ln - 1 → Ln\n\nReorder the list to be on the following form: L0 → Ln → L1 → Ln - 1 → L2 → Ln - 2 → …\n\nYou may not modify the values in the list\'s nodes. Only nodes themselves may be changed. The function should modify the list in-place.',
+    templateCode: `from typing import Optional
+
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+
+def reorderList(head: Optional[ListNode]) -> None:
+  """
+  Do not return anything, modify head in-place instead.
+  """
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[1, 2, 3, 4]], output: [1, 4, 2, 3] },
+      { input: [[1, 2, 3, 4, 5]], output: [1, 5, 2, 4, 3] },
+    ],
+  },
+  {
+    slug: 'odd-even-list',
+    title: 'Odd Even Linked List',
+    summary: 'Group all odd nodes together followed by the even nodes.',
+    difficulty: 4,
+    tags: ['Linked List', 'Two Pointer'],
+    categorySlug: 'linked-lists',
+    entryPoint: 'oddEvenList',
+    problemType: 'linked-list',
+    body: 'Given the `head` of a singly linked list, group all the nodes with odd indices together followed by the nodes with even indices, and return the reordered list.\n\nThe first node is considered odd, the second node even, and so on.\n\nNote that the relative order inside both the even and odd groups should remain as it was in the input. You must solve the problem in O(1) extra space complexity and O(n) time complexity.',
+    templateCode: `from typing import Optional
+
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+
+def oddEvenList(head: Optional[ListNode]) -> Optional[ListNode]:
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[1, 2, 3, 4, 5]], output: [1, 3, 5, 2, 4] },
+      { input: [[2, 1, 3, 5, 6, 4, 7]], output: [2, 3, 6, 7, 1, 5, 4] },
+    ],
   },
 ];
