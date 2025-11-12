@@ -1,3 +1,4 @@
+
 import { z } from 'zod';
 
 export const CategorySchema = z.object({
@@ -1012,7 +1013,101 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
       { input: ['a', 0], output: 0 },
     ],
   },
+  {
+    slug: 'longest-unique-substring',
+    title: 'Longest Substring Without Repeating Characters',
+    summary: 'Find the length of the longest substring without repeating characters.',
+    difficulty: 4,
+    tags: ['String', 'Sliding Window', 'Hash Set'],
+    categorySlug: 'two-pointers',
+    entryPoint: 'length_of_longest_substring',
+    body:
+      'Given a string `s`, find the length of the longest substring without repeating characters.',
+    templateCode:
+      `def length_of_longest_substring(s):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: ['abcabcbb'], output: 3 },
+      { input: ['bbbbb'], output: 1 },
+      { input: ['pwwkew'], output: 3 },
+      { input: [''], output: 0 },
+      { input: ['dvdf'], output: 3 },
+    ],
+  },
+  
+  {
+    slug: 'fruit-into-baskets',
+    title: 'Fruit Into Baskets',
+    summary: 'Find the maximum number of fruits you can collect in two baskets.',
+    difficulty: 4,
+    tags: ['Array', 'Sliding Window', 'Hash Map'],
+    categorySlug: 'two-pointers',
+    entryPoint: 'total_fruit',
+    body:
+      'You are visiting a farm with a single row of fruit trees, arranged from left to right. The trees are represented by an integer array `fruits` where `fruits[i]` is the type of fruit the `i`-th tree produces.\n\n' +
+      'You want to collect as much fruit as possible. However, the owner has some strict rules you must follow:\n\n' +
+      '- You only have two baskets, and each basket can only hold a single type of fruit.\n' +
+      '- Starting from any tree of your choice, you must pick exactly one fruit from every tree (including the start tree) while moving to the right. The picked fruits must fit in one of your baskets.\n' +
+      '- Once you reach a tree with fruit that cannot fit in your baskets, you must stop.\n\n' +
+      'Given the integer array `fruits`, return the maximum number of fruits you can pick.\n\n' +
+      'This problem is equivalent to finding the length of the longest subarray with at most 2 distinct elements.',
+    templateCode:
+      `def total_fruit(fruits):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[1,2,1]], output: 3 },
+      { input: [[0,1,2,2]], output: 3 },
+      { input: [[1,2,3,2,2]], output: 4 },
+      { input: [[3,3,3,1,2,1,1,2,3,3,4]], output: 5 },
+    ],
+  },
 
+  {
+    slug: 'max-consecutive-ones-iii',
+    title: 'Max Consecutive Ones III',
+    summary: 'Find the longest contiguous subarray of 1s if you can flip at most k 0s.',
+    difficulty: 5,
+    tags: ['Array', 'Sliding Window', 'Two Pointer'],
+    categorySlug: 'two-pointers',
+    entryPoint: 'longest_ones',
+    body:
+      'Given a binary array `nums` and an integer `k`, return the maximum number of consecutive 1\'s in the array if you can flip at most `k` 0s.',
+    templateCode:
+      `def longest_ones(nums, k):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[1,1,1,0,0,0,1,1,1,1,0], 2], output: 6 },
+      { input: [[0,0,1,1,0,0,1,1,1,0,1,1,0,0,0,1,1,1,1], 3], output: 10 },
+      { input: [[0,0,0,1], 4], output: 4 },
+    ],
+  },
+  
+  {
+    slug: 'count-anagrams-of-p-in-s',
+    title: 'Count Anagrams of a Pattern in a String',
+    summary: 'Count all occurrences of anagrams of a pattern `p` within a string `s`.',
+    difficulty: 5,
+    tags: ['String', 'Sliding Window', 'Hash Map', 'Counting'],
+    categorySlug: 'two-pointers',
+    entryPoint: 'count_anagrams',
+    body:
+      'Given two strings `s` and `p`, return the number of occurrences of anagrams of `p` in `s`.\n\n' +
+      'An anagram is a word or phrase formed by rearranging the letters of a different word or phrase, typically using all the original letters exactly once.',
+    templateCode:
+      `def count_anagrams(s, p):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: ['cbaebabacd', 'abc'], output: 2 }, // "cba" and "bac"
+      { input: ['abab', 'ab'], output: 3 },
+      { input: ['abc', 'd'], output: 0 },
+      { input: ['aaaaa', 'aa'], output: 4 },
+    ],
+  },
+  
   // ==========================================
   // PHASE 7: Arrays & Two Pointer
   // ==========================================
@@ -1101,6 +1196,27 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
       { input: [[1, 2, 3, 1, 2, 3], 2], output: false },
       { input: [[99, 99], 2], output: true },
       { input: [[1], 1], output: false },
+    ],
+  },
+  {
+    slug: 'max-sum-subarray-size-k',
+    title: 'Max Sum Subarray of Size K',
+    summary: 'Find the maximum sum of any contiguous subarray of size k.',
+    difficulty: 3,
+    tags: ['Array', 'Sliding Window'],
+    categorySlug: 'two-pointers',
+    entryPoint: 'max_sum_subarray',
+    body:
+      'Given an array of positive integers `nums` and a positive integer `k`, find the maximum sum of any contiguous subarray of size `k`.',
+    templateCode:
+      `def max_sum_subarray(nums, k):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[2, 1, 5, 1, 3, 2], 3], output: 9 }, // Subarray [5, 1, 3]
+      { input: [[1, 9, -1, -2, 7, 3, -1, 2], 4], output: 13 }, // Subarray [9, -1, -2, 7]
+      { input: [[1, 2, 3, 4, 5], 1], output: 5 },
+      { input: [[5, 4, 3, 2, 1], 5], output: 15 },
     ],
   },
 
@@ -1239,6 +1355,28 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
       { input: ['a', 'aa'], output: '' },
       { input: ['ab', 'a'], output: 'a' },
       { input: ['cabwefgewcwaefgcf', 'cae'], output: 'cwae' },
+    ],
+  },
+
+  {
+    slug: 'find-all-anagrams-in-a-string',
+    title: 'Find All Anagrams in a String',
+    summary: 'Find all starting indices of a pattern\'s anagrams in a string.',
+    difficulty: 6,
+    tags: ['String', 'Sliding Window', 'Hash Map', 'Counting'],
+    categorySlug: 'two-pointers',
+    entryPoint: 'find_all_anagrams',
+    body:
+      'Given two strings `s` and `p`, return an array of all the start indices of `p`\'s anagrams in `s`.\n\n' +
+      'An anagram is a word or phrase formed by rearranging the letters of a different word or phrase, typically using all the original letters exactly once.',
+    templateCode:
+      `def find_all_anagrams(s, p):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: ['cbaebabacd', 'abc'], output: [0, 6], compare: "multiset" },
+      { input: ['abab', 'ab'], output: [0, 1, 2], compare: "multiset" },
+      { input: ['abc', 'd'], output: [], compare: "multiset" },
     ],
   },
 
@@ -2348,3 +2486,5 @@ def oddEvenList(head: Optional[ListNode]) -> Optional[ListNode]:
     ],
   },
 ];
+
+    
