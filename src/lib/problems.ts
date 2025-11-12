@@ -21,15 +21,16 @@ export const categories: Category[] = [
   { slug: "stacks", title: "Stacks & Queues", description: "Stacks, bracket matching, stateful scans.", order: 2, levelMin: 2, levelMax: 6, topics: ["Stack","Strings"] },
   { slug: "two-pointers", title: "Two-Pointers & Windows", description: "Pointers, windows, de-duplication.", order: 3, levelMin: 3, levelMax: 6, topics: ["Two Pointer","Sliding Window"] },
   { slug: "linked-lists", title: "Linked Lists", description: "Fast/slow pointers, list reversal, cycle detection.", order: 4, levelMin: 1, levelMax: 5, topics: ["Linked List", "Two Pointer"]},
-  { slug: "sets-ordering", title: "Sets & Ordering", description: "Ordering, merging, interval sweeps.", order: 5, levelMin: 4, levelMax: 5, topics: ["Sorting","Sweep","Set"] },
-  { slug: "greedy-intervals", title: "Greedy & Intervals", description: "Greedy choices, interval management.", order: 6, levelMin: 4, levelMax: 6, topics: ["Greedy","Intervals","Sorting"] },
-  { slug: "recursion-dp", title: "Recursion & Backtracking", description: "Recurrence intuition, memoization, simple DP.", order: 7, levelMin: 2, levelMax: 8, topics: ["Recursion","DP","Math", "Backtracking"] },
-  { slug: "trees", title: "Trees (DFS/BFS)", description: "Traversal patterns and basic tree properties.", order: 8, levelMin: 2, levelMax: 6, topics: ["Tree","DFS","BFS"] },
-  { slug: "heaps", title: "Heaps & Priority Queues", description: "Selection, k-way merge, top-k.", order: 9, levelMin: 4, levelMax: 7, topics: ["Heap","Priority Queue"] },
-  { slug: "graphs", title: "Graphs & Topo Sort", description: "Cycle detection, topo order, reachability.", order: 10, levelMin: 5, levelMax: 7, topics: ["Graph","Topo Sort","DFS"] },
-  { slug: "grids-backtracking", title: "Grids & Backtracking", description: "Grid search, constraint propagation.", order: 11, levelMin: 5, levelMax: 8, topics: ["Grid","Backtracking","DFS"] },
-  { slug: "math-bit-tricks", title: "Math & Bit Tricks", description: "Number theory, bitwise operations.", order: 12, levelMin: 4, levelMax: 7, topics: ["Math","Bit Manipulation"] },
-  { slug: "advanced-binary-search", title: "Advanced Binary Search", description: "Partitioning tricks on answers/arrays.", order: 13, levelMin: 5, levelMax: 9, topics: ["Binary Search"] },
+  { slug: "cyclic-sort", title: "Cyclic Sort", description: "In-place sorting for 1-to-N arrays, finding duplicates/missing.", order: 5, levelMin: 3, levelMax: 6, topics: ["Sorting", "Array"]},
+  { slug: "sets-ordering", title: "Sets & Ordering", description: "Ordering, merging, interval sweeps.", order: 6, levelMin: 4, levelMax: 5, topics: ["Sorting","Sweep","Set"] },
+  { slug: "greedy-intervals", title: "Greedy & Intervals", description: "Greedy choices, interval management.", order: 7, levelMin: 4, levelMax: 6, topics: ["Greedy","Intervals","Sorting"] },
+  { slug: "recursion-dp", title: "Recursion & Backtracking", description: "Recurrence intuition, memoization, simple DP.", order: 8, levelMin: 2, levelMax: 8, topics: ["Recursion","DP","Math", "Backtracking"] },
+  { slug: "trees", title: "Trees (DFS/BFS)", description: "Traversal patterns and basic tree properties.", order: 9, levelMin: 2, levelMax: 6, topics: ["Tree","DFS","BFS"] },
+  { slug: "heaps", title: "Heaps & Priority Queues", description: "Selection, k-way merge, top-k.", order: 10, levelMin: 4, levelMax: 7, topics: ["Heap","Priority Queue"] },
+  { slug: "graphs", title: "Graphs & Topo Sort", description: "Cycle detection, topo order, reachability.", order: 11, levelMin: 5, levelMax: 7, topics: ["Graph","Topo Sort","DFS"] },
+  { slug: "grids-backtracking", title: "Grids & Backtracking", description: "Grid search, constraint propagation.", order: 12, levelMin: 5, levelMax: 8, topics: ["Grid","Backtracking","DFS"] },
+  { slug: "math-bit-tricks", title: "Math & Bit Tricks", description: "Number theory, bitwise operations.", order: 13, levelMin: 4, levelMax: 7, topics: ["Math","Bit Manipulation"] },
+  { slug: "advanced-binary-search", title: "Advanced Binary Search", description: "Partitioning tricks on answers/arrays.", order: 14, levelMin: 5, levelMax: 9, topics: ["Binary Search"] },
 ];
 
 // Represents the data stored in the main `problems/{slug}` document.
@@ -1014,7 +1015,7 @@ For example, \`reverse_string_recursive("hello")\` should return \`"olleh"\`.`,
     ],
   },
   {
-    slug: 'longest-unique-substring',
+    slug: 'longest-substring-without-repeating-characters',
     title: 'Longest Substring Without Repeating Characters',
     summary: 'Find the length of the longest substring without repeating characters.',
     difficulty: 4,
@@ -2485,6 +2486,79 @@ def oddEvenList(head: Optional[ListNode]) -> Optional[ListNode]:
       { input: [[2, 1, 3, 5, 6, 4, 7]], output: [2, 3, 6, 7, 1, 5, 4] },
     ],
   },
+  {
+    slug: 'cyclic-sort-problem',
+    title: 'Cyclic Sort',
+    summary: 'Sort an array of numbers from 1 to n in-place.',
+    difficulty: 3,
+    tags: ['Array', 'Sorting'],
+    categorySlug: 'cyclic-sort',
+    entryPoint: 'cyclic_sort',
+    body: 'You are given an array containing `n` objects. Each object, when created, was assigned a unique number from 1 to `n` based on its creation sequence. This means that the object with sequence number `3` should be at index `2`, `4` should be at index `3`, and so on.\n\nWrite a function to sort the objects in-place on their creation sequence number in O(n) and without using any extra space. For simplicity, let\'s assume that the objects are just numbers, so we have an array of unique numbers from 1 to `n`.',
+    templateCode: `def cyclic_sort(nums):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[3, 1, 5, 4, 2]], output: [1, 2, 3, 4, 5] },
+      { input: [[2, 6, 4, 3, 1, 5]], output: [1, 2, 3, 4, 5, 6] },
+      { input: [[1, 5, 6, 4, 3, 2]], output: [1, 2, 3, 4, 5, 6] },
+    ],
+  },
+  {
+    slug: 'find-the-missing-number-cyclic',
+    title: 'Find the Missing Number',
+    summary: 'Find the missing number in an array of n numbers from the range [0, n].',
+    difficulty: 4,
+    tags: ['Array', 'Sorting', 'Cyclic Sort'],
+    categorySlug: 'cyclic-sort',
+    entryPoint: 'find_missing_number',
+    body: 'We are given an array containing `n` distinct numbers taken from the range `0` to `n`. Since the array has only `n` numbers out of the total `n+1` numbers, find the missing number.\n\nUse the Cyclic Sort pattern to place each number at its correct index.',
+    templateCode: `def find_missing_number(nums):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[4, 0, 3, 1]], output: 2 },
+      { input: [[8, 3, 5, 2, 4, 6, 0, 1]], output: 7 },
+      { input: [[0, 1, 2, 3]], output: 4 },
+    ],
+  },
+  {
+    slug: 'find-all-duplicates-cyclic',
+    title: 'Find all Duplicates in an Array',
+    summary: 'Find all duplicate numbers in an array of numbers from 1 to n.',
+    difficulty: 5,
+    tags: ['Array', 'Sorting', 'Cyclic Sort'],
+    categorySlug: 'cyclic-sort',
+    entryPoint: 'find_all_duplicates',
+    body: 'We are given an unsorted array containing `n` numbers taken from the range 1 to `n`. The array has some numbers that appear twice. Find all the duplicate numbers without using any extra space.',
+    templateCode: `def find_all_duplicates(nums):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[3, 4, 4, 5, 5]], output: [4, 5], compare: 'multiset' },
+      { input: [[5, 4, 7, 2, 3, 5, 3]], output: [3, 5], compare: 'multiset' },
+    ],
+  },
+  {
+    slug: 'find-first-k-missing-positives',
+    title: 'Find the First K Missing Positive Numbers',
+    summary: 'Find the first k missing positive numbers from an unsorted array.',
+    difficulty: 6,
+    tags: ['Array', 'Sorting', 'Cyclic Sort'],
+    categorySlug: 'cyclic-sort',
+    entryPoint: 'find_first_k_missing_positives',
+    body: 'Given an unsorted array containing numbers and a number ‘k’, find the first ‘k’ missing positive numbers in the array.\n\nFirst, use Cyclic Sort to place numbers at their correct indices. Then, iterate through the sorted array to find the first `k` missing positive numbers.',
+    templateCode: `def find_first_k_missing_positives(nums, k):
+  # Your code here
+  pass`,
+    testCases: [
+      { input: [[3, -1, 4, 5, 5], 3], output: [1, 2, 6], compare: 'multiset' },
+      { input: [[2, 3, 4], 3], output: [1, 5, 6], compare: 'multiset' },
+      { input: [[-2, -3, 4], 2], output: [1, 2], compare: 'multiset' },
+    ],
+  },
 ];
+
+    
 
     
