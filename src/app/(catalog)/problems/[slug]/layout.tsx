@@ -8,6 +8,7 @@ import {
   SidebarHeader,
   SidebarTrigger,
   SidebarContent,
+  SidebarInset,
 } from '@/components/ui/sidebar';
 import { useFirebase, useCollection, useMemoFirebase, useUser } from '@/firebase';
 import { collection, query, where, collectionGroup } from 'firebase/firestore';
@@ -147,7 +148,7 @@ export default function ProblemLayout({ children }: { children: ReactNode }) {
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="relative flex h-[calc(100vh-var(--header-height,4rem)-1px)] overflow-hidden">
-        <Sidebar collapsible="icon">
+        <Sidebar collapsible="icon" variant="floating">
           <SidebarHeader>
             <div className="flex items-center justify-between p-2">
               <span className="font-semibold text-lg group-data-[collapsible=icon]:hidden">Problems</span>
@@ -160,9 +161,9 @@ export default function ProblemLayout({ children }: { children: ReactNode }) {
             </div>
           </SidebarContent>
         </Sidebar>
-        <div className="flex-1 overflow-auto">
-          {children}
-        </div>
+        <SidebarInset>
+            {children}
+        </SidebarInset>
       </div>
     </SidebarProvider>
   );
