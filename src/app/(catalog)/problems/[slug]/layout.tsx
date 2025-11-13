@@ -145,7 +145,7 @@ function ProblemList() {
 
 export default function ProblemLayout({ children }: { children: ReactNode }) {
   return (
-    <SidebarProvider defaultOpen={false}>
+    <SidebarProvider defaultOpen={true}>
       <div className="relative flex h-[calc(100vh-var(--header-height,4rem)-1px)] overflow-hidden">
         <Sidebar collapsible="icon">
           <SidebarHeader>
@@ -160,7 +160,7 @@ export default function ProblemLayout({ children }: { children: ReactNode }) {
             </div>
           </SidebarContent>
         </Sidebar>
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-auto">
           {children}
         </div>
       </div>

@@ -12,6 +12,11 @@ import { Button } from "@/components/ui/button";
 import { PlayIcon, Loader2, CheckCircle, XCircle, Rocket, Info, ArrowRight, Wand2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -1025,61 +1030,65 @@ export default function ProblemDetailClient({ slug }: { slug: string }) {
   }
 
   return (
-    <div className="grid h-full grid-cols-1 gap-4 overflow-hidden p-4 md:grid-cols-2">
-      <div className="h-full overflow-y-auto pr-4">
-        <article className="container-prose">
-          <div className="flex items-center gap-2">
-            <h1 className="text-4xl font-bold font-headline">{p.title}</h1>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <Info className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <div className="space-y-2 p-2 max-w-xs">
-                    <Badge
-                      variant={
-                        p.difficulty <= 3
-                          ? "secondary"
-                          : p.difficulty > 3 && p.difficulty <= 6
-                            ? "default"
-                            : "destructive"
-                      }
-                      className={p.difficulty > 3 && p.difficulty <= 6 ? "bg-amber-500 hover:bg-amber-500/80" : ""}
-                    >
-                      Difficulty: {p.difficulty}
-                    </Badge>
-                    <div className="flex flex-wrap gap-1.5">
-                      {p.tags.map((t: string) => (
-                        <TopicBadge key={t} label={t} />
-                      ))}
+    <ResizablePanelGroup direction="horizontal" className="h-full w-full">
+      <ResizablePanel defaultSize={50}>
+        <div className="h-full overflow-y-auto p-4 pr-2">
+          <article className="container-prose">
+            <div className="flex items-center gap-2">
+              <h1 className="text-4xl font-bold font-headline">{p.title}</h1>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Info className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <div className="space-y-2 p-2 max-w-xs">
+                      <Badge
+                        variant={
+                          p.difficulty <= 3
+                            ? "secondary"
+                            : p.difficulty > 3 && p.difficulty <= 6
+                              ? "default"
+                              : "destructive"
+                        }
+                        className={p.difficulty > 3 && p.difficulty <= 6 ? "bg-amber-500 hover:bg-amber-500/80" : ""}
+                      >
+                        Difficulty: {p.difficulty}
+                      </Badge>
+                      <div className="flex flex-wrap gap-1.5">
+                        {p.tags.map((t: string) => (
+                          <TopicBadge key={t} label={t} />
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
 
-          <hr className="my-6" />
+            <hr className="my-6" />
 
-          <ReactMarkdown
-            className="prose dark:prose-invert max-w-none"
-            components={{
-              code: ({ node, ...props }) => <code className="font-code" {...props} />,
-            }}
-          >
-            {p.body}
-          </ReactMarkdown>
+            <ReactMarkdown
+              className="prose dark:prose-invert max-w-none"
+              components={{
+                code: ({ node, ...props }) => <code className="font-code" {...props} />,
+              }}
+            >
+              {p.body}
+            </ReactMarkdown>
 
-          <TestCasesDisplay slug={slug} />
-        </article>
-      </div>
-
-      <div className="h-full overflow-y-auto pl-4">
-        {testCases && <CodeRunner problem={p} testCases={testCases} slug={slug} nextProblemSlug={nextProblemSlug} />}
-      </div>
-    </div>
+            <TestCasesDisplay slug={slug} />
+          </article>
+        </div>
+      </ResizablePanel>
+      <ResizableHandle withHandle />
+      <ResizablePanel defaultSize={50}>
+        <div className="h-full overflow-y-auto p-4 pl-2">
+          {testCases && <CodeRunner problem={p} testCases={testCases} slug={slug} nextProblemSlug={nextProblemSlug} />}
+        </div>
+      </ResizablePanel>
+    </ResizablePanelGroup>
   );
 }
