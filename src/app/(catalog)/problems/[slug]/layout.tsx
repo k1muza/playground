@@ -146,7 +146,7 @@ function ProblemList() {
 
 export default function ProblemLayout({ children }: { children: ReactNode }) {
   return (
-    <SidebarProvider defaultOpen={true}>
+    <SidebarProvider defaultOpen={false}>
       <div className="relative h-[calc(100vh-var(--header-height,4rem)-1px)] overflow-hidden">
         <Sidebar collapsible="icon" variant="floating" className="absolute top-0 left-0 h-full z-20 bg-card border-r">
           <SidebarHeader>
