@@ -1032,7 +1032,7 @@ export default function ProblemDetailClient({ slug }: { slug: string }) {
   return (
     <ResizablePanelGroup direction="horizontal" className="h-full w-full">
       <ResizablePanel defaultSize={50}>
-        <div className="h-full overflow-y-auto p-4 pr-2">
+        <div className="h-full overflow-y-auto p-4 pl-16 pr-2">
           <article className="container-prose">
             <div className="flex items-center gap-2">
               <h1 className="text-4xl font-bold font-headline">{p.title}</h1>
