@@ -148,7 +148,7 @@ export default function ProblemLayout({ children }: { children: ReactNode }) {
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="relative h-[calc(100vh-var(--header-height,4rem)-1px)] overflow-hidden">
-        <Sidebar collapsible="icon" variant="floating" className="absolute top-0 left-0 h-full z-20">
+        <Sidebar collapsible="icon" variant="floating" className="absolute top-0 left-0 h-full z-20 bg-card border-r">
           <SidebarHeader>
             <div className="flex items-center justify-between p-2">
               <span className="font-semibold text-lg group-data-[collapsible=icon]:hidden">Problems</span>
