@@ -72,7 +72,7 @@ const sortedCategories = [...categories].sort((a, b) => a.order - b.order);
 
 function ProblemDetailSkeleton() {
   return (
-    <div className="grid h-full grid-cols-1 gap-4 overflow-hidden p-4 md:grid-cols-2">
+    <div className="grid h-full grid-cols-1 gap-4 overflow-hidden p-4 pl-16 md:grid-cols-2">
       <div className="h-full overflow-y-auto">
         <Skeleton className="h-6 w-16 mb-4" />
         <Skeleton className="h-10 w-3/4 mb-4" />
@@ -1009,24 +1009,8 @@ export default function ProblemDetailClient({ slug }: { slug: string }) {
 
   const loading = isProblemLoading || areTestCasesLoading || areProblemsLoading;
 
-  if (loading) {
+  if (!p || loading) {
     return <ProblemDetailSkeleton />;
-  }
-
-  if (!p) {
-    // Client components can't call notFound(); render a friendly fallback
-    return (
-      <Container className="py-16">
-        <Card>
-          <CardContent className="p-8">
-            <h1 className="text-2xl font-bold mb-2">Problem not found</h1>
-            <p className="text-muted-foreground">
-              We couldn’t find a problem with slug “{slug}”.
-            </p>
-          </CardContent>
-        </Card>
-      </Container>
-    );
   }
 
   return (
